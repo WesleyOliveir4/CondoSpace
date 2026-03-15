@@ -21,12 +21,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.R
-import com.example.condospace.model.Product
 import com.example.condospace.navigation.NavBar
 import com.example.condospace.ui.components.CategoriesSection
-import com.example.condospace.ui.components.ProductSection
+import com.example.condospace.ui.components.PublicationsSection
 import com.example.condospace.ui.components.ResidenceSelector
+import com.example.condospace.ui.mocks.PublicationsMocks
 import com.example.condospace.ui.theme.CondoSpaceTheme
 
 @Composable
@@ -81,28 +80,16 @@ fun HomeScreenContent(navController: NavHostController) {
             ) {
                 CategoriesSection()
 
-                val produtos = listOf(
-                    Product("Ana Paula Silva","Contadora",4.9,127,R.drawable.img_contadora),
-                    Product("Carlos Mendes","Encanador",4.8,94,R.drawable.img_encanador),
-                    Product("Paula Silva","Diarista",4.9,127,R.drawable.img_diarista),
-                    Product("Jonas Silveira","Pedreiro",4.8,94,R.drawable.img_pedreiro),
-                )
 
-                val produtosRegiao = listOf(
-                    Product("Paulo Silva","Pintor",4.9,127,R.drawable.img_pintor),
-                    Product("Matheus Silva","Encanador",4.8,94,R.drawable.img_advogado),
-                    Product("Paula Silva","Diarista",4.9,127,R.drawable.img_diarista),
-                    Product("Jonas Silveira","Pedreiro",4.8,94,R.drawable.img_pedreiro),
-                )
-
-                ProductSection(
+                PublicationsSection(
                     title = "Recomendados pelo seu condomínio",
-                    products = produtos
+                    publications = PublicationsMocks().getPublications()
                 )
 
-                ProductSection(
+
+                PublicationsSection(
                     title = "Serviços em destaque na região",
-                    products = produtosRegiao
+                    publications = PublicationsMocks().getExternalPublications()
                 )
             }
         }

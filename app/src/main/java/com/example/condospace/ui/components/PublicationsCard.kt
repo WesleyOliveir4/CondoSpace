@@ -28,10 +28,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.condospace.model.Product
+import com.example.condospace.model.Publication
 
 @Composable
-fun ProductCard(product: Product) {
+fun PublicationsCard(publication: Publication) {
 
     Card(
         modifier = Modifier
@@ -43,8 +43,8 @@ fun ProductCard(product: Product) {
         Column {
 
             Image(
-                painter = painterResource(product.imageRes),
-                contentDescription = product.tituloProduto,
+                painter = painterResource(publication.imageRes),
+                contentDescription = publication.title,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(130.dp),
@@ -56,12 +56,12 @@ fun ProductCard(product: Product) {
             ) {
 
                 Text(
-                    text = product.tituloProduto,
+                    text = publication.title,
                     style = MaterialTheme.typography.titleMedium
                 )
 
                 Text(
-                    text = product.descricaoProduto,
+                    text = publication.description,
                     style = MaterialTheme.typography.bodySmall
                 )
 
@@ -78,12 +78,12 @@ fun ProductCard(product: Product) {
 
                     Spacer(modifier = Modifier.width(4.dp))
 
-                    Text("${product.notaProduto}")
+                    Text("${publication.score}")
 
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
-                        "(${product.numeroAvaliacoesProduto})",
+                        "(${publication.reviewsNumber})",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -93,9 +93,9 @@ fun ProductCard(product: Product) {
 }
 
 @Composable
-fun ProductSection(
+fun PublicationsSection(
     title: String,
-    products: List<Product>,
+    publications: List<Publication>,
     onSeeMoreClick: () -> Unit = {}
 ) {
 
@@ -129,8 +129,8 @@ fun ProductSection(
             contentPadding = PaddingValues(start = 16.dp)
         ) {
 
-            items(products) { product ->
-                ProductCard(product)
+            items(publications) { publication ->
+                PublicationsCard(publication)
             }
 
         }
