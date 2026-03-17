@@ -18,15 +18,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.condospace.model.Publication
 
@@ -35,10 +38,17 @@ fun PublicationsCard(publication: Publication) {
 
     Card(
         modifier = Modifier
-            .width(220.dp)
-            .padding(end = 12.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
+            .width(240.dp)
+            .height(240.dp)
+            .padding(end = 12.dp)
+            .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp), ambientColor = Color.Black),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardColors(
+            containerColor = Color.White,
+            contentColor = Color.Black,
+            disabledContainerColor = Color.Transparent,
+            disabledContentColor = Color.Transparent)
+    )  {
 
         Column {
 
@@ -57,15 +67,19 @@ fun PublicationsCard(publication: Publication) {
 
                 Text(
                     text = publication.title,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Text(
                     text = publication.description,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.weight(1f))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
@@ -126,7 +140,8 @@ fun PublicationsSection(
         Spacer(modifier = Modifier.height(12.dp))
 
         LazyRow(
-            contentPadding = PaddingValues(start = 16.dp)
+            contentPadding = PaddingValues(start = 16.dp),
+            verticalAlignment = Alignment.Top
         ) {
 
             items(publications) { publication ->
