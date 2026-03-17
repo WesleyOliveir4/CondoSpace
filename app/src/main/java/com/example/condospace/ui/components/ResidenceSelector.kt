@@ -24,8 +24,8 @@ fun ResidenceSelector(
     onClick: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.background,
         modifier = Modifier.clickable { onClick() }
     ) {
         Row(

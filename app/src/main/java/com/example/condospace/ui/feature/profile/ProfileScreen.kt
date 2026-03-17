@@ -15,7 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.condospace.navigation.NavBar
+import com.example.condospace.ui.components.navBar.NavBar
 import com.example.condospace.ui.theme.CondoSpaceTheme
 
 @Composable
