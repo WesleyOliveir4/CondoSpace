@@ -28,11 +28,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.ui.components.CondoSpaceTopBar
+import com.example.condospace.ui.component.CondoSpaceTopBar
 import com.example.condospace.ui.feature.profile.components.ContactCard
 import com.example.condospace.ui.feature.profile.components.OptionsCard
 import com.example.condospace.ui.feature.profile.components.ProfileHeader
-import com.example.condospace.ui.components.navBar.NavBar
+import com.example.condospace.ui.component.navBar.NavBar
 import com.example.condospace.ui.theme.CondoSpaceTheme
 
 @Composable

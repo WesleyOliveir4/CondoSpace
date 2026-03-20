@@ -1,4 +1,4 @@
-package com.example.condospace.ui.components.navBar
+package com.example.condospace.ui.component.navBar
 
 
 import androidx.compose.material.icons.Icons

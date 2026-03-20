@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.ui.components.navBar.NavBar
-import com.example.condospace.ui.components.CondoSpaceTopBar
+import com.example.condospace.ui.component.navBar.NavBar
+import com.example.condospace.ui.component.CondoSpaceTopBar
 import com.example.condospace.ui.feature.favorites.components.SearchPublications
 import com.example.condospace.ui.mocks.PublicationsMocks
 import com.example.condospace.ui.theme.CondoSpaceTheme
