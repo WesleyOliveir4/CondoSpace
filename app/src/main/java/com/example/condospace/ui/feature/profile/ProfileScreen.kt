@@ -1,9 +1,22 @@
 package com.example.condospace.ui.feature.profile
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -15,56 +28,111 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.condospace.ui.components.CondoSpaceTopBar
+import com.example.condospace.ui.components.ContactCard
+import com.example.condospace.ui.components.OptionsCard
+import com.example.condospace.ui.components.ProfileHeader
 import com.example.condospace.ui.components.navBar.NavBar
 import com.example.condospace.ui.theme.CondoSpaceTheme
 
 @Composable
 fun ProfileScreen(navController: NavHostController) {
     CondoSpaceTheme {
-        Scaffold(
-            bottomBar = { NavBar(navController, "Profile") }
-        ) {
-                innerPadding ->
-
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                color = Color(4285563448)
-            ) {
-                ProfileScreenContent()
-            }
-        }
+        ProfileScreenContent(navController)
     }
 }
 
 
 @Composable
-fun ProfileScreenContent() {
-    Column(
+fun ProfileScreenContent(navController: NavHostController) {
+    Scaffold(
+        bottomBar = { NavBar(navController, "Profile") },
+        topBar = {
+            CondoSpaceTopBar()
+        }
+    ) { innerPadding ->
+
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            color = MaterialTheme.colorScheme.background
+        ) {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+
+                ProfileHeader()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ContactCard()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OptionsCard()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LogoutButton()
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Condo Market v1.0.0",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
+fun LogoutButton() {
+
+    OutlinedButton(
+        onClick = { },
         modifier = Modifier
-            .padding(16.dp),
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonColors(
+            containerColor = Color.White,
+            contentColor = Color.Red,
+            disabledContainerColor = Color.White,
+            disabledContentColor = Color.Black
+        ),
+        border = BorderStroke(1.dp, Color.LightGray)
     ) {
+
+        Icon(
+            Icons.Default.Logout,
+            contentDescription = null,
+            tint = Color.Red
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
         Text(
-            modifier = Modifier.fillMaxWidth()
-                .padding(top = 85.dp),
-            text = "Profile Screen",
-            textAlign = TextAlign.Center,
-            fontSize = 35.sp,
+            "Sair da conta",
+            color = Color.Red
         )
     }
-
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
+    val navController = rememberNavController()
+
     CondoSpaceTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color(4285563448)
-        ) {
-            ProfileScreenContent()
-        }
+            ProfileScreenContent(navController)
     }
 }
