@@ -1,4 +1,4 @@
-package com.example.condospace.ui.feature.home
+package com.example.condospace.ui.feature.home.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +15,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.ui.components.navBar.NavBar
-import com.example.condospace.ui.components.CategoriesSection
+import com.example.condospace.ui.feature.home.components.CategoriesSection
 import com.example.condospace.ui.components.CondoSpaceTopBar
-import com.example.condospace.ui.components.PublicationsSection
+import com.example.condospace.ui.feature.home.components.PublicationsSection
 import com.example.condospace.ui.mocks.PublicationsMocks
 import com.example.condospace.ui.theme.CondoSpaceTheme
 

@@ -1,4 +1,4 @@
-package com.example.condospace.ui.feature.publish
+package com.example.condospace.ui.feature.publish.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,8 +15,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.ui.components.CondoSpaceTopBar
-import com.example.condospace.ui.components.CreatePublicationScreen
-import com.example.condospace.ui.components.PublicationCardList
+import com.example.condospace.ui.feature.publish.components.CreatePublicationScreen
+import com.example.condospace.ui.feature.publish.components.PublicationCardList
 import com.example.condospace.ui.components.navBar.NavBar
 import com.example.condospace.ui.mocks.PublicationsMocks
 import com.example.condospace.ui.theme.CondoSpaceTheme

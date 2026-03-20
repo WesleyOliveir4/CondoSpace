@@ -1,4 +1,4 @@
-package com.example.condospace.ui.components
+package com.example.condospace.ui.feature.home.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

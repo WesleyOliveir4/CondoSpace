@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.ui.feature.favorites.FavoritesScreen
-import com.example.condospace.ui.feature.home.HomeScreen
-import com.example.condospace.ui.feature.profile.ProfileScreen
-import com.example.condospace.ui.feature.publish.PublishScreen
+import com.example.condospace.ui.feature.favorites.screen.FavoritesScreen
+import com.example.condospace.ui.feature.home.screen.HomeScreen
+import com.example.condospace.ui.feature.profile.screen.ProfileScreen
+import com.example.condospace.ui.feature.publish.screen.PublishScreen
 
 @Composable
 fun NavBarNavigation() {
