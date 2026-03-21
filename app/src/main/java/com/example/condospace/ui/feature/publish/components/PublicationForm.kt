@@ -1,4 +1,4 @@
-package com.example.condospace.ui.components
+package com.example.condospace.ui.feature.publish.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable

@@ -1,4 +1,4 @@
-package com.example.condospace.ui.feature.publish
+package com.example.condospace.ui.feature.home.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,25 +14,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.ui.components.CondoSpaceTopBar
-import com.example.condospace.ui.components.CreatePublicationScreen
-import com.example.condospace.ui.components.PublicationCardList
-import com.example.condospace.ui.components.navBar.NavBar
+import com.example.condospace.ui.component.navBar.NavBar
+import com.example.condospace.ui.feature.home.components.CategoriesSection
+import com.example.condospace.ui.component.CondoSpaceTopBar
+import com.example.condospace.ui.feature.home.components.PublicationsSection
 import com.example.condospace.ui.mocks.PublicationsMocks
 import com.example.condospace.ui.theme.CondoSpaceTheme
 
 @Composable
-fun PublishScreen(navController: NavHostController) {
+fun HomeScreen(navController: NavHostController) {
     CondoSpaceTheme {
-        PublishScreenContent(navController)
+        HomeScreenContent(navController)
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PublishScreenContent(navController: NavHostController) {
+fun HomeScreenContent(navController: NavHostController) {
     Scaffold(
-        bottomBar = { NavBar(navController, "Publish") },
+        bottomBar = { NavBar(navController, "Home") },
         topBar = {
             CondoSpaceTopBar()
         }
@@ -47,30 +48,32 @@ fun PublishScreenContent(navController: NavHostController) {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
-                CreatePublicationScreen()
+                CategoriesSection()
 
-                PublicationCardList(
-                    title = "Minhas publicações",
-                    publications = PublicationsMocks().getFavoritedPublications(),
-                    onEditClick = { /* editar */ },
-                    onDeleteClick = { /* deletar */ }
+
+                PublicationsSection(
+                    title = "Recomendados pelo seu condomínio",
+                    publications = PublicationsMocks().getPublications()
                 )
 
-            }
 
+                PublicationsSection(
+                    title = "Serviços em destaque na região",
+                    publications = PublicationsMocks().getExternalPublications()
+                )
+            }
         }
     }
-
 }
 
 
 
 @Preview(showBackground = true)
 @Composable
-fun PublishScreenPreview() {
+fun HomeScreenPreview() {
     val navController = rememberNavController()
 
     CondoSpaceTheme {
-        PublishScreenContent(navController)
+        HomeScreenContent(navController)
     }
 }

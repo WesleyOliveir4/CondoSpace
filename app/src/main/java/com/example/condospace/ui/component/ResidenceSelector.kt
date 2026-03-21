@@ -1,4 +1,4 @@
-package com.example.condospace.ui.components
+package com.example.condospace.ui.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row

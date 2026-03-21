@@ -1,4 +1,4 @@
-package com.example.condospace.ui.feature.profile
+package com.example.condospace.ui.feature.profile.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
@@ -26,14 +26,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.ui.components.CondoSpaceTopBar
-import com.example.condospace.ui.components.ContactCard
-import com.example.condospace.ui.components.OptionsCard
-import com.example.condospace.ui.components.ProfileHeader
-import com.example.condospace.ui.components.navBar.NavBar
+import com.example.condospace.ui.component.CondoSpaceTopBar
+import com.example.condospace.ui.feature.profile.components.ContactCard
+import com.example.condospace.ui.feature.profile.components.OptionsCard
+import com.example.condospace.ui.feature.profile.components.ProfileHeader
+import com.example.condospace.ui.component.navBar.NavBar
 import com.example.condospace.ui.theme.CondoSpaceTheme
 
 @Composable
