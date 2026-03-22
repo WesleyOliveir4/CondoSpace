@@ -20,16 +20,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.condospace.navigation.NavBarRoutes
+import com.example.condospace.navigation.NavRoutes
 
 @Composable
 fun NavBar(navController: NavHostController, key: String) {
 
     val navItems = listOf(
-        NavItem("Home", Icons.Default.Home, NavBarRoutes.Home),
-        NavItem("Favorites", Icons.Default.FavoriteBorder, NavBarRoutes.Favorites),
-        NavItem("Publish", Icons.Default.AddCircleOutline, NavBarRoutes.Publish),
-        NavItem("Profile", Icons.Default.PersonOutline, NavBarRoutes.Profile)
+        NavItem("Home", Icons.Default.Home, NavRoutes.Home),
+        NavItem("Favorites", Icons.Default.FavoriteBorder, NavRoutes.Favorites),
+        NavItem("Publish", Icons.Default.AddCircleOutline, NavRoutes.Publish),
+        NavItem("Profile", Icons.Default.PersonOutline, NavRoutes.Profile)
     )
 
     NavigationBar(
@@ -86,5 +86,5 @@ fun NavBar(navController: NavHostController, key: String) {
 data class NavItem(
     val title: String,
     val icon: ImageVector,
-    val routes: NavBarRoutes
+    val routes: NavRoutes
 )

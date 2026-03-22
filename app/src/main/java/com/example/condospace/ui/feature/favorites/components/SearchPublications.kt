@@ -41,7 +41,8 @@ import com.example.condospace.model.Publication
 
 @Composable
 fun SearchPublications(
-    publications: List<Publication>
+    publications: List<Publication>,
+    onPublicationClick: (Publication) -> Unit = {}
 ) {
 
     var searchText by remember { mutableStateOf("") }
@@ -76,16 +77,23 @@ fun SearchPublications(
 
         LazyColumn {
             items(filteredList) { publication ->
-                PublicationItem(publication)
+                PublicationItem(
+                    publication = publication,
+                    onClick = { onPublicationClick(publication) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun PublicationItem(publication: Publication) {
+fun PublicationItem(
+    publication: Publication,
+    onClick: () -> Unit = {}
+) {
 
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)

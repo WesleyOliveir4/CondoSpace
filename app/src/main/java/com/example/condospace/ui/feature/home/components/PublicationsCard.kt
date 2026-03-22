@@ -34,21 +34,24 @@ import androidx.compose.ui.unit.dp
 import com.example.condospace.model.Publication
 
 @Composable
-fun PublicationsCard(publication: Publication) {
-
+fun PublicationsCard(
+    publication: Publication,
+    onClick: (Publication) -> Unit
+) {
     Card(
         modifier = Modifier
             .width(240.dp)
             .height(240.dp)
             .padding(end = 12.dp)
-            .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp), ambientColor = Color.Black),
+            .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp), ambientColor = Color.Black)
+            .clickable { onClick(publication) },
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
             containerColor = Color.White,
             contentColor = Color.Black,
             disabledContainerColor = Color.Transparent,
             disabledContentColor = Color.Transparent)
-    )  {
+    ) {
 
         Column {
 
@@ -110,13 +113,12 @@ fun PublicationsCard(publication: Publication) {
 fun PublicationsSection(
     title: String,
     publications: List<Publication>,
-    onSeeMoreClick: () -> Unit = {}
+    onSeeMoreClick: () -> Unit = {},
+    onItemClick: (Publication) -> Unit = {}
 ) {
-
     Column(
         modifier = Modifier.padding(vertical = 16.dp)
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -124,7 +126,6 @@ fun PublicationsSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium
@@ -143,11 +144,12 @@ fun PublicationsSection(
             contentPadding = PaddingValues(start = 16.dp),
             verticalAlignment = Alignment.Top
         ) {
-
             items(publications) { publication ->
-                PublicationsCard(publication)
+                PublicationsCard(
+                    publication = publication,
+                    onClick = { onItemClick(publication) }
+                )
             }
-
         }
     }
 }

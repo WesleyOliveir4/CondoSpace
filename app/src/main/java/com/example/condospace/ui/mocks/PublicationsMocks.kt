@@ -16,7 +16,11 @@ class PublicationsMocks() {
                 publicationType = "serviço",
                 score = 4.9,
                 reviewsNumber = 127,
-                imageRes = R.drawable.img_contadora
+                imageRes = R.drawable.img_contadora,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             ),
             Publication(
                 id = 2,
@@ -27,7 +31,11 @@ class PublicationsMocks() {
                 publicationType = "serviço",
                 score = 4.8,
                 reviewsNumber = 94,
-                imageRes = R.drawable.img_encanador
+                imageRes = R.drawable.img_encanador,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             ),
             Publication(
                 id = 3,
@@ -38,7 +46,11 @@ class PublicationsMocks() {
                 publicationType = "serviço",
                 score = 4.9,
                 reviewsNumber = 127,
-                imageRes = R.drawable.img_diarista
+                imageRes = R.drawable.img_diarista,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             ),
             Publication(
                 id = 4,
@@ -49,7 +61,11 @@ class PublicationsMocks() {
                 publicationType = "serviço",
                 score = 4.8,
                 reviewsNumber = 94,
-                imageRes = R.drawable.img_pedreiro
+                imageRes = R.drawable.img_pedreiro,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             )
         )
 
@@ -66,7 +82,11 @@ class PublicationsMocks() {
                 publicationType = "serviço",
                 score = 4.9,
                 reviewsNumber = 127,
-                imageRes = R.drawable.img_pintor
+                imageRes = R.drawable.img_pintor,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             ),
             Publication(
                 id = 6,
@@ -77,7 +97,11 @@ class PublicationsMocks() {
                 publicationType = "serviço",
                 score = 4.8,
                 reviewsNumber = 94,
-                imageRes = R.drawable.img_advogado
+                imageRes = R.drawable.img_advogado,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             ),
             Publication(
                 id = 7,
@@ -88,7 +112,11 @@ class PublicationsMocks() {
                 publicationType = "serviço",
                 score = 4.9,
                 reviewsNumber = 127,
-                imageRes = R.drawable.img_diarista
+                imageRes = R.drawable.img_diarista,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             ),
             Publication(
                 id = 8,
@@ -99,7 +127,11 @@ class PublicationsMocks() {
                 publicationType = "serviço",
                 score = 4.8,
                 reviewsNumber = 94,
-                imageRes = R.drawable.img_pedreiro
+                imageRes = R.drawable.img_pedreiro,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             )
         )
     }
@@ -115,7 +147,11 @@ class PublicationsMocks() {
                 publicationType = "serviço",
                 score = 4.8,
                 reviewsNumber = 94,
-                imageRes = R.drawable.img_contadora
+                imageRes = R.drawable.img_contadora,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://wordpress-cms-revista-prod-assets.quero.space/legacy_posts/post_images/31496/73b63defedd6ae08f15d9509b7871444961b24ca.jpg?1600797248"
             ),
             Publication(
                 id = 10,
@@ -124,7 +160,11 @@ class PublicationsMocks() {
                 description = "Móveis",
                 detailedDescription = "Sofá em ótimo estado, pouco uso. Tecido impermeabilizado e sem manchas. Retirada no bloco B.",
                 publicationType = "produto",
-                imageRes = R.drawable.img_sofa
+                imageRes = R.drawable.img_sofa,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             ),
             Publication(
                 id = 11,
@@ -133,7 +173,11 @@ class PublicationsMocks() {
                 description = "Móveis",
                 detailedDescription = "Cadeira ergonômica com regulagem de altura e braços. Motivo da venda: troca por um modelo gamer.",
                 publicationType = "produto",
-                imageRes = R.drawable.img_cadeira_escritorio
+                imageRes = R.drawable.img_cadeira_escritorio,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             ),
             Publication(
                 id = 12,
@@ -142,7 +186,11 @@ class PublicationsMocks() {
                 description = "Eletrônicos",
                 detailedDescription = "Smart TV 4K em perfeito estado. Acompanha controle remoto original. Motivo: Não cabe na minha casa nova.",
                 publicationType = "produto",
-                imageRes = R.drawable.img_tv_samsung55
+                imageRes = R.drawable.img_tv_samsung55,
+                date = "10/05/2023",
+                price = 120.0,
+                likes = 10,
+                imageUrl = "https://example.com/image1.jpg"
             )
         )
     }

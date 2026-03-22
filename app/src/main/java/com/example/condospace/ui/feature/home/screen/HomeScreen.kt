@@ -22,16 +22,29 @@ import com.example.condospace.ui.mocks.PublicationsMocks
 import com.example.condospace.ui.theme.CondoSpaceTheme
 
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(
+    navController: NavHostController,
+    navigateToPublishList: () -> Unit = {},
+    navigateToPublicationSelected: () -> Unit
+) {
     CondoSpaceTheme {
-        HomeScreenContent(navController)
+        HomeScreenContent(
+            navController,
+            navigateToPublishList,
+            navigateToPublicationSelected
+        )
     }
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent(navController: NavHostController) {
+fun HomeScreenContent(
+    navController: NavHostController,
+    navigateToPublishList: () -> Unit,
+    navigateToPublicationSelected: () -> Unit
+)
+{
     Scaffold(
         bottomBar = { NavBar(navController, "Home") },
         topBar = {
@@ -48,18 +61,34 @@ fun HomeScreenContent(navController: NavHostController) {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
-                CategoriesSection()
+                CategoriesSection(
+                    onCategoryClick = {
+                        navigateToPublishList()
+                    }
+                )
 
 
                 PublicationsSection(
                     title = "Recomendados pelo seu condomínio",
-                    publications = PublicationsMocks().getPublications()
+                    publications = PublicationsMocks().getPublications(),
+                    onSeeMoreClick = {
+                        navigateToPublishList()
+                    },
+                    onItemClick = {
+                        navigateToPublicationSelected()
+                    }
                 )
 
 
                 PublicationsSection(
                     title = "Serviços em destaque na região",
-                    publications = PublicationsMocks().getExternalPublications()
+                    publications = PublicationsMocks().getExternalPublications(),
+                    onSeeMoreClick = {
+                        navigateToPublishList()
+                    },
+                    onItemClick = {
+                        navigateToPublicationSelected()
+                    }
                 )
             }
         }
@@ -72,8 +101,11 @@ fun HomeScreenContent(navController: NavHostController) {
 @Composable
 fun HomeScreenPreview() {
     val navController = rememberNavController()
-
     CondoSpaceTheme {
-        HomeScreenContent(navController)
+        HomeScreenContent(
+            navController,
+            navigateToPublishList = {},
+            navigateToPublicationSelected = {}
+        )
     }
 }
