@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Inventory2
@@ -31,6 +33,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.example.condospace.model.Publication
 
 enum class PublicationType {
     PRODUCT,
@@ -48,8 +51,9 @@ fun PublicationTypeSelector(
         shape = RoundedCornerShape(16.dp),
         color = Color.White,
         tonalElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth().
-        shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp), ambientColor = Color.Black)
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp), ambientColor = Color.Black)
     ) {
 
         Column(
@@ -154,8 +158,9 @@ fun PublicationTypeItem(
 }
 
 @Composable
-fun CreatePublicationScreen() {
-
+fun CreatePublicationScreen(
+    onPublicationCreated: (Publication) -> Unit = {}
+) {
     var selectedType by remember { mutableStateOf<PublicationType?>(null) }
 
     Column(
@@ -163,31 +168,28 @@ fun CreatePublicationScreen() {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
         PublicationTypeSelector(
             selectedType = selectedType,
             onTypeSelected = { type ->
-
-                selectedType =
-                    if (selectedType == type) null
-                    else type
+                selectedType = if (selectedType == type) null else type
             }
         )
 
         Spacer(Modifier.height(16.dp))
 
         if (selectedType != null) {
-
             PublicationForm(
-                title =
-                    when (selectedType) {
-                        PublicationType.PRODUCT -> "Informações do anúncio"
-                        PublicationType.SERVICE -> "Informações do serviço"
-                        PublicationType.RECOMMENDATION -> "Indicar serviço"
-                        else -> {
-                            "Informações do anúncio"
-                        }
-                    }
+                title = when (selectedType) {
+                    PublicationType.PRODUCT -> "Informações do anúncio"
+                    PublicationType.SERVICE -> "Informações do serviço"
+                    PublicationType.RECOMMENDATION -> "Indicar serviço"
+                    null -> ""
+                },
+                publicationType = selectedType!!,
+                onPublish = { publication ->
+                    onPublicationCreated(publication)
+                    selectedType = null // Fecha o formulário após a publicação
+                }
             )
         }
     }

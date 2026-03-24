@@ -3,6 +3,8 @@ package com.example.condospace.model
 data class Publication(
     val id: Int,
     val publicationOwner: String,
+    val serviceProvider: String? = null,
+    val contact: String? = null,
     val imageUrl: String,
     val title: String,
     val description: String,
