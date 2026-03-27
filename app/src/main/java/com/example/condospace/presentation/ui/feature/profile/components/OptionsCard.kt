@@ -15,7 +15,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +26,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun OptionsCard() {
+fun OptionsCard(
+    onMyDataClick: () -> Unit = {},
+    onChangePasswordClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
+) {
 
     Card(
         modifier = Modifier
@@ -41,22 +45,22 @@ fun OptionsCard() {
 
         Column {
 
-            OptionItem(Icons.Default.Person, "Meus dados")
-            Divider()
-            OptionItem(Icons.Default.Lock, "Alterar senha")
-            Divider()
-            OptionItem(Icons.Default.Settings, "Configurações")
+            OptionItem(Icons.Default.Person, "Meus dados", onMyDataClick)
+            HorizontalDivider()
+            OptionItem(Icons.Default.Lock, "Alterar senha", onChangePasswordClick)
+            HorizontalDivider()
+            OptionItem(Icons.Default.Settings, "Configurações", onSettingsClick)
         }
     }
 }
 
 @Composable
-fun OptionItem(icon: ImageVector, text: String) {
+fun OptionItem(icon: ImageVector, text: String, onClick: () -> Unit) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { }
+            .clickable { onClick() }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

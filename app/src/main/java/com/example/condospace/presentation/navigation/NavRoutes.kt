@@ -16,11 +16,17 @@ sealed class NavRoutes {
 
     @Serializable
     object Profile : NavRoutes()
+    
     @Serializable
     object PublicationsList : NavRoutes()
+    
     @Serializable
     object PublicationSelected : NavRoutes()
+    
     @Serializable
-    class EditPublicationScreen(val publicationId: Int) : NavRoutes()
+    data class EditPublicationScreen(val publicationId: Int) : NavRoutes()
+    
+    @Serializable
+    object UserDataScreen : NavRoutes()
 
 }
