@@ -18,7 +18,9 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CondoSpaceTopBar(){
+fun CondoSpaceTopBar(
+    residenceSelector: () -> Unit
+){
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.White,
@@ -28,7 +30,7 @@ fun CondoSpaceTopBar(){
             ResidenceSelector(
                 text = "Residencial Green Park",
                 onClick = {
-                    // abrir tela para selecionar seu condomínio
+                    residenceSelector()
                 }
             )
         },

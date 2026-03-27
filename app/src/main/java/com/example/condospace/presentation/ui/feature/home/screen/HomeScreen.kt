@@ -25,13 +25,15 @@ import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 fun HomeScreen(
     navController: NavHostController,
     navigateToPublishList: () -> Unit = {},
-    navigateToPublicationSelected: () -> Unit
+    navigateToPublicationSelected: () -> Unit,
+    navigateToSelectCondominium: () -> Unit
 ) {
     CondoSpaceTheme {
         HomeScreenContent(
             navController,
             navigateToPublishList,
-            navigateToPublicationSelected
+            navigateToPublicationSelected,
+            navigateToSelectCondominium
         )
     }
 }
@@ -42,13 +44,18 @@ fun HomeScreen(
 fun HomeScreenContent(
     navController: NavHostController,
     navigateToPublishList: () -> Unit,
-    navigateToPublicationSelected: () -> Unit
+    navigateToPublicationSelected: () -> Unit,
+    navigateToSelectCondominium: () -> Unit
 )
 {
     Scaffold(
         bottomBar = { NavBar(navController, "Home") },
         topBar = {
-            CondoSpaceTopBar()
+            CondoSpaceTopBar(
+                residenceSelector = {
+                    navigateToSelectCondominium()
+                }
+            )
         }
     ) { innerPadding ->
 
@@ -105,7 +112,8 @@ fun HomeScreenPreview() {
         HomeScreenContent(
             navController,
             navigateToPublishList = {},
-            navigateToPublicationSelected = {}
+            navigateToPublicationSelected = {},
+            navigateToSelectCondominium = {}
         )
     }
 }

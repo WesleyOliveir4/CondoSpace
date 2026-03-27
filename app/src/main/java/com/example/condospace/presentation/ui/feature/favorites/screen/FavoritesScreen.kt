@@ -20,10 +20,11 @@ import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 @Composable
 fun FavoritesScreen(
     navController: NavHostController,
-    navigateToPublicationSelected: () -> Unit
+    navigateToPublicationSelected: () -> Unit,
+    navigateToSelectCondominium: () -> Unit
 ) {
     CondoSpaceTheme {
-        FavoritesScreenContent(navController,navigateToPublicationSelected)
+        FavoritesScreenContent(navController, navigateToPublicationSelected, navigateToSelectCondominium)
     }
 }
 
@@ -32,12 +33,17 @@ fun FavoritesScreen(
 @Composable
 fun FavoritesScreenContent(
     navController: NavHostController,
-    navigateToPublicationSelected: () -> Unit
+    navigateToPublicationSelected: () -> Unit,
+    navigateToSelectCondominium: () -> Unit
 ) {
     Scaffold(
         bottomBar = { NavBar(navController, "Favorites") },
         topBar = {
-            CondoSpaceTopBar()
+            CondoSpaceTopBar(
+                residenceSelector = {
+                    navigateToSelectCondominium()
+                }
+            )
         }
     ) { innerPadding ->
 
@@ -64,6 +70,10 @@ fun FavoritesScreenPreview() {
     val navController = rememberNavController()
 
     CondoSpaceTheme {
-        FavoritesScreenContent(navController, navigateToPublicationSelected = {})
+        FavoritesScreenContent(
+            navController,
+            navigateToPublicationSelected = {},
+            navigateToSelectCondominium = {}
+        )
     }
 }

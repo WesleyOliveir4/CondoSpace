@@ -38,12 +38,14 @@ import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
-    navigateToUserData: () -> Unit
+    navigateToUserData: () -> Unit,
+    navigateToSelectCondominium: () -> Unit
 ) {
     CondoSpaceTheme {
         ProfileScreenContent(
             navController,
-            navigateToUserData
+            navigateToUserData,
+            navigateToSelectCondominium
         )
     }
 }
@@ -52,12 +54,17 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenContent(
     navController: NavHostController,
-    navigateToUserData: () -> Unit
+    navigateToUserData: () -> Unit,
+    navigateToSelectCondominium: () -> Unit
 ) {
     Scaffold(
         bottomBar = { NavBar(navController, "Profile") },
         topBar = {
-            CondoSpaceTopBar()
+            CondoSpaceTopBar(
+                residenceSelector = {
+                    navigateToSelectCondominium()
+                }
+            )
         }
     ) { innerPadding ->
 
@@ -145,6 +152,10 @@ fun ProfileScreenPreview() {
     val navController = rememberNavController()
 
     CondoSpaceTheme {
-            ProfileScreenContent(navController, navigateToUserData = {})
+            ProfileScreenContent(
+                navController,
+                navigateToUserData = {},
+                navigateToSelectCondominium = {}
+            )
     }
 }
