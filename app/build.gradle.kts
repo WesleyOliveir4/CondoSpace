@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.benchmark.traceprocessor)
     implementation(libs.androidx.ui)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.compose.foundation)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

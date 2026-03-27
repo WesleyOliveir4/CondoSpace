@@ -16,22 +16,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
+import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.feature.publish.components.CreatePublicationScreen
 import com.example.condospace.presentation.ui.feature.publish.components.PublicationCardList
-import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.mocks.PublicationsMocks
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 
 @Composable
-fun PublishScreen(navController: NavHostController) {
+fun PublishScreen(
+    navController: NavHostController,
+    navigateToPublicationSelected: () -> Unit,
+    navigateToEditPublication: (Int) -> Unit
+) {
     CondoSpaceTheme {
-        PublishScreenContent(navController)
+        PublishScreenContent(
+            navController,
+            navigateToPublicationSelected,
+            navigateToEditPublication
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PublishScreenContent(navController: NavHostController) {
+fun PublishScreenContent(
+    navController: NavHostController,
+    navigateToPublicationSelected: () -> Unit,
+    navigateToEditPublication: (Int) -> Unit
+) {
     Scaffold(
         bottomBar = { NavBar(navController, "Publish") },
         topBar = {
@@ -57,7 +69,11 @@ fun PublishScreenContent(navController: NavHostController) {
                 PublicationCardList(
                     title = "Minhas publicações",
                     publications = PublicationsMocks().getFavoritedPublications(),
-                    onEditClick = { /* editar */ },
+                    onEditClick = { publication ->
+                        navigateToEditPublication(
+                            publication.id
+                        )
+                    },
                     onDeleteClick = { /* deletar */ }
                 )
 
@@ -76,6 +92,10 @@ fun PublishScreenPreview() {
     val navController = rememberNavController()
 
     CondoSpaceTheme {
-        PublishScreenContent(navController)
+        PublishScreenContent(
+            navController,
+            navigateToPublicationSelected = {},
+            navigateToEditPublication = {}
+        )
     }
 }

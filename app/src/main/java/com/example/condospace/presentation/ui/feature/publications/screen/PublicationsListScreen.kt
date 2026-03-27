@@ -25,7 +25,7 @@ fun PublicationsListScreen(
     CondoSpaceTheme {
         PublicationsListScreenContent(
             navController = navController,
-            onPublicationClick = navigateToPublicationSelected
+            navigateToPublicationSelected = navigateToPublicationSelected
         )
     }
 }
@@ -35,7 +35,7 @@ fun PublicationsListScreen(
 @Composable
 fun PublicationsListScreenContent(
     navController: NavHostController,
-    onPublicationClick: () -> Unit = {}
+    navigateToPublicationSelected: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -54,7 +54,7 @@ fun PublicationsListScreenContent(
         ) {
             SearchPublications(
                 publications = PublicationsMocks().getFavoritedPublications(),
-                onPublicationClick = { onPublicationClick() }
+                onPublicationClick = { navigateToPublicationSelected() }
             )
         }
     }
@@ -63,10 +63,13 @@ fun PublicationsListScreenContent(
 
 @Preview(showBackground = true)
 @Composable
-fun FavoritesScreenPreview() {
+fun  PublicationsListScreenPreview() {
     val navController = rememberNavController()
 
     CondoSpaceTheme {
-        PublicationsListScreenContent(navController)
+        PublicationsListScreenContent(
+            navController,
+            navigateToPublicationSelected = {},
+        )
     }
 }

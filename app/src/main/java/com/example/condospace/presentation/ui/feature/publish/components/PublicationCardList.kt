@@ -164,4 +164,3 @@ fun PublicationCardItem(
         }
     }
 }
-

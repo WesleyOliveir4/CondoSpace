@@ -4,8 +4,10 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,10 +15,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -26,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -37,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -52,8 +60,10 @@ import com.example.condospace.presentation.ui.enums.CategoryType
 fun PublicationForm(
     title: String,
     publicationType: PublicationType,
-    onPublish: (Publication) -> Unit
+    onPublish: (Publication) -> Unit,
+    initialImages: List<Uri> = emptyList()
 ) {
+
     var titleState by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf<CategoryType?>(null) }
     var descriptionState by remember { mutableStateOf("") }
@@ -61,14 +71,15 @@ fun PublicationForm(
     var contactState by remember { mutableStateOf("") }
     var priceState by remember { mutableStateOf("") }
     var providerNameState by remember { mutableStateOf("") }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    var images by remember { mutableStateOf(initialImages) }
 
     var expanded by remember { mutableStateOf(false) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        selectedImageUri = uri
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris: List<Uri> ->
+        images = images + uris
     }
 
     val isButtonEnabled = when (publicationType) {
@@ -76,124 +87,107 @@ fun PublicationForm(
             titleState.isNotBlank() &&
                     selectedCategory != null &&
                     descriptionState.isNotBlank() &&
-                    selectedImageUri != null &&
+                    images.isNotEmpty() &&
                     priceState.isNotBlank()
         }
         PublicationType.SERVICE -> {
             titleState.isNotBlank() &&
                     descriptionState.isNotBlank() &&
-                    selectedImageUri != null
+                    images.isNotEmpty()
         }
         PublicationType.RECOMMENDATION -> {
             titleState.isNotBlank() &&
                     descriptionState.isNotBlank() &&
                     providerNameState.isNotBlank() &&
-                    selectedImageUri != null
+                    images.isNotEmpty()
         }
     }
+
+    val isEditMode = initialImages.isNotEmpty()
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp), ambientColor = Color.Black),
+            .shadow(2.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
 
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium
-            )
+            Text(title, style = MaterialTheme.typography.titleMedium)
 
             Spacer(Modifier.height(16.dp))
 
             Text("Título")
-            Spacer(Modifier.height(4.dp))
-
             OutlinedTextField(
                 value = titleState,
                 onValueChange = { titleState = it },
                 placeholder = { Text("Ex: Sofá 3 lugares semi-novo") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                modifier = Modifier.fillMaxWidth()
             )
 
             if (publicationType == PublicationType.PRODUCT) {
-                Spacer(Modifier.height(12.dp))
 
+                Spacer(Modifier.height(12.dp))
                 Text("Categoria")
-                Spacer(Modifier.height(4.dp))
 
                 ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onExpandedChange = { expanded = !expanded },
-                    modifier = Modifier.fillMaxWidth()
+                    onExpandedChange = { expanded = !expanded }
                 ) {
+
                     OutlinedTextField(
                         value = selectedCategory?.title ?: "",
                         onValueChange = {},
                         readOnly = true,
                         placeholder = { Text("Selecione a categoria") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth(),
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                        },
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
                     )
 
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        CategoryType.entries.filter { it != CategoryType.ALLTYPES }.forEach { category ->
-                            DropdownMenuItem(
-                                text = { Text(category.title) },
-                                onClick = {
-                                    selectedCategory = category
-                                    expanded = false
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = category.icon,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            )
-                        }
+
+                        CategoryType.entries
+                            .filter { it != CategoryType.ALLTYPES }
+                            .forEach { category ->
+
+                                DropdownMenuItem(
+                                    text = { Text(category.title) },
+                                    onClick = {
+                                        selectedCategory = category
+                                        expanded = false
+                                    }
+                                )
+                            }
                     }
                 }
             }
 
             if (publicationType == PublicationType.RECOMMENDATION) {
+
                 Spacer(Modifier.height(12.dp))
-                Text("Nome do Prestador de Serviço")
-                Spacer(Modifier.height(4.dp))
+                Text("Nome do prestador")
+
                 OutlinedTextField(
                     value = providerNameState,
                     onValueChange = { providerNameState = it },
-                    placeholder = { Text("Ex: João Silva") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
             Spacer(Modifier.height(12.dp))
 
             Text("Descrição")
-            Spacer(Modifier.height(4.dp))
 
             OutlinedTextField(
                 value = descriptionState,
                 onValueChange = { descriptionState = it },
-                placeholder = { Text("Descreva seu produto ou serviço...") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
@@ -202,49 +196,48 @@ fun PublicationForm(
             Spacer(Modifier.height(12.dp))
 
             Text("Fotos")
-            Spacer(Modifier.height(6.dp))
 
-            PhotoPicker(
-                imageUri = selectedImageUri,
-                onPickPhoto = { galleryLauncher.launch("image/*") }
+            PhotoCarousel(
+                images = images,
+                onAddPhoto = { galleryLauncher.launch("image/*") },
+                onRemovePhoto = { uri ->
+                    images = images - uri
+                }
             )
 
             if (publicationType == PublicationType.PRODUCT) {
+
                 Spacer(Modifier.height(12.dp))
                 Text("Preço")
-                Spacer(Modifier.height(4.dp))
+
                 OutlinedTextField(
                     value = priceState,
                     onValueChange = { priceState = it },
-                    placeholder = { Text("Ex: 150.00") },
-                    modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true
-                )
-            }
-
-            if (publicationType == PublicationType.SERVICE) {
-                Spacer(Modifier.height(12.dp))
-                Text("Localização (Opcional)")
-                Spacer(Modifier.height(4.dp))
-                OutlinedTextField(
-                    value = locationState,
-                    onValueChange = { locationState = it },
-                    placeholder = { Text("Ex: Bloco A, Apto 101") },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            Spacer(Modifier.height(12.dp))
+            if (publicationType == PublicationType.SERVICE) {
+
+                Spacer(Modifier.height(12.dp))
+                Text("Localização")
+
+                OutlinedTextField(
+                    value = locationState,
+                    onValueChange = { locationState = it },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             if (publicationType == PublicationType.RECOMMENDATION) {
+
+                Spacer(Modifier.height(12.dp))
                 Text("Contato")
-                Spacer(Modifier.height(4.dp))
 
                 OutlinedTextField(
                     value = contactState,
                     onValueChange = { contactState = it },
-                    placeholder = { Text("Telefone") },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -256,8 +249,8 @@ fun PublicationForm(
                     val publication = Publication(
                         id = (1..10000).random(),
                         publicationOwner = "Morador CondoSpace",
-                        serviceProvider = if (publicationType == PublicationType.RECOMMENDATION) providerNameState else null,
-                        imageUrl = selectedImageUri.toString(),
+                        serviceProvider = providerNameState,
+                        imageUrl = images.firstOrNull()?.toString() ?: "",
                         title = titleState,
                         description = descriptionState,
                         detailedDescription = descriptionState,
@@ -269,61 +262,66 @@ fun PublicationForm(
                     )
                     onPublish(publication)
                 },
+                enabled = isButtonEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                enabled = isButtonEnabled,
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2962FF),
-                    disabledContainerColor = Color.LightGray
-                )
+                    .height(50.dp)
             ) {
-                Text("Publicar anúncio")
+                Text(if (isEditMode) "Salvar alterações" else "Publicar anúncio")
             }
         }
     }
 }
 
 @Composable
-fun PhotoPicker(
-    imageUri: Uri?,
-    onPickPhoto: () -> Unit
+fun PhotoCarousel(
+    images: List<Uri>,
+    onAddPhoto: () -> Unit,
+    onRemovePhoto: (Uri) -> Unit
 ) {
-    val hasPhoto = imageUri != null
 
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, if (hasPhoto) Color(0xFF2962FF) else Color.LightGray),
-        color = if (hasPhoto) Color(0xFFE8F0FE) else Color.Transparent,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)
-            .clickable { onPickPhoto() }
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (hasPhoto) {
-            AsyncImage(
-                model = imageUri,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AddPhotoAlternate,
+
+        items(images) { image ->
+
+            Box {
+
+                AsyncImage(
+                    model = image,
                     contentDescription = null,
-                    tint = Color.Gray,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
                 )
 
-                Text(
-                    text = "Clique para abrir a galeria",
-                    color = Color.Gray
+                IconButton(
+                    onClick = { onRemovePhoto(image) },
+                    modifier = Modifier.align(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null,
+                        tint = Color.Blue
+                    )
+                }
+            }
+        }
+
+        item {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFE0E0E0))
+                    .clickable { onAddPhoto() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Adicionar foto"
                 )
             }
         }

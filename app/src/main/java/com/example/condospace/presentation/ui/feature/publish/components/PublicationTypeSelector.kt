@@ -33,10 +33,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.condospace.domain.model.Publication
 
-enum class PublicationType {
-    PRODUCT,
-    SERVICE,
-    RECOMMENDATION
+enum class PublicationType(val value: String) {
+    PRODUCT("produto"),
+    SERVICE("serviço"),
+    RECOMMENDATION("recomendação")
 }
 
 @Composable

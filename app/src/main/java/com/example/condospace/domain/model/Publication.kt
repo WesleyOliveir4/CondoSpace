@@ -1,5 +1,8 @@
 package com.example.condospace.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Publication(
     val id: Int,
     val publicationOwner: String,

@@ -4,9 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.condospace.presentation.ui.feature.favorites.screen.FavoritesScreen
 import com.example.condospace.presentation.ui.feature.home.screen.HomeScreen
 import com.example.condospace.presentation.ui.feature.profile.screen.ProfileScreen
+import com.example.condospace.presentation.ui.feature.publications.screen.EditPublicationScreen
 import com.example.condospace.presentation.ui.feature.publications.screen.PublicationSelectedScreen
 import com.example.condospace.presentation.ui.feature.publications.screen.PublicationsListScreen
 import com.example.condospace.presentation.ui.feature.publish.screen.PublishScreen
@@ -43,7 +45,17 @@ fun NavNavigation() {
         }
 
         composable<NavRoutes.Publish> {
-            PublishScreen(navController)
+            PublishScreen(
+                navController,
+                navigateToPublicationSelected = {
+                    navController.navigate(NavRoutes.PublicationSelected)
+                },
+                navigateToEditPublication = { publicationId: Int ->
+                    navController.navigate(
+                        NavRoutes.EditPublicationScreen(publicationId = publicationId)
+                    )
+                }
+            )
         }
 
         composable<NavRoutes.Profile> {
@@ -61,6 +73,16 @@ fun NavNavigation() {
 
         composable<NavRoutes.PublicationSelected> {
             PublicationSelectedScreen(navController)
+        }
+
+        composable<NavRoutes.EditPublicationScreen> { backStackEntry ->
+
+            val route = backStackEntry.toRoute<NavRoutes.EditPublicationScreen>()
+
+            EditPublicationScreen(
+                navController,
+                publicationId = route.publicationId
+            )
         }
 
     }
