@@ -8,6 +8,7 @@ import androidx.navigation.toRoute
 import com.example.condospace.presentation.ui.feature.favorites.screen.FavoritesScreen
 import com.example.condospace.presentation.ui.feature.home.screen.HomeScreen
 import com.example.condospace.presentation.ui.feature.profile.screen.ProfileScreen
+import com.example.condospace.presentation.ui.feature.profile.screen.UserDataScreen
 import com.example.condospace.presentation.ui.feature.publications.screen.EditPublicationScreen
 import com.example.condospace.presentation.ui.feature.publications.screen.PublicationSelectedScreen
 import com.example.condospace.presentation.ui.feature.publications.screen.PublicationsListScreen
@@ -59,7 +60,12 @@ fun NavNavigation() {
         }
 
         composable<NavRoutes.Profile> {
-            ProfileScreen(navController)
+            ProfileScreen(
+                navController,
+                navigateToUserData = {
+                    navController.navigate(NavRoutes.UserDataScreen)
+                }
+            )
         }
 
         composable<NavRoutes.PublicationsList> {
@@ -83,6 +89,10 @@ fun NavNavigation() {
                 navController,
                 publicationId = route.publicationId
             )
+        }
+
+        composable<NavRoutes.UserDataScreen> {
+            UserDataScreen(navController)
         }
 
     }
