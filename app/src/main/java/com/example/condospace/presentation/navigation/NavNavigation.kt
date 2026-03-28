@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.condospace.presentation.ui.feature.condominium.SelectCondominiumScreen
 import com.example.condospace.presentation.ui.feature.favorites.screen.FavoritesScreen
 import com.example.condospace.presentation.ui.feature.home.screen.HomeScreen
 import com.example.condospace.presentation.ui.feature.profile.screen.ProfileScreen
@@ -32,6 +33,9 @@ fun NavNavigation() {
                 },
                 navigateToPublicationSelected = {
                     navController.navigate(NavRoutes.PublicationSelected)
+                },
+                navigateToSelectCondominium = {
+                    navController.navigate(NavRoutes.SelectCondominiumScreen)
                 }
             )
         }
@@ -41,6 +45,9 @@ fun NavNavigation() {
                 navController,
                 navigateToPublicationSelected = {
                     navController.navigate(NavRoutes.PublicationSelected)
+                },
+                navigateToSelectCondominium = {
+                    navController.navigate(NavRoutes.SelectCondominiumScreen)
                 }
             )
         }
@@ -55,6 +62,9 @@ fun NavNavigation() {
                     navController.navigate(
                         NavRoutes.EditPublicationScreen(publicationId = publicationId)
                     )
+                },
+                navigateToSelectCondominium = {
+                    navController.navigate(NavRoutes.SelectCondominiumScreen)
                 }
             )
         }
@@ -64,6 +74,9 @@ fun NavNavigation() {
                 navController,
                 navigateToUserData = {
                     navController.navigate(NavRoutes.UserDataScreen)
+                },
+                navigateToSelectCondominium = {
+                    navController.navigate(NavRoutes.SelectCondominiumScreen)
                 }
             )
         }
@@ -93,6 +106,10 @@ fun NavNavigation() {
 
         composable<NavRoutes.UserDataScreen> {
             UserDataScreen(navController)
+        }
+
+        composable<NavRoutes.SelectCondominiumScreen> {
+            SelectCondominiumScreen(navController)
         }
 
     }

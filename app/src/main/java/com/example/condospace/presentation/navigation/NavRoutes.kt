@@ -28,5 +28,7 @@ sealed class NavRoutes {
     
     @Serializable
     object UserDataScreen : NavRoutes()
+    @Serializable
+        object SelectCondominiumScreen : NavRoutes()
 
 }
