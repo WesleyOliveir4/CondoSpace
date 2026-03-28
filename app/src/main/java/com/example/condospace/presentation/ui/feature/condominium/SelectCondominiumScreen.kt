@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -96,9 +97,26 @@ fun SelectCondominiumComponent() {
             .padding(16.dp)
     ) {
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Selecione seu condomínio",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color(0xFF354EAB),
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Card(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(4.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
             )
@@ -151,6 +169,7 @@ fun SelectCondominiumComponent() {
             Card(
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(4.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
                 )
@@ -162,7 +181,6 @@ fun SelectCondominiumComponent() {
 
                     Spacer(Modifier.height(12.dp))
 
-                    // CEP
                     OutlinedTextField(
                         value = cep,
                         onValueChange = { cep = it },
@@ -182,8 +200,9 @@ fun SelectCondominiumComponent() {
                             } else emptyList()
                         },
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2962FF),
+                            containerColor = Color(0xFF354EAB),
                             contentColor = Color.White
                         )
                     ) {
@@ -192,7 +211,6 @@ fun SelectCondominiumComponent() {
 
                     Spacer(Modifier.height(12.dp))
 
-                    // RESULTADOS
                     if (searchResults.isNotEmpty()) {
 
                         searchResults.forEach { condo ->
@@ -243,6 +261,7 @@ fun SelectCondominiumComponent() {
                                 isEditing = false
                             },
                             modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF2962FF),
                                 contentColor = Color.White
