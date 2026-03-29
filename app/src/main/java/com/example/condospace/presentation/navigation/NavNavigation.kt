@@ -60,8 +60,10 @@ fun NavNavigation() {
                 navigateToPublicationSelected = {
                     navController.navigate(NavRoutes.PublicationSelected)
                 },
-                navigateToSelectCondominium = {
-                    navController.navigate(NavRoutes.SelectCondominiumScreen)
+                navigateToSelectCondominium = { userId: String ->
+                    navController.navigate(NavRoutes.SelectCondominiumScreen(
+                        userId = userId,
+                    ))
                 }
             )
         }

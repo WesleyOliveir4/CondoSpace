@@ -10,30 +10,41 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.feature.home.components.CategoriesSection
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.feature.home.components.PublicationsSection
+import com.example.condospace.presentation.ui.feature.home.viewmodel.HomeViewModel
 import com.example.condospace.presentation.ui.mocks.PublicationsMocks
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
     navigateToPublishList: () -> Unit = {},
     navigateToPublicationSelected: () -> Unit,
-    navigateToSelectCondominium: () -> Unit
+    navigateToSelectCondominium: (String) -> Unit,
 ) {
+    val viewModel: HomeViewModel = koinViewModel()
+
+    val condominiumName by viewModel.condominiumName.collectAsStateWithLifecycle()
+    val userUuid by viewModel.userUuid.collectAsStateWithLifecycle()
+
     CondoSpaceTheme {
         HomeScreenContent(
-            navController,
-            navigateToPublishList,
-            navigateToPublicationSelected,
-            navigateToSelectCondominium
+            navController = navController,
+            condominiumName = condominiumName,
+            userUuid = userUuid,
+            navigateToPublishList = navigateToPublishList,
+            navigateToPublicationSelected = navigateToPublicationSelected,
+            navigateToSelectCondominium = navigateToSelectCondominium
         )
     }
 }
@@ -43,17 +54,22 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     navController: NavHostController,
+    condominiumName: String,
+    userUuid: String,
     navigateToPublishList: () -> Unit,
     navigateToPublicationSelected: () -> Unit,
-    navigateToSelectCondominium: () -> Unit
+    navigateToSelectCondominium: (String) -> Unit
 )
 {
     Scaffold(
         bottomBar = { NavBar(navController, "Home") },
         topBar = {
             CondoSpaceTopBar(
+                condominiumName = condominiumName,
                 residenceSelector = {
-                    navigateToSelectCondominium()
+                    navigateToSelectCondominium(
+                        userUuid
+                    )
                 }
             )
         }
@@ -110,10 +126,12 @@ fun HomeScreenPreview() {
     val navController = rememberNavController()
     CondoSpaceTheme {
         HomeScreenContent(
-            navController,
+            navController = navController,
+            condominiumName = "Condomínio Exemplo",
             navigateToPublishList = {},
             navigateToPublicationSelected = {},
-            navigateToSelectCondominium = {}
+            navigateToSelectCondominium = {},
+            userUuid = "Condomínio Exemplo"
         )
     }
 }

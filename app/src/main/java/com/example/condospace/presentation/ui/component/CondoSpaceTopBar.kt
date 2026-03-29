@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CondoSpaceTopBar(
+    condominiumName: String,
     residenceSelector: () -> Unit
 ){
     CenterAlignedTopAppBar(
@@ -28,7 +29,7 @@ fun CondoSpaceTopBar(
         modifier = Modifier.shadow(elevation = 2.dp, ambientColor = Color.Black),
         title = {
             ResidenceSelector(
-                text = "Residencial Green Park",
+                text = condominiumName,
                 onClick = {
                     residenceSelector()
                 }

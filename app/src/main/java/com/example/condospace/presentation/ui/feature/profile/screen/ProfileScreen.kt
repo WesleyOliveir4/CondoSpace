@@ -21,11 +21,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
@@ -33,19 +35,27 @@ import com.example.condospace.presentation.ui.feature.profile.components.Contact
 import com.example.condospace.presentation.ui.feature.profile.components.OptionsCard
 import com.example.condospace.presentation.ui.feature.profile.components.ProfileHeader
 import com.example.condospace.presentation.ui.component.navBar.NavBar
+import com.example.condospace.presentation.ui.feature.profile.viewmodel.ProfileViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
     navigateToUserData: () -> Unit,
-    navigateToSelectCondominium: () -> Unit
+    navigateToSelectCondominium: (String) -> Unit,
+    viewModel: ProfileViewModel = koinViewModel()
 ) {
+    val condominiumName by viewModel.condominiumName.collectAsStateWithLifecycle()
+    val userUuid by viewModel.userUuid.collectAsStateWithLifecycle()
+
     CondoSpaceTheme {
         ProfileScreenContent(
-            navController,
-            navigateToUserData,
-            navigateToSelectCondominium
+            navController = navController,
+            condominiumName = condominiumName,
+            userUuid = userUuid,
+            navigateToUserData = navigateToUserData,
+            navigateToSelectCondominium = navigateToSelectCondominium
         )
     }
 }
@@ -54,15 +64,18 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenContent(
     navController: NavHostController,
+    condominiumName: String,
+    userUuid: String,
     navigateToUserData: () -> Unit,
-    navigateToSelectCondominium: () -> Unit
+    navigateToSelectCondominium: (String) -> Unit
 ) {
     Scaffold(
         bottomBar = { NavBar(navController, "Profile") },
         topBar = {
             CondoSpaceTopBar(
+                condominiumName = condominiumName,
                 residenceSelector = {
-                    navigateToSelectCondominium()
+                    navigateToSelectCondominium(userUuid)
                 }
             )
         }
@@ -154,6 +167,8 @@ fun ProfileScreenPreview() {
     CondoSpaceTheme {
             ProfileScreenContent(
                 navController,
+                condominiumName = "Condominio Exemplo",
+                userUuid = "123",
                 navigateToUserData = {},
                 navigateToSelectCondominium = {}
             )
