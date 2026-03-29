@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.condospace.presentation.ui.feature.condominium.SelectCondominiumScreen
+import com.example.condospace.presentation.ui.feature.condominium.screen.SelectCondominiumScreen
 import com.example.condospace.presentation.ui.feature.favorites.screen.FavoritesScreen
 import com.example.condospace.presentation.ui.feature.home.screen.HomeScreen
 import com.example.condospace.presentation.ui.feature.login.screen.LoginScreen
@@ -37,7 +37,14 @@ fun NavNavigation() {
         }
 
         composable<NavRoutes.RegisterScreen> {
-            RegisterScreen(navController)
+            RegisterScreen(
+                navController,
+                navigateToSelectCondominium = { userId: String ->
+                    navController.navigate(NavRoutes.SelectCondominiumScreen(
+                        userId = userId
+                    ))
+                }
+            )
         }
 
         composable<NavRoutes.Home> {
@@ -123,8 +130,13 @@ fun NavNavigation() {
             UserDataScreen(navController)
         }
 
-        composable<NavRoutes.SelectCondominiumScreen> {
-            SelectCondominiumScreen(navController)
+        composable<NavRoutes.SelectCondominiumScreen> { backStackEntry ->
+            val route = backStackEntry.toRoute<NavRoutes.SelectCondominiumScreen>()
+
+            SelectCondominiumScreen(
+                navController,
+                userId = route.userId
+            )
         }
 
     }

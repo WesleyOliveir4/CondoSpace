@@ -2,9 +2,7 @@ package com.example.condospace.presentation.ui.feature.profile.screen
 
 
 import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -35,23 +31,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.R
 import com.example.condospace.domain.model.User
 import com.example.condospace.presentation.ui.component.TopBarReturn
-import com.example.condospace.presentation.ui.feature.favorites.components.SearchPublications
 import com.example.condospace.presentation.ui.feature.profile.components.InfoItem
-import com.example.condospace.presentation.ui.feature.publications.components.EditableProfileImage
-import com.example.condospace.presentation.ui.mocks.PublicationsMocks
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Composable
 fun UserDataScreen(
@@ -65,7 +56,7 @@ fun UserDataScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)
 @Composable
 fun UserDataScreenContent(
     navController: NavHostController,
@@ -87,10 +78,10 @@ fun UserDataScreenContent(
         ) {
             UserDetailsComponent(
                 user = User(
-                    id = 1,
+                    uuid = Uuid.random().toString(),
                     name = "João Silva",
                     phoneNumber = "(11) 98999-2000",
-                    profilePicture = R.drawable.img_person,
+                    profilePicture = "R.drawable.img_person",
                     email = "john.jay@example.com",
                     cep = "04916020",
                     condominiumName = "Residencial Green Park"
@@ -132,14 +123,14 @@ fun UserDetailsComponent(
             ) {
 
                 var profileImage by remember { mutableStateOf<Uri?>(null) }
-
-                EditableProfileImage(
-                    imageUri = profileImage,
-                    imageRes = user.profilePicture,
-                    onImageSelected = { newUri ->
-                        profileImage = newUri
-                    }
-                )
+//
+//                EditableProfileImage(
+//                    imageUri = profileImage,
+//                    imageRes = user.profilePicture,
+//                    onImageSelected = { newUri ->
+//                        profileImage = newUri
+//                    }
+//                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 

@@ -35,6 +35,6 @@ sealed class NavRoutes {
     @Serializable
     object UserDataScreen : NavRoutes()
     @Serializable
-        object SelectCondominiumScreen : NavRoutes()
+    data class SelectCondominiumScreen(val userId: String) : NavRoutes()
 
 }

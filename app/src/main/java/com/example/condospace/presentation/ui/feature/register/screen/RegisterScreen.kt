@@ -17,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -24,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,15 +43,25 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.R
 import com.example.condospace.presentation.ui.component.TopBarReturn
+import com.example.condospace.presentation.ui.feature.register.state.RegisterState
+import com.example.condospace.presentation.ui.feature.register.viewmodel.RegisterViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun RegisterScreen(
     navController: NavHostController,
+    navigateToSelectCondominium: (String) -> Unit,
 ) {
+    val registerViewModel: RegisterViewModel = koinViewModel()
+    val registerState by registerViewModel.registerState.collectAsState()
+
     CondoSpaceTheme {
         RegisterScreenContent(
             navController = navController,
+            navigateToSelectCondominium,
+            registerViewModel = registerViewModel,
+            registerState = registerState
         )
     }
 }
@@ -59,6 +71,9 @@ fun RegisterScreen(
 @Composable
 fun RegisterScreenContent(
     navController: NavHostController,
+    navigateToSelectCondominium: (String) -> Unit,
+    registerViewModel: RegisterViewModel,
+    registerState: RegisterState
 ) {
     Scaffold(
         topBar = {
@@ -75,11 +90,33 @@ fun RegisterScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            RegisterComponent(
-                onCreateAccountClick = { name, email, password, phone ->
+            Box {
+                RegisterComponent(
+                    onCreateAccountClick = { name, email, password, phone ->
+                        registerViewModel.signup(
+                            email = email,
+                            password = password,
+                            name = name,
+                            phone = phone
+                        )
+                    },
+                    isLoading = registerState is RegisterState.Loading
+                )
 
+                when (registerState) {
+                    is RegisterState.Registered -> {
+                        navigateToSelectCondominium(registerState.userUuid)
+                    }
+                    is RegisterState.Error -> {
+                        Text(
+                            text = registerState.message,
+                            color = Color.Red,
+                            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+                        )
+                    }
+                    else -> Unit
                 }
-            )
+            }
         }
     }
 
@@ -87,6 +124,7 @@ fun RegisterScreenContent(
 
 @Composable
 fun RegisterComponent(
+    isLoading: Boolean = false,
     onCreateAccountClick: (name: String, email: String, password: String, phone: String) -> Unit
 ) {
 
@@ -104,7 +142,6 @@ fun RegisterComponent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 🔵 Ícone + título
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -223,12 +260,20 @@ fun RegisterComponent(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF354EAB)
                     ),
-                    enabled = name.isNotBlank() &&
+                    enabled = !isLoading && name.isNotBlank() &&
                             email.isNotBlank() &&
                             password.length >= 6 &&
                             phone.isNotBlank()
                 ) {
-                    Text("Criar conta")
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Criar conta")
+                    }
                 }
             }
         }
@@ -239,10 +284,15 @@ fun RegisterComponent(
 @Composable
 fun RegisterScreenPreview() {
     val navController = rememberNavController()
+    val registerViewModel: RegisterViewModel = koinViewModel()
+
 
     CondoSpaceTheme {
         RegisterScreenContent(
-            navController,
+            navController = navController,
+            navigateToSelectCondominium = {},
+            registerViewModel = registerViewModel,
+            registerState = RegisterState.NotRegistered
         )
     }
 }

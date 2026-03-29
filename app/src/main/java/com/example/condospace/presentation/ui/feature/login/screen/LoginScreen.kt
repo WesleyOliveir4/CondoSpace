@@ -1,6 +1,7 @@
 package com.example.condospace.presentation.ui.feature.login.screen
 
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -27,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,17 +46,25 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.R
+import com.example.condospace.presentation.ui.feature.login.state.LoginState
+import com.example.condospace.presentation.ui.feature.login.viewmodel.LoginViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
     navController: NavHostController,
     navigateToRegister: () -> Unit,
 ) {
+    val loginViewModel: LoginViewModel = koinViewModel()
+    val loginState by loginViewModel.loginState.collectAsState()
+
     CondoSpaceTheme {
         LoginScreenContent(
             navController = navController,
-            navigateToRegister
+            loginViewModel = loginViewModel,
+            loginState = loginState,
+            navigateToRegister = navigateToRegister,
         )
     }
 }
@@ -63,6 +74,8 @@ fun LoginScreen(
 @Composable
 fun LoginScreenContent(
     navController: NavHostController,
+    loginViewModel: LoginViewModel,
+    loginState: LoginState,
     navigateToRegister: () -> Unit
 ) {
     Scaffold(
@@ -74,17 +87,42 @@ fun LoginScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            LoginComponent(
-                onLoginClick = { email, password ->
+            Box {
+                LoginComponent(
+                    onLoginClick = { email, password ->
+                        loginViewModel.login(
+                            email = email,
+                            password = password
+                        )
+                    },
+                    onRegisterClick = {
+                        navigateToRegister()
+                    },
+                    onForgotPasswordClick = {
 
-                },
-                onRegisterClick = {
-                    navigateToRegister()
-                },
-                onForgotPasswordClick ={
+                    },
+                    isLoading = loginState is LoginState.Loading
+                )
 
+                when (loginState) {
+                    is LoginState.Error -> {
+                        Text(
+                            text = loginState.message,
+                            color = Color.Red,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(16.dp)
+                        )
+                    }
+                    is LoginState.Authenticated -> {
+                        Log.e(
+                            "LoginScreenContent",
+                            "Authenticated"
+                        )
+                    }
+                    else -> Unit
                 }
-            )
+            }
         }
     }
 
@@ -94,7 +132,8 @@ fun LoginScreenContent(
 fun LoginComponent(
     onLoginClick: (email: String, password: String) -> Unit,
     onRegisterClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit
+    onForgotPasswordClick: () -> Unit,
+    isLoading: Boolean = false
 ){
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
@@ -201,9 +240,18 @@ fun LoginComponent(
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF354EAB)
-                        )
+                        ),
+                        enabled = !isLoading
                     ) {
-                        Text("Entrar")
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Entrar")
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -229,12 +277,15 @@ fun LoginComponent(
 @Composable
 fun  LoginScreenPreview() {
     val navController = rememberNavController()
+    val loginViewModel: LoginViewModel = koinViewModel()
+
 
     CondoSpaceTheme {
         LoginScreenContent(
-            navController,
-            navigateToRegister = {
-            }
+            navController = navController,
+            loginViewModel = loginViewModel,
+            loginState = LoginState.Unauthenticated,
+            navigateToRegister = {}
         )
     }
 }

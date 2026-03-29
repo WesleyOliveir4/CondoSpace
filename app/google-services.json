@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "858846982671",
+    "project_id": "condospace-pucpr",
+    "storage_bucket": "condospace-pucpr.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:858846982671:android:4a35c837c8ec941834a97a",
+        "android_client_info": {
+          "package_name": "com.example.condospace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbSvKAp4vdtZJeuVZP_y9J30OJKq7G_V8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
