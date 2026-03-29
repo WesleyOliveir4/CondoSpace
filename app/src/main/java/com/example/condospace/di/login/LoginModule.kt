@@ -8,5 +8,12 @@ import org.koin.dsl.module
 val loginModule = module {
     factory { SignInUseCase(get()) }
     
-    viewModel { LoginViewModel(signInUseCase = get()) }
+    viewModel { 
+        LoginViewModel(
+            signInUseCase = get(),
+            authRepository = get(),
+            userRepository = get(),
+            userPreferencesRepository = get()
+        ) 
+    }
 }

@@ -55,6 +55,7 @@ import org.koin.androidx.compose.koinViewModel
 fun LoginScreen(
     navController: NavHostController,
     navigateToRegister: () -> Unit,
+    navigateToHome: () -> Unit,
 ) {
     val loginViewModel: LoginViewModel = koinViewModel()
     val loginState by loginViewModel.loginState.collectAsState()
@@ -65,6 +66,7 @@ fun LoginScreen(
             loginViewModel = loginViewModel,
             loginState = loginState,
             navigateToRegister = navigateToRegister,
+            navigateToHome = navigateToHome
         )
     }
 }
@@ -76,7 +78,8 @@ fun LoginScreenContent(
     navController: NavHostController,
     loginViewModel: LoginViewModel,
     loginState: LoginState,
-    navigateToRegister: () -> Unit
+    navigateToRegister: () -> Unit,
+    navigateToHome: () -> Unit
 ) {
     Scaffold(
     ) { innerPadding ->
@@ -115,10 +118,7 @@ fun LoginScreenContent(
                         )
                     }
                     is LoginState.Authenticated -> {
-                        Log.e(
-                            "LoginScreenContent",
-                            "Authenticated"
-                        )
+                        navigateToHome()
                     }
                     else -> Unit
                 }
@@ -285,7 +285,8 @@ fun  LoginScreenPreview() {
             navController = navController,
             loginViewModel = loginViewModel,
             loginState = LoginState.Unauthenticated,
-            navigateToRegister = {}
+            navigateToRegister = {},
+            navigateToHome = {}
         )
     }
 }

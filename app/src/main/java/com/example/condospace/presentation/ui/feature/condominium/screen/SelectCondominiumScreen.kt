@@ -53,6 +53,8 @@ import org.koin.androidx.compose.koinViewModel
 fun SelectCondominiumScreen(
     navController: NavHostController,
     userId: String,
+    navigateToLogin: () -> Unit,
+    registerFlow: Boolean,
 ) {
     val condominiumViewModel : SelectCondominiumViewModel = koinViewModel()
     val condominiumState by condominiumViewModel.condominiumState.collectAsState()
@@ -65,6 +67,8 @@ fun SelectCondominiumScreen(
     CondoSpaceTheme {
         SelectCondominiumScreenContent(
             navController = navController,
+            registerFlow = registerFlow,
+            navigateToLogin = navigateToLogin,
             condominiumState = condominiumState,
             searchResults = searchResults,
             onSearchClick = { cep ->
@@ -89,13 +93,15 @@ fun SelectCondominiumScreenContent(
     searchResults: List<Condominium>,
     onSearchClick: (String) -> Unit,
     onSaveCondominiumSelectedClick: (Condominium) -> Unit,
-    onSaveCondominiumCreateClick: (Condominium) -> Unit
+    onSaveCondominiumCreateClick: (Condominium) -> Unit,
+    registerFlow: Boolean,
+    navigateToLogin: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopBarReturn(
                 title = "Endereço",
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.navigateUp() }
             )
         }
     ) { innerPadding ->
@@ -126,13 +132,17 @@ fun SelectCondominiumScreenContent(
                         )
                     }
                     is CondominiumState.CondominiumSaved -> {
-                        SelectCondominiumComponent(
-                            initialCondo = condominiumState.condominium,
-                            searchResults = searchResults,
-                            onSearchClick = onSearchClick,
-                            onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
-                            onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
-                        )
+                        if (registerFlow) {
+                            navigateToLogin()
+                        }else{
+                            SelectCondominiumComponent(
+                                initialCondo = condominiumState.condominium,
+                                searchResults = searchResults,
+                                onSearchClick = onSearchClick,
+                                onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
+                                onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
+                            )
+                        }
                     }
                     is CondominiumState.CondominiumNotFound -> {
                         SelectCondominiumComponent(
@@ -345,7 +355,7 @@ fun SelectCondominiumComponent(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF2962FF),
+                                containerColor = Color(0xFF354EAB),
                                 contentColor = Color.White
                             )
                         ) {
@@ -371,7 +381,9 @@ fun  SelectCondominiumScreenPreview() {
             searchResults = emptyList<Condominium>(),
             onSearchClick = {},
             onSaveCondominiumSelectedClick = {},
-            onSaveCondominiumCreateClick = {}
+            onSaveCondominiumCreateClick = {},
+            registerFlow = false,
+            navigateToLogin = {}
         )
     }
 }

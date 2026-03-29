@@ -32,6 +32,9 @@ fun NavNavigation() {
                 navController,
                 navigateToRegister = {
                     navController.navigate(NavRoutes.RegisterScreen)
+                },
+                navigateToHome = {
+                    navController.navigate(NavRoutes.Home)
                 }
             )
         }
@@ -41,7 +44,8 @@ fun NavNavigation() {
                 navController,
                 navigateToSelectCondominium = { userId: String ->
                     navController.navigate(NavRoutes.SelectCondominiumScreen(
-                        userId = userId
+                        userId = userId,
+                        registerFlow = true
                     ))
                 }
             )
@@ -135,7 +139,11 @@ fun NavNavigation() {
 
             SelectCondominiumScreen(
                 navController,
-                userId = route.userId
+                userId = route.userId,
+                registerFlow = route.registerFlow,
+                navigateToLogin = {
+                    navController.navigate(NavRoutes.LoginScreen)
+                }
             )
         }
 
