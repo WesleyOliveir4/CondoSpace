@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.condospace.domain.model.Publication
 import com.example.condospace.presentation.ui.enums.CategoryType
+import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -247,13 +248,13 @@ fun PublicationForm(
             Button(
                 onClick = {
                     val publication = Publication(
-                        id = (1..10000).random(),
+                        id = UUID.randomUUID().toString(),
                         publicationOwnerUuid = "123456789",
                         publicationOwner = "Morador CondoSpace",
                         serviceProvider = providerNameState,
                         contact = contactState,
                         price = priceState.toDoubleOrNull() ?: 0.0,
-                        imageUrlList = images.map { it.toString() },
+                        imagesSelectList = images.map { it },
                         title = titleState,
                         description = descriptionState,
                         publicationType = publicationType.toString(),

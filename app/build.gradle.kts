@@ -70,11 +70,15 @@ dependencies {
     
     // DataStore
     implementation(libs.androidx.datastore)
+
+    //Cloudinary
+    implementation(libs.cloudinary.android)
     
     // Koin
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.google.firebase.firestore)
+    implementation(libs.play.services.cast.tv)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

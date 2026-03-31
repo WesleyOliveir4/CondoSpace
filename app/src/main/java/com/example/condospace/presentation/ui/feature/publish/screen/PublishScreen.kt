@@ -30,18 +30,20 @@ import org.koin.androidx.compose.koinViewModel
 fun PublishScreen(
     navController: NavHostController,
     navigateToPublicationSelected: () -> Unit,
-    navigateToEditPublication: (Int) -> Unit,
+    navigateToEditPublication: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
-    viewModel: PublishViewModel = koinViewModel()
 ) {
-    val condominiumName by viewModel.condominiumName.collectAsStateWithLifecycle()
-    val userUuid by viewModel.userUuid.collectAsStateWithLifecycle()
+    val publishViewModel: PublishViewModel = koinViewModel()
+
+    val condominiumName by publishViewModel.condominiumName.collectAsStateWithLifecycle()
+    val userUuid by publishViewModel.userUuid.collectAsStateWithLifecycle()
 
     CondoSpaceTheme {
         PublishScreenContent(
             navController = navController,
             condominiumName = condominiumName,
             userUuid = userUuid,
+            publishViewModel = publishViewModel,
             navigateToPublicationSelected = navigateToPublicationSelected,
             navigateToEditPublication = navigateToEditPublication,
             navigateToSelectCondominium = navigateToSelectCondominium
@@ -55,8 +57,9 @@ fun PublishScreenContent(
     navController: NavHostController,
     condominiumName: String,
     userUuid: String,
+    publishViewModel: PublishViewModel,
     navigateToPublicationSelected: () -> Unit,
-    navigateToEditPublication: (Int) -> Unit,
+    navigateToEditPublication: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit
 ) {
     Scaffold(
@@ -82,7 +85,7 @@ fun PublishScreenContent(
             ) {
                 CreatePublicationScreen(
                     onPublicationCreated = { publication ->
-
+                        publishViewModel.createPublication(publication)
                         Log.e("Publicacao Criada", "$publication")
                     }
                 )
@@ -111,15 +114,17 @@ fun PublishScreenContent(
 @Composable
 fun PublishScreenPreview() {
     val navController = rememberNavController()
+    val publishViewModel: PublishViewModel = koinViewModel()
+
 
     CondoSpaceTheme {
         PublishScreenContent(
             navController,
             condominiumName = "Condomínio Exemplo",
             userUuid = "123",
+            publishViewModel,
             navigateToPublicationSelected = {},
-            navigateToEditPublication = {},
-            navigateToSelectCondominium = {}
-        )
+            navigateToEditPublication = {}
+        ) {}
     }
 }

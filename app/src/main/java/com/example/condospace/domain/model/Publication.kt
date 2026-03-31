@@ -4,12 +4,12 @@ import android.net.Uri
 
 
 data class Publication(
-    val id: Int,
+    val id: String,
     val publicationOwnerUuid: String,
     val publicationOwner: String,
     val serviceProvider: String? = null,
     val contact: String? = null,
-    val imageUrlList : List<String>? = null,
+    val imageUrlList : List<PublicationImage>? = null,
     val imagesSelectList : List<Uri>? = null,
     val title: String,
     val description: String,
