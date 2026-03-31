@@ -9,7 +9,7 @@ class GetUserCondominiumUseCase(
     suspend operator fun invoke(userId: String): Result<Condominium?> {
         return userRepository.getUser(userId).map { user ->
             if (user != null && !user.cep.isNullOrBlank() && !user.condominiumName.isNullOrBlank()) {
-                Condominium(name = user.condominiumName, cep = user.cep)
+                Condominium(name = user.condominiumName, cep = user.cep, id = "")
             } else {
                 null
             }

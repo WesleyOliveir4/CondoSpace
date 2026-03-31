@@ -348,7 +348,7 @@ fun SelectCondominiumComponent(
                         Button(
                             onClick = {
                                 if (manualName.isNotBlank()) {
-                                    onSaveCondominiumCreateClick(Condominium(manualName, cep))
+                                    onSaveCondominiumCreateClick(Condominium(name = manualName, cep =  cep))
                                     isEditing = false
                                 }
                             },

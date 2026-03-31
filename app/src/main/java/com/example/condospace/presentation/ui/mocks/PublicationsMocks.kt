@@ -11,6 +11,7 @@ class PublicationsMocks() {
             Publication(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_01",
+                publicationCondominiumId = "condo_01",
                 publicationOwner = "Ana Paula Silva",
                 title = "Contadora",
                 description = "Consultoria contábil para MEI e empresas. Ofereço serviços completos de contabilidade, declaração de imposto de renda e planejamento financeiro.",
@@ -28,6 +29,7 @@ class PublicationsMocks() {
             Publication(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_02",
+                publicationCondominiumId = "condo_01",
                 publicationOwner = "Carlos Mendes",
                 title = "Encanador",
                 description = "Reparos hidráulicos em geral. Especialista em detecção de vazamentos, troca de tubulação e instalação de metais sanitários.",
@@ -45,6 +47,7 @@ class PublicationsMocks() {
             Publication(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_03",
+                publicationCondominiumId = "condo_01",
                 publicationOwner = "Paula Silva",
                 title = "Diarista",
                 description = "Limpeza residencial e comercial. Serviço de limpeza profunda ou manutenção, organização de armários e passadoria.",
@@ -62,6 +65,7 @@ class PublicationsMocks() {
             Publication(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_04",
+                publicationCondominiumId = "condo_01",
                 publicationOwner = "Jonas Silveira",
                 title = "Pedreiro",
                 description = "Pequenas reformas e alvenaria. Experiência em assentamento de pisos, azulejos e reparos estruturais.",
@@ -84,6 +88,7 @@ class PublicationsMocks() {
             Publication(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "ext_01",
+                publicationCondominiumId = "condo_01",
                 publicationOwner = "Paulo Silva",
                 title = "Pintor",
                 description = "Pintura residencial interna e externa. Trabalho com texturas, grafiato e pintura fina.",
@@ -101,6 +106,7 @@ class PublicationsMocks() {
             Publication(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "ext_02",
+                publicationCondominiumId = "condo_01",
                 publicationOwner = "Matheus Silva",
                 title = "Advogado",
                 description = "Assessoria jurídica civil e família. Especialista em direito do consumidor e contratos.",
@@ -123,6 +129,7 @@ class PublicationsMocks() {
             Publication(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_05",
+                publicationCondominiumId = "condo_01",
                 publicationOwner = "Ricardo Gomes",
                 title = "Sofá 3 lugares cinza",
                 description = "Móveis em ótimo estado, pouco uso. Tecido impermeabilizado e sem manchas. Retirada no bloco B.",
@@ -140,6 +147,7 @@ class PublicationsMocks() {
             Publication(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_06",
+                publicationCondominiumId = "condo_01",
                 publicationOwner = "Juliana Lins",
                 title = "Cadeira de escritório",
                 description = "Cadeira ergonômica com regulagem de altura e braços. Perfeita para home office.",

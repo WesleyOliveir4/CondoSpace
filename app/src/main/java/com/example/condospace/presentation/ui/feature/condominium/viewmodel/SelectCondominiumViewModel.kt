@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class SelectCondominiumViewModel(
     private val getUserCondominiumUseCase: GetUserCondominiumUseCase,
@@ -74,7 +75,8 @@ class SelectCondominiumViewModel(
             updateUserCondominiumUseCase(
                 userId = userId,
                 condominiumName = condominium.name,
-                cep = condominium.cep
+                cep = condominium.cep,
+                condominiumId = UUID.randomUUID().toString()
             ).onSuccess {
                 _condominiumState.value = CondominiumState.CondominiumSaved(condominium)
             }.onFailure { error ->

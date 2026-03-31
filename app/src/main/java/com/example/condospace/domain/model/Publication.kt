@@ -6,6 +6,7 @@ import android.net.Uri
 data class Publication(
     val id: String,
     val publicationOwnerUuid: String,
+    val publicationCondominiumId: String,
     val publicationOwner: String,
     val serviceProvider: String? = null,
     val contact: String? = null,

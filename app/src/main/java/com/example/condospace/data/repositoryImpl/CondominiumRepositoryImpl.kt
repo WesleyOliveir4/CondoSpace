@@ -17,9 +17,13 @@ class CondominiumRepositoryImpl(
                 .get()
                 .await()
 
-            val localCondos = document.get("localCondominiums") as? List<String>
-            val result = localCondos?.map { name ->
-                Condominium(name = name, cep = cep)
+            val localCondos = document.get("localCondominiums") as? List<Map<String, Any>>
+            val result = localCondos?.map { map ->
+                Condominium(
+                    id = map["id"] as? String ?: "",
+                    name = map["name"] as? String ?: "",
+                    cep = cep
+                )
             } ?: emptyList()
 
             Result.success(result)
@@ -29,17 +33,21 @@ class CondominiumRepositoryImpl(
     }
 
     override suspend fun saveCondominium(condominium: Condominium): Result<Unit> {
+        val condoData = mapOf(
+            "id" to condominium.id,
+            "name" to condominium.name
+        )
         return try {
             firestore.collection("Condominium")
                 .document(condominium.cep)
-                .update("localCondominiums", FieldValue.arrayUnion(condominium.name))
+                .update("localCondominiums", FieldValue.arrayUnion(condoData))
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
             try {
                 firestore.collection("Condominium")
                     .document(condominium.cep)
-                    .set(mapOf("localCondominiums" to listOf(condominium.name)))
+                    .set(mapOf("localCondominiums" to listOf(condoData)))
                     .await()
                 Result.success(Unit)
             } catch (e2: Exception) {

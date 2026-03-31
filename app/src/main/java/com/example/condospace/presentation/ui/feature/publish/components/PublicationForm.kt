@@ -250,6 +250,7 @@ fun PublicationForm(
                     val publication = Publication(
                         id = UUID.randomUUID().toString(),
                         publicationOwnerUuid = "123456789",
+                        publicationCondominiumId = "123456789",
                         publicationOwner = "Morador CondoSpace",
                         serviceProvider = providerNameState,
                         contact = contactState,
