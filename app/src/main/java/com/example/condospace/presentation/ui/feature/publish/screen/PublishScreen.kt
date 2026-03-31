@@ -82,6 +82,7 @@ fun PublishScreenContent(
             ) {
                 CreatePublicationScreen(
                     onPublicationCreated = { publication ->
+
                         Log.e("Publicacao Criada", "$publication")
                     }
                 )

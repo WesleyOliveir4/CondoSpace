@@ -1,6 +1,5 @@
 package com.example.condospace.presentation.ui.feature.home.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,9 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.condospace.domain.model.Publication
 
 @Composable
@@ -55,8 +54,8 @@ fun PublicationsCard(
 
         Column {
 
-            Image(
-                painter = painterResource(publication.imageRes),
+            AsyncImage(
+                model = publication.imageUrlList?.firstOrNull(),
                 contentDescription = publication.title,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -95,12 +94,12 @@ fun PublicationsCard(
 
                     Spacer(modifier = Modifier.width(4.dp))
 
-                    Text("${publication.score}")
+                    Text("${publication.likes}")
 
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
-                        "(${publication.reviewsNumber})",
+                        "(${publication.likes})",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }

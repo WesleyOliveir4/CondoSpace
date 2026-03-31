@@ -1,6 +1,5 @@
 package com.example.condospace.presentation.ui.feature.favorites.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,9 +33,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.condospace.domain.model.Publication
 
 @Composable
@@ -111,8 +110,8 @@ fun PublicationItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Image(
-                painter = painterResource(publication.imageRes),
+            AsyncImage(
+                model = publication.imageUrlList?.firstOrNull(),
                 contentDescription = publication.title,
                 modifier = Modifier
                     .size(70.dp)
@@ -137,7 +136,7 @@ fun PublicationItem(
                 )
 
                 Text(
-                    publication.detailedDescription,
+                    publication.description,
                     style = MaterialTheme.typography.bodySmall
                 )
 

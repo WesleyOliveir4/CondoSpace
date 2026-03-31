@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.TopBarReturn
@@ -61,11 +60,11 @@ fun EditPublicationScreenContent(
                 ?: PublicationType.PRODUCT
         }
 
-        val initialImages = remember {
-            if (publication.imageUrl.isNotBlank()) {
-                listOf(publication.imageUrl.toUri())
-            } else emptyList()
-        }
+//        val initialImages = remember {
+//            if (publication.imageUrl.isNotBlank()) {
+//                listOf(publication.imageUrl.toUri())
+//            } else emptyList()
+//        }
 
         Column(
             modifier = Modifier
@@ -85,7 +84,7 @@ fun EditPublicationScreenContent(
 
                 publicationType = currentPublicationType,
 
-                initialImages = initialImages,
+                initialImages = emptyList(),
 
                 onPublish = { updatedPublication ->
                     val finalPublication = updatedPublication.copy(

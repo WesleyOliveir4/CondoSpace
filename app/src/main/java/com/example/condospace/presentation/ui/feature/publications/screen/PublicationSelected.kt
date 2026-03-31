@@ -77,7 +77,7 @@ fun PublicationSelectedScreenContent(
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
 
-                PublicationImage(publication.imageUrl)
+                PublicationImage(publication.imageUrlList?.first() ?: "")
 
                 PublicationContent(publication)
             }
