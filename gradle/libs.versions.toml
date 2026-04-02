@@ -28,6 +28,8 @@ googleid = "1.2.0"
 koin = "4.0.0"
 firebaseFirestoreVersion = "26.1.2"
 datastore = "1.1.2"
+cloudinary = "3.1.2"
+playServicesCastTv = "21.1.1"
 
 [libraries]
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -65,6 +67,8 @@ koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = 
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 google-firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestoreVersion" }
 androidx-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
+cloudinary-android = { group = "com.cloudinary", name = "cloudinary-android", version.ref = "cloudinary" }
+play-services-cast-tv = { group = "com.google.android.gms", name = "play-services-cast-tv", version.ref = "playServicesCastTv" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

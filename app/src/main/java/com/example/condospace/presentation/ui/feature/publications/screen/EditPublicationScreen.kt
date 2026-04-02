@@ -23,7 +23,7 @@ import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 @Composable
 fun EditPublicationScreen(
     navController: NavHostController,
-    publicationId: Int
+    publicationId: String
 ) {
     CondoSpaceTheme {
         EditPublicationScreenContent(
@@ -37,7 +37,7 @@ fun EditPublicationScreen(
 @Composable
 fun EditPublicationScreenContent(
     navController: NavHostController,
-    publicationId: Int,
+    publicationId: String,
 ) {
 
     Scaffold(

@@ -86,7 +86,7 @@ fun NavNavigation() {
                 navigateToPublicationSelected = {
                     navController.navigate(NavRoutes.PublicationSelected)
                 },
-                navigateToEditPublication = { publicationId: Int ->
+                navigateToEditPublication = { publicationId: String ->
                     navController.navigate(
                         NavRoutes.EditPublicationScreen(publicationId = publicationId)
                     )

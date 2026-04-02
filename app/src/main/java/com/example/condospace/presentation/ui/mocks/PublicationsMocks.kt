@@ -1,13 +1,15 @@
 package com.example.condospace.presentation.ui.mocks
 
 import com.example.condospace.domain.model.Publication
+import com.example.condospace.domain.model.PublicationImage
+import java.util.UUID
 
 class PublicationsMocks() {
 
     fun getPublications(): List<Publication> {
         return listOf(
             Publication(
-                id = 1,
+                id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_01",
                 publicationOwner = "Ana Paula Silva",
                 title = "Contadora",
@@ -16,10 +18,15 @@ class PublicationsMocks() {
                 date = "10/05/2023",
                 price = 120.0,
                 likes = 127,
-                imageUrlList = listOf("https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=500")
+                imageUrlList = listOf(
+                    PublicationImage(
+                        url = "https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=500",
+                        publicId = "public_id_1"
+                    )
+                )
             ),
             Publication(
-                id = 2,
+                id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_02",
                 publicationOwner = "Carlos Mendes",
                 title = "Encanador",
@@ -28,10 +35,15 @@ class PublicationsMocks() {
                 date = "12/05/2023",
                 price = 150.0,
                 likes = 94,
-                imageUrlList = listOf("https://images.unsplash.com/photo-1581244277943-fe4a9c777189?q=80&w=500")
+                imageUrlList = listOf(
+                    PublicationImage(
+                        url = "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?q=80&w=500",
+                        publicId = "public_id_1"
+                    )
+                )
             ),
             Publication(
-                id = 3,
+                id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_03",
                 publicationOwner = "Paula Silva",
                 title = "Diarista",
@@ -40,10 +52,15 @@ class PublicationsMocks() {
                 date = "15/05/2023",
                 price = 180.0,
                 likes = 150,
-                imageUrlList = listOf("https://images.unsplash.com/photo-1581578731522-745d05ad9a2d?q=80&w=500")
+                imageUrlList = listOf(
+                    PublicationImage(
+                        url = "https://images.unsplash.com/photo-1581578731522-745d05ad9a2d?q=80&w=500",
+                        publicId = "public_id_1"
+                    )
+                )
             ),
             Publication(
-                id = 4,
+                id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_04",
                 publicationOwner = "Jonas Silveira",
                 title = "Pedreiro",
@@ -52,7 +69,12 @@ class PublicationsMocks() {
                 date = "18/05/2023",
                 price = 200.0,
                 likes = 82,
-                imageUrlList = listOf("https://images.unsplash.com/photo-1504148455328-c376907d081c?q=80&w=500")
+                imageUrlList = listOf(
+                    PublicationImage(
+                        url = "https://images.unsplash.com/photo-1504148455328-c376907d081c?q=80&w=500",
+                        publicId = "public_id_1"
+                    )
+                )
             )
         )
     }
@@ -60,7 +82,7 @@ class PublicationsMocks() {
     fun getExternalPublications(): List<Publication> {
         return listOf(
             Publication(
-                id = 5,
+                id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "ext_01",
                 publicationOwner = "Paulo Silva",
                 title = "Pintor",
@@ -69,10 +91,15 @@ class PublicationsMocks() {
                 date = "20/05/2023",
                 price = 300.0,
                 likes = 110,
-                imageUrlList = listOf("https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=500")
+                imageUrlList = listOf(
+                    PublicationImage(
+                        url = "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=500",
+                        publicId = "public_id_1"
+                    )
+                )
             ),
             Publication(
-                id = 6,
+                id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "ext_02",
                 publicationOwner = "Matheus Silva",
                 title = "Advogado",
@@ -81,7 +108,12 @@ class PublicationsMocks() {
                 date = "22/05/2023",
                 price = 250.0,
                 likes = 67,
-                imageUrlList = listOf("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=500")
+                imageUrlList = listOf(
+                    PublicationImage(
+                        url = "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=500",
+                        publicId = "public_id_1"
+                    )
+                )
             )
         )
     }
@@ -89,7 +121,7 @@ class PublicationsMocks() {
     fun getFavoritedPublications(): List<Publication> {
         return listOf(
             Publication(
-                id = 10,
+                id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_05",
                 publicationOwner = "Ricardo Gomes",
                 title = "Sofá 3 lugares cinza",
@@ -98,10 +130,15 @@ class PublicationsMocks() {
                 date = "25/05/2023",
                 price = 850.0,
                 likes = 12,
-                imageUrlList = listOf("https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=500")
+                imageUrlList = listOf(
+                    PublicationImage(
+                        url = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=500",
+                        publicId = "public_id_1"
+                    )
+                )
             ),
             Publication(
-                id = 11,
+                id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_06",
                 publicationOwner = "Juliana Lins",
                 title = "Cadeira de escritório",
@@ -110,7 +147,12 @@ class PublicationsMocks() {
                 date = "26/05/2023",
                 price = 450.0,
                 likes = 8,
-                imageUrlList = listOf("https://images.unsplash.com/photo-1505797149-43b007662c21?q=80&w=500")
+                imageUrlList = listOf(
+                    PublicationImage(
+                        url = "https://images.unsplash.com/photo-1505797149-43b007662c21?q=80&w=500",
+                        publicId = "public_id_1"
+                    )
+                )
             )
         )
     }
