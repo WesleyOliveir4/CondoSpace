@@ -1,9 +1,10 @@
-package com.example.condospace.data.repositoryImpl
+package com.example.condospace.data.repositoryImpl.dataStore
 
-import com.example.condospace.data.entity.UserEntity
-import com.example.condospace.data.mapper.toDomain
+import com.example.condospace.domain.entity.UserEntity
 import com.example.condospace.data.mapper.toEntity
-import com.example.condospace.domain.model.User
+import com.example.condospace.data.mapper.toModel
+import com.example.condospace.data.model.User
+import com.example.condospace.domain.entity.CondominiumEntity
 import com.example.condospace.domain.repository.UserRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -12,12 +13,12 @@ class UserRepositoryImpl(
     private val firestore: FirebaseFirestore
 ) : UserRepository {
 
-    override suspend fun createUser(user: User): Result<Unit> {
+    override suspend fun createUser(user: UserEntity): Result<Unit> {
         return try {
-            val userEntity = user.toEntity()
+            val user = user.toModel()
             firestore.collection("users")
-                .document(userEntity.uuid)
-                .set(userEntity)
+                .document(user.uuid)
+                .set(user)
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
@@ -25,15 +26,15 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun getUser(userId: String): Result<User?> {
+    override suspend fun getUser(userId: String): Result<UserEntity?> {
         return try {
             val document = firestore.collection("users")
                 .document(userId)
                 .get()
                 .await()
 
-            val userEntity = document.toObject(UserEntity::class.java)
-            Result.success(userEntity?.toDomain())
+            val userEntity = document.toObject(User::class.java)
+            Result.success(userEntity?.toEntity())
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -41,16 +42,14 @@ class UserRepositoryImpl(
 
     override suspend fun updateUserCondominium(
         userId: String,
-        condominiumName: String,
-        cep: String
+        condominium: CondominiumEntity
     ): Result<Unit> {
         return try {
             firestore.collection("users")
                 .document(userId)
                 .update(
                     mapOf(
-                        "condominiumName" to condominiumName,
-                        "cep" to cep
+                        "condominium" to condominium.toModel(),
                     )
                 )
                 .await()

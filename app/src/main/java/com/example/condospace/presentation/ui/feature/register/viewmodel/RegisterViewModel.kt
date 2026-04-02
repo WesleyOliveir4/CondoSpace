@@ -2,9 +2,11 @@ package com.example.condospace.presentation.ui.feature.register.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.condospace.domain.model.User
-import com.example.condospace.domain.usecase.CreateUserUseCase
-import com.example.condospace.domain.usecase.SignUpUseCase
+import com.example.condospace.data.model.User
+import com.example.condospace.domain.usecase.register.CreateUserUseCase
+import com.example.condospace.domain.usecase.register.SignUpUseCase
+import com.example.condospace.presentation.model.UserUiModel
+import com.example.condospace.presentation.model.toEntity
 import com.example.condospace.presentation.ui.feature.register.state.RegisterState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,14 +33,13 @@ class RegisterViewModel(
             val signUpResult = signUpUseCase(email, password)
             
             signUpResult.onSuccess { uid ->
-                val newUser = User(
+                val newUser = UserUiModel(
                     uuid = uid,
                     name = name,
                     phoneNumber = phone,
                     profilePicture = "",
                     email = email,
-                    cep = "",
-                    condominiumName = ""
+                    condominium = null
                 )
                 saveUserToFirestore(newUser)
             }.onFailure { exception ->
@@ -47,8 +48,8 @@ class RegisterViewModel(
         }
     }
 
-    private suspend fun saveUserToFirestore(user: User) {
-        val result = createUserUseCase(user)
+    private suspend fun saveUserToFirestore(user: UserUiModel) {
+        val result = createUserUseCase(user.toEntity())
         if (result.isSuccess) {
             _registerState.value = RegisterState.Registered(
                 userUuid = user.uuid

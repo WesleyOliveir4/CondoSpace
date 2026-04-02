@@ -1,4 +1,4 @@
-package com.example.condospace.data.repositoryImpl
+package com.example.condospace.data.repositoryImpl.firebase
 
 import com.example.condospace.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth

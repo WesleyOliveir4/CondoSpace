@@ -37,7 +37,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.domain.model.User
+import com.example.condospace.data.model.User
+import com.example.condospace.presentation.model.CondominiumUiModel
+import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
 import com.example.condospace.presentation.ui.feature.profile.components.InfoItem
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
@@ -77,14 +79,16 @@ fun UserDataScreenContent(
             color = MaterialTheme.colorScheme.background
         ) {
             UserDetailsComponent(
-                user = User(
+                user = UserUiModel(
                     uuid = Uuid.random().toString(),
                     name = "João Silva",
                     phoneNumber = "(11) 98999-2000",
                     profilePicture = "R.drawable.img_person",
                     email = "john.jay@example.com",
-                    cep = "04916020",
-                    condominiumName = "Residencial Green Park"
+                    condominium = CondominiumUiModel(
+                        name = "Condomínio Exemplo",
+                        cep = "12345-678",
+                    )
                 )
             )
         }
@@ -94,7 +98,7 @@ fun UserDataScreenContent(
 
 @Composable
 fun UserDetailsComponent(
-    user: User
+    user: UserUiModel
 ) {
 
     Column(
@@ -141,7 +145,7 @@ fun UserDetailsComponent(
                 )
 
                 Text(
-                    text = user.condominiumName,
+                    text = user.condominium?.name ?: "",
                     color = Color.White.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -178,13 +182,13 @@ fun UserDetailsComponent(
                 InfoItem(
                     icon = Icons.Default.LocationOn,
                     title = "CEP",
-                    value = user.cep
+                    value = user.condominium?.cep ?: ""
                 )
 
                 InfoItem(
                     icon = Icons.Default.Home,
                     title = "Condomínio",
-                    value = user.condominiumName
+                    value = user.condominium?.name ?: ""
                 )
             }
         }

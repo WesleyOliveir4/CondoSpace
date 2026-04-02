@@ -36,12 +36,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.condospace.domain.model.Publication
+import com.example.condospace.presentation.model.PublicationUiModel
 
 @Composable
 fun SearchPublications(
-    publications: List<Publication>,
-    onPublicationClick: (Publication) -> Unit = {}
+    publications: List<PublicationUiModel>,
+    onPublicationClick: (PublicationUiModel) -> Unit = {}
 ) {
 
     var searchText by remember { mutableStateOf("") }
@@ -87,7 +87,7 @@ fun SearchPublications(
 
 @Composable
 fun PublicationItem(
-    publication: Publication,
+    publication: PublicationUiModel,
     onClick: () -> Unit = {}
 ) {
 

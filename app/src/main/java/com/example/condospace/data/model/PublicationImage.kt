@@ -1,4 +1,4 @@
-package com.example.condospace.domain.model
+package com.example.condospace.data.model
 
 data class PublicationImage(
     val url: String,

@@ -1,17 +1,17 @@
 package com.example.condospace.di.register
 
-import com.example.condospace.data.repositoryImpl.AuthRepositoryImpl
-import com.example.condospace.data.repositoryImpl.UserRepositoryImpl
-import com.example.condospace.data.repositoryImpl.CondominiumRepositoryImpl
+import com.example.condospace.data.repositoryImpl.firebase.AuthRepositoryImpl
+import com.example.condospace.data.repositoryImpl.dataStore.UserRepositoryImpl
+import com.example.condospace.data.repositoryImpl.firebase.CondominiumRepositoryImpl
 import com.example.condospace.domain.repository.AuthRepository
 import com.example.condospace.domain.repository.UserRepository
 import com.example.condospace.domain.repository.CondominiumRepository
-import com.example.condospace.domain.usecase.CreateUserUseCase
-import com.example.condospace.domain.usecase.SignUpUseCase
-import com.example.condospace.domain.usecase.GetUserCondominiumUseCase
-import com.example.condospace.domain.usecase.SearchCondominiumByCepUseCase
-import com.example.condospace.domain.usecase.SaveCondominiumUseCase
-import com.example.condospace.domain.usecase.UpdateUserCondominiumUseCase
+import com.example.condospace.domain.usecase.register.CreateUserUseCase
+import com.example.condospace.domain.usecase.register.SignUpUseCase
+import com.example.condospace.domain.usecase.condominium.GetUserCondominiumUseCase
+import com.example.condospace.domain.usecase.condominium.SearchCondominiumByCepUseCase
+import com.example.condospace.domain.usecase.condominium.SaveCondominiumUseCase
+import com.example.condospace.domain.usecase.condominium.UpdateUserCondominiumUseCase
 import com.example.condospace.presentation.ui.feature.register.viewmodel.RegisterViewModel
 import com.example.condospace.presentation.ui.feature.condominium.viewmodel.SelectCondominiumViewModel
 import com.google.firebase.auth.FirebaseAuth

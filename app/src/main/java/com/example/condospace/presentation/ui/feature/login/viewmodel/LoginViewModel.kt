@@ -1,12 +1,11 @@
 package com.example.condospace.presentation.ui.feature.login.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.condospace.domain.repository.AuthRepository
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.repository.UserRepository
-import com.example.condospace.domain.usecase.SignInUseCase
+import com.example.condospace.domain.usecase.login.SignInUseCase
 import com.example.condospace.presentation.ui.feature.login.state.LoginState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

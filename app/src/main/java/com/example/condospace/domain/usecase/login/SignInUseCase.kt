@@ -1,4 +1,4 @@
-package com.example.condospace.domain.usecase
+package com.example.condospace.domain.usecase.login
 
 import com.example.condospace.domain.repository.AuthRepository
 

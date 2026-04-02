@@ -30,15 +30,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.condospace.domain.model.Publication
+import com.example.condospace.presentation.model.PublicationUiModel
 
 @Composable
 fun PublicationCardList(
     title: String,
-    publications: List<Publication>,
+    publications: List<PublicationUiModel>,
     modifier: Modifier = Modifier,
-    onEditClick: (Publication) -> Unit = {},
-    onDeleteClick: (Publication) -> Unit = {}
+    onEditClick: (PublicationUiModel) -> Unit = {},
+    onDeleteClick: (PublicationUiModel) -> Unit = {}
 ) {
     if (publications.isEmpty()) {
         return
@@ -81,7 +81,7 @@ fun PublicationCardList(
 
 @Composable
 fun PublicationCardItem(
-    publication: Publication,
+    publication: PublicationUiModel,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier

@@ -30,12 +30,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.condospace.domain.model.Publication
+import com.example.condospace.presentation.model.PublicationUiModel
 
 @Composable
 fun PublicationsCard(
-    publication: Publication,
-    onClick: (Publication) -> Unit
+    publication: PublicationUiModel,
+    onClick: (PublicationUiModel) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -111,9 +111,9 @@ fun PublicationsCard(
 @Composable
 fun PublicationsSection(
     title: String,
-    publications: List<Publication>,
+    publications: List<PublicationUiModel>,
     onSeeMoreClick: () -> Unit = {},
-    onItemClick: (Publication) -> Unit = {}
+    onItemClick: (PublicationUiModel) -> Unit = {}
 ) {
     Column(
         modifier = Modifier.padding(vertical = 16.dp)

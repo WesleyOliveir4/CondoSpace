@@ -2,10 +2,12 @@ package com.example.condospace.presentation.ui.feature.publish.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.condospace.domain.model.Publication
 import com.example.condospace.domain.repository.ImageRepository
 import com.example.condospace.domain.repository.PublicationRepository
 import com.example.condospace.domain.repository.UserPreferencesRepository
+import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.model.toEntity
+import com.example.condospace.presentation.model.toUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +33,7 @@ class PublishViewModel(
     val publishState: StateFlow<PublishState> = _publishState.asStateFlow()
 
     val condominiumName: StateFlow<String> = userPreferencesRepository.userData
-        .map { user -> user?.condominiumName ?: "Selecionar Condomínio" }
+        .map { user -> user?.condominium?.name ?: "Selecionar Condomínio" }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -46,7 +48,7 @@ class PublishViewModel(
             initialValue = ""
         )
 
-    fun createPublication(publication: Publication) {
+    fun createPublication(publication: PublicationUiModel) {
         _publishState.value = PublishState.Loading
         viewModelScope.launch {
             try {
@@ -63,8 +65,8 @@ class PublishViewModel(
                     emptyList()
                 }
 
-                val finalPublication = publication.copy(imageUrlList = uploadedImages)
-                val saveResult = publicationRepository.createPublication(finalPublication)
+                val finalPublication = publication.copy(imageUrlList = uploadedImages.map { it.toUiModel() })
+                val saveResult = publicationRepository.createPublication(finalPublication.toEntity())
                 
                 if (saveResult.isSuccess) {
                     _publishState.value = PublishState.Success

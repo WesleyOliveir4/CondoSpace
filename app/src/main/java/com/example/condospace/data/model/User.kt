@@ -1,15 +1,14 @@
-package com.example.condospace.data.entity
+package com.example.condospace.data.model
 
 import kotlinx.serialization.Serializable
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
-data class UserEntity(
+@Serializable
+data class User (
     val uuid: String = "",
     val name: String = "",
     val phoneNumber: String = "",
     val profilePicture: String? = null,
     val email: String = "",
-    val cep: String? = null,
-    val condominiumName: String? = null
+    val condominium: Condominium? = null,
+    val publicationsIdFavored: List<String>? = null
 )
