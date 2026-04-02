@@ -31,7 +31,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.condospace.domain.model.Publication
+import com.example.condospace.presentation.model.PublicationUiModel
 
 enum class PublicationType(val value: String) {
     PRODUCT("produto"),
@@ -157,7 +157,7 @@ fun PublicationTypeItem(
 
 @Composable
 fun CreatePublicationScreen(
-    onPublicationCreated: (Publication) -> Unit = {}
+    onPublicationCreated: (PublicationUiModel) -> Unit = {}
 ) {
     var selectedType by remember { mutableStateOf<PublicationType?>(null) }
 

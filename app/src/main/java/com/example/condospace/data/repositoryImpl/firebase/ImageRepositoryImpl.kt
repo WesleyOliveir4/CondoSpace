@@ -1,12 +1,11 @@
-package com.example.condospace.data.repositoryImpl
+package com.example.condospace.data.repositoryImpl.firebase
 
 import android.content.Context
 import android.net.Uri
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
-
-import com.example.condospace.domain.model.PublicationImage
+import com.example.condospace.domain.entity.PublicationImageEntity
 import com.example.condospace.domain.repository.ImageRepository
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -27,9 +26,9 @@ class ImageRepositoryImpl(
         }
     }
 
-    override suspend fun uploadImages(uris: List<Uri>, folder: String): Result<List<PublicationImage>> {
+    override suspend fun uploadImages(uris: List<Uri>, folder: String): Result<List<PublicationImageEntity>> {
         return try {
-            val uploadedImages = mutableListOf<PublicationImage>()
+            val uploadedImages = mutableListOf<PublicationImageEntity>()
             
             for (uri in uris) {
                 val result = uploadSingleImage(uri, folder)
@@ -45,7 +44,7 @@ class ImageRepositoryImpl(
         }
     }
 
-    private suspend fun uploadSingleImage(uri: Uri, folder: String): Result<PublicationImage> = 
+    private suspend fun uploadSingleImage(uri: Uri, folder: String): Result<PublicationImageEntity> =
         suspendCancellableCoroutine { continuation ->
             MediaManager.get().upload(uri)
                 .option("folder", folder)
@@ -56,7 +55,7 @@ class ImageRepositoryImpl(
                         val url = resultData?.get("secure_url") as? String
                         val publicId = resultData?.get("public_id") as? String
                         if (url != null && publicId != null) {
-                            continuation.resume(Result.success(PublicationImage(url, publicId)))
+                            continuation.resume(Result.success(PublicationImageEntity(url, publicId)))
                         } else {
                             continuation.resume(Result.failure(Exception("Cloudinary response missing data")))
                         }

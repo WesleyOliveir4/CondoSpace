@@ -42,7 +42,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.domain.model.Condominium
+import com.example.condospace.data.model.Condominium
+import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
 import com.example.condospace.presentation.ui.feature.condominium.state.CondominiumState
 import com.example.condospace.presentation.ui.feature.condominium.viewmodel.SelectCondominiumViewModel
@@ -90,10 +91,10 @@ fun SelectCondominiumScreen(
 fun SelectCondominiumScreenContent(
     navController: NavHostController,
     condominiumState: CondominiumState,
-    searchResults: List<Condominium>,
+    searchResults: List<CondominiumUiModel>,
     onSearchClick: (String) -> Unit,
-    onSaveCondominiumSelectedClick: (Condominium) -> Unit,
-    onSaveCondominiumCreateClick: (Condominium) -> Unit,
+    onSaveCondominiumSelectedClick: (CondominiumUiModel) -> Unit,
+    onSaveCondominiumCreateClick: (CondominiumUiModel) -> Unit,
     registerFlow: Boolean,
     navigateToLogin: () -> Unit
 ) {
@@ -169,14 +170,14 @@ fun SelectCondominiumScreenContent(
 
 @Composable
 fun SelectCondominiumComponent(
-    initialCondo: Condominium?,
-    searchResults: List<Condominium>,
+    initialCondo: CondominiumUiModel?,
+    searchResults: List<CondominiumUiModel>,
     onSearchClick: (String) -> Unit,
-    onSaveCondominiumSelectedClick: (Condominium) -> Unit,
-    onSaveCondominiumCreateClick: (Condominium) -> Unit
+    onSaveCondominiumSelectedClick: (CondominiumUiModel) -> Unit,
+    onSaveCondominiumCreateClick: (CondominiumUiModel) -> Unit
 ) {
 
-    var selectedCondo by remember(initialCondo) { mutableStateOf<Condominium?>(initialCondo) }
+    var selectedCondo by remember(initialCondo) { mutableStateOf<CondominiumUiModel?>(initialCondo) }
     var isEditing by remember(initialCondo) { mutableStateOf(initialCondo == null) }
 
     var cep by remember { mutableStateOf("") }
@@ -348,7 +349,7 @@ fun SelectCondominiumComponent(
                         Button(
                             onClick = {
                                 if (manualName.isNotBlank()) {
-                                    onSaveCondominiumCreateClick(Condominium(name = manualName, cep =  cep))
+                                    onSaveCondominiumCreateClick(CondominiumUiModel(name = manualName, cep =  cep))
                                     isEditing = false
                                 }
                             },
@@ -378,7 +379,7 @@ fun  SelectCondominiumScreenPreview() {
         SelectCondominiumScreenContent(
             navController = navController,
             condominiumState = CondominiumState.CondominiumNotFound,
-            searchResults = emptyList<Condominium>(),
+            searchResults = emptyList<CondominiumUiModel>(),
             onSearchClick = {},
             onSaveCondominiumSelectedClick = {},
             onSaveCondominiumCreateClick = {},

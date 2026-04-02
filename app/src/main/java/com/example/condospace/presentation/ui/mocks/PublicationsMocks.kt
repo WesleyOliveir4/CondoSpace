@@ -1,14 +1,14 @@
 package com.example.condospace.presentation.ui.mocks
 
-import com.example.condospace.domain.model.Publication
-import com.example.condospace.domain.model.PublicationImage
+import com.example.condospace.presentation.model.PublicationImageUiModel
+import com.example.condospace.presentation.model.PublicationUiModel
 import java.util.UUID
 
 class PublicationsMocks() {
 
-    fun getPublications(): List<Publication> {
+    fun getPublications(): List<PublicationUiModel> {
         return listOf(
-            Publication(
+            PublicationUiModel(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_01",
                 publicationCondominiumId = "condo_01",
@@ -20,13 +20,13 @@ class PublicationsMocks() {
                 price = 120.0,
                 likes = 127,
                 imageUrlList = listOf(
-                    PublicationImage(
+                    PublicationImageUiModel(
                         url = "https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=500",
                         publicId = "public_id_1"
                     )
                 )
             ),
-            Publication(
+            PublicationUiModel(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_02",
                 publicationCondominiumId = "condo_01",
@@ -38,13 +38,13 @@ class PublicationsMocks() {
                 price = 150.0,
                 likes = 94,
                 imageUrlList = listOf(
-                    PublicationImage(
+                    PublicationImageUiModel(
                         url = "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?q=80&w=500",
                         publicId = "public_id_1"
                     )
                 )
             ),
-            Publication(
+            PublicationUiModel(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_03",
                 publicationCondominiumId = "condo_01",
@@ -56,13 +56,13 @@ class PublicationsMocks() {
                 price = 180.0,
                 likes = 150,
                 imageUrlList = listOf(
-                    PublicationImage(
+                    PublicationImageUiModel(
                         url = "https://images.unsplash.com/photo-1581578731522-745d05ad9a2d?q=80&w=500",
                         publicId = "public_id_1"
                     )
                 )
             ),
-            Publication(
+            PublicationUiModel(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_04",
                 publicationCondominiumId = "condo_01",
@@ -74,7 +74,7 @@ class PublicationsMocks() {
                 price = 200.0,
                 likes = 82,
                 imageUrlList = listOf(
-                    PublicationImage(
+                    PublicationImageUiModel(
                         url = "https://images.unsplash.com/photo-1504148455328-c376907d081c?q=80&w=500",
                         publicId = "public_id_1"
                     )
@@ -83,9 +83,9 @@ class PublicationsMocks() {
         )
     }
 
-    fun getExternalPublications(): List<Publication> {
+    fun getExternalPublications(): List<PublicationUiModel> {
         return listOf(
-            Publication(
+            PublicationUiModel(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "ext_01",
                 publicationCondominiumId = "condo_01",
@@ -97,13 +97,13 @@ class PublicationsMocks() {
                 price = 300.0,
                 likes = 110,
                 imageUrlList = listOf(
-                    PublicationImage(
+                    PublicationImageUiModel(
                         url = "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=500",
                         publicId = "public_id_1"
                     )
                 )
             ),
-            Publication(
+            PublicationUiModel(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "ext_02",
                 publicationCondominiumId = "condo_01",
@@ -115,7 +115,7 @@ class PublicationsMocks() {
                 price = 250.0,
                 likes = 67,
                 imageUrlList = listOf(
-                    PublicationImage(
+                    PublicationImageUiModel(
                         url = "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=500",
                         publicId = "public_id_1"
                     )
@@ -124,9 +124,9 @@ class PublicationsMocks() {
         )
     }
 
-    fun getFavoritedPublications(): List<Publication> {
+    fun getFavoritedPublications(): List<PublicationUiModel> {
         return listOf(
-            Publication(
+            PublicationUiModel(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_05",
                 publicationCondominiumId = "condo_01",
@@ -138,13 +138,13 @@ class PublicationsMocks() {
                 price = 850.0,
                 likes = 12,
                 imageUrlList = listOf(
-                    PublicationImage(
+                    PublicationImageUiModel(
                         url = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=500",
                         publicId = "public_id_1"
                     )
                 )
             ),
-            Publication(
+            PublicationUiModel(
                 id = UUID.randomUUID().toString(),
                 publicationOwnerUuid = "user_06",
                 publicationCondominiumId = "condo_01",
@@ -156,7 +156,7 @@ class PublicationsMocks() {
                 price = 450.0,
                 likes = 8,
                 imageUrlList = listOf(
-                    PublicationImage(
+                    PublicationImageUiModel(
                         url = "https://images.unsplash.com/photo-1505797149-43b007662c21?q=80&w=500",
                         publicId = "public_id_1"
                     )

@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.domain.model.Publication
+import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
 import com.example.condospace.presentation.ui.feature.publications.components.BottomContactBar
 import com.example.condospace.presentation.ui.feature.publications.components.PublicationImage
@@ -48,7 +48,7 @@ fun PublicationSelectedScreen(navController: NavHostController) {
 @Composable
 fun PublicationSelectedScreenContent(
     navController: NavHostController,
-    publication: Publication,
+    publication: PublicationUiModel,
 ) {
     Scaffold(
         topBar = {
@@ -88,7 +88,7 @@ fun PublicationSelectedScreenContent(
 
 
 @Composable
-fun PublicationContent(publication: Publication) {
+fun PublicationContent(publication: PublicationUiModel) {
     Column(
         modifier = Modifier.padding(16.dp)
     ) {

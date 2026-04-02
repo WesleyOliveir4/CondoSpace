@@ -13,7 +13,7 @@ class ProfileViewModel(
 ) : ViewModel() {
 
     val condominiumName: StateFlow<String> = userPreferencesRepository.userData
-        .map { user -> user?.condominiumName ?: "Selecionar Condomínio" }
+        .map { user -> user?.condominium?.name ?: "Selecionar Condomínio" }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
