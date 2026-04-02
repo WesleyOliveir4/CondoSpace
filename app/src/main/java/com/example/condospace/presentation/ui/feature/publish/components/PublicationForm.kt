@@ -248,17 +248,17 @@ fun PublicationForm(
                 onClick = {
                     val publication = Publication(
                         id = (1..10000).random(),
+                        publicationOwnerUuid = "123456789",
                         publicationOwner = "Morador CondoSpace",
                         serviceProvider = providerNameState,
-                        imageUrl = images.firstOrNull()?.toString() ?: "",
+                        contact = contactState,
+                        price = priceState.toDoubleOrNull() ?: 0.0,
+                        imageUrlList = images.map { it.toString() },
                         title = titleState,
                         description = descriptionState,
-                        detailedDescription = descriptionState,
                         publicationType = publicationType.toString(),
-                        price = priceState.toDoubleOrNull() ?: 0.0,
                         likes = 0,
                         date = "24/05/2024",
-                        imageRes = 0
                     )
                     onPublish(publication)
                 },

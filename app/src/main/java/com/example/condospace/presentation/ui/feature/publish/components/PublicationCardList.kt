@@ -1,6 +1,5 @@
 package com.example.condospace.presentation.ui.feature.publish.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,19 +26,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.condospace.domain.model.Publication
 
 @Composable
 fun PublicationCardList(
-title: String,
-publications: List<Publication>,
-modifier: Modifier = Modifier,
-onEditClick: (Publication) -> Unit = {},
-onDeleteClick: (Publication) -> Unit = {}
+    title: String,
+    publications: List<Publication>,
+    modifier: Modifier = Modifier,
+    onEditClick: (Publication) -> Unit = {},
+    onDeleteClick: (Publication) -> Unit = {}
 ) {
     if (publications.isEmpty()) {
         return
@@ -103,8 +102,8 @@ fun PublicationCardItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Image(
-                painter = painterResource(publication.imageRes),
+            AsyncImage(
+                model = publication.imageUrlList?.firstOrNull(),
                 contentDescription = publication.title,
                 modifier = Modifier
                     .size(70.dp)

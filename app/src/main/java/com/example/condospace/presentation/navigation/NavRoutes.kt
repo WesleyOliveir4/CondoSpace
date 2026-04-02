@@ -4,6 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class NavRoutes {
+    @Serializable
+    object LoginScreen : NavRoutes()
+
+    @Serializable
+    object RegisterScreen : NavRoutes()
+
 
     @Serializable
     object Home : NavRoutes()
@@ -29,6 +35,6 @@ sealed class NavRoutes {
     @Serializable
     object UserDataScreen : NavRoutes()
     @Serializable
-        object SelectCondominiumScreen : NavRoutes()
+    data class SelectCondominiumScreen(val userId: String, val registerFlow: Boolean = false) : NavRoutes()
 
 }

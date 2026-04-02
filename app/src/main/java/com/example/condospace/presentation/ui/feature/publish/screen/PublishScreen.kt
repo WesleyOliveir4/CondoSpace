@@ -11,30 +11,40 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.feature.publish.components.CreatePublicationScreen
 import com.example.condospace.presentation.ui.feature.publish.components.PublicationCardList
+import com.example.condospace.presentation.ui.feature.publish.viewmodel.PublishViewModel
 import com.example.condospace.presentation.ui.mocks.PublicationsMocks
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PublishScreen(
     navController: NavHostController,
     navigateToPublicationSelected: () -> Unit,
     navigateToEditPublication: (Int) -> Unit,
-    navigateToSelectCondominium: () -> Unit
+    navigateToSelectCondominium: (String) -> Unit,
+    viewModel: PublishViewModel = koinViewModel()
 ) {
+    val condominiumName by viewModel.condominiumName.collectAsStateWithLifecycle()
+    val userUuid by viewModel.userUuid.collectAsStateWithLifecycle()
+
     CondoSpaceTheme {
         PublishScreenContent(
-            navController,
-            navigateToPublicationSelected,
-            navigateToEditPublication,
-            navigateToSelectCondominium
+            navController = navController,
+            condominiumName = condominiumName,
+            userUuid = userUuid,
+            navigateToPublicationSelected = navigateToPublicationSelected,
+            navigateToEditPublication = navigateToEditPublication,
+            navigateToSelectCondominium = navigateToSelectCondominium
         )
     }
 }
@@ -43,16 +53,19 @@ fun PublishScreen(
 @Composable
 fun PublishScreenContent(
     navController: NavHostController,
+    condominiumName: String,
+    userUuid: String,
     navigateToPublicationSelected: () -> Unit,
     navigateToEditPublication: (Int) -> Unit,
-    navigateToSelectCondominium: () -> Unit
+    navigateToSelectCondominium: (String) -> Unit
 ) {
     Scaffold(
         bottomBar = { NavBar(navController, "Publish") },
         topBar = {
             CondoSpaceTopBar(
+                condominiumName = condominiumName,
                 residenceSelector = {
-                    navigateToSelectCondominium()
+                    navigateToSelectCondominium(userUuid)
                 }
             )
         }
@@ -69,6 +82,7 @@ fun PublishScreenContent(
             ) {
                 CreatePublicationScreen(
                     onPublicationCreated = { publication ->
+
                         Log.e("Publicacao Criada", "$publication")
                     }
                 )
@@ -101,6 +115,8 @@ fun PublishScreenPreview() {
     CondoSpaceTheme {
         PublishScreenContent(
             navController,
+            condominiumName = "Condomínio Exemplo",
+            userUuid = "123",
             navigateToPublicationSelected = {},
             navigateToEditPublication = {},
             navigateToSelectCondominium = {}

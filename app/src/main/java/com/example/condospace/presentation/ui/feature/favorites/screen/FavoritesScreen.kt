@@ -7,24 +7,38 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.feature.favorites.components.SearchPublications
+import com.example.condospace.presentation.ui.feature.favorites.viewmodel.FavoritesViewModel
 import com.example.condospace.presentation.ui.mocks.PublicationsMocks
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun FavoritesScreen(
     navController: NavHostController,
     navigateToPublicationSelected: () -> Unit,
-    navigateToSelectCondominium: () -> Unit
+    navigateToSelectCondominium: (String) -> Unit,
+    viewModel: FavoritesViewModel = koinViewModel()
 ) {
+    val condominiumName by viewModel.condominiumName.collectAsStateWithLifecycle()
+    val userUuid by viewModel.userUuid.collectAsStateWithLifecycle()
+
     CondoSpaceTheme {
-        FavoritesScreenContent(navController, navigateToPublicationSelected, navigateToSelectCondominium)
+        FavoritesScreenContent(
+            navController = navController,
+            condominiumName = condominiumName,
+            userUuid = userUuid,
+            navigateToPublicationSelected = navigateToPublicationSelected,
+            navigateToSelectCondominium = navigateToSelectCondominium
+        )
     }
 }
 
@@ -33,15 +47,18 @@ fun FavoritesScreen(
 @Composable
 fun FavoritesScreenContent(
     navController: NavHostController,
+    condominiumName: String,
+    userUuid: String,
     navigateToPublicationSelected: () -> Unit,
-    navigateToSelectCondominium: () -> Unit
+    navigateToSelectCondominium: (String) -> Unit
 ) {
     Scaffold(
         bottomBar = { NavBar(navController, "Favorites") },
         topBar = {
             CondoSpaceTopBar(
+                condominiumName = condominiumName,
                 residenceSelector = {
-                    navigateToSelectCondominium()
+                    navigateToSelectCondominium(userUuid)
                 }
             )
         }
@@ -71,7 +88,9 @@ fun FavoritesScreenPreview() {
 
     CondoSpaceTheme {
         FavoritesScreenContent(
-            navController,
+            navController = navController,
+            condominiumName = "Condomínio Exemplo",
+            userUuid = "123",
             navigateToPublicationSelected = {},
             navigateToSelectCondominium = {}
         )
