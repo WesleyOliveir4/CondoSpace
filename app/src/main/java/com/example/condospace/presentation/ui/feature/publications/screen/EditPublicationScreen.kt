@@ -84,15 +84,15 @@ fun EditPublicationScreenContent(
 
                 publicationType = currentPublicationType,
 
-                initialImages = emptyList(),
-
                 onPublish = { updatedPublication ->
                     val finalPublication = updatedPublication.copy(
                         id = publication.id,
                         likes = publication.likes,
                         date = publication.date
                     )
-                }
+                },
+                initialImages = TODO(),
+                user = TODO(),
             )
         }
     }

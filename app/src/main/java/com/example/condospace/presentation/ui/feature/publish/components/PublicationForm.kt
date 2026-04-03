@@ -1,5 +1,6 @@
 package com.example.condospace.presentation.ui.feature.publish.components
 
+import android.R.attr.category
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -47,7 +49,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.enums.CategoryType
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 
@@ -57,7 +62,8 @@ fun PublicationForm(
     title: String,
     publicationType: PublicationType,
     onPublish: (PublicationUiModel) -> Unit,
-    initialImages: List<Uri> = emptyList()
+    initialImages: List<Uri> = emptyList(),
+    user: UserUiModel
 ) {
 
     var titleState by remember { mutableStateOf("") }
@@ -80,6 +86,8 @@ fun PublicationForm(
 
     val isButtonEnabled = when (publicationType) {
         PublicationType.PRODUCT -> {
+            publicationType.value = selectedCategory?.title ?: ""
+
             titleState.isNotBlank() &&
                     selectedCategory != null &&
                     descriptionState.isNotBlank() &&
@@ -141,7 +149,9 @@ fun PublicationForm(
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded)
                         },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
 
                     ExposedDropdownMenu(
@@ -202,7 +212,6 @@ fun PublicationForm(
             )
 
             if (publicationType == PublicationType.PRODUCT) {
-
                 Spacer(Modifier.height(12.dp))
                 Text("Preço")
 
@@ -242,24 +251,29 @@ fun PublicationForm(
 
             Button(
                 onClick = {
+                    val date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
                     val publication = PublicationUiModel(
                         id = UUID.randomUUID().toString(),
-                        publicationOwnerUuid = "123456789",
-                        publicationCondominiumId = "123456789",
-                        publicationOwner = "Morador CondoSpace",
+                        publicationOwnerUuid = user.uuid,
+                        publicationCondominiumId = user.condominium?.id ?: "",
+                        publicationOwner = user.name,
                         serviceProvider = providerNameState,
                         contact = contactState,
                         price = priceState.toDoubleOrNull() ?: 0.0,
                         imagesSelectList = images.map { it },
                         title = titleState,
                         description = descriptionState,
-                        publicationType = publicationType.toString(),
+                        publicationType = publicationType.value,
                         likes = 0,
-                        date = "24/05/2024",
+                        date = date,
                     )
                     onPublish(publication)
                 },
                 enabled = isButtonEnabled,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF354EAB)
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)

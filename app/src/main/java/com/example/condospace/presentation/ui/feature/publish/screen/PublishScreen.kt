@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.feature.publish.components.CreatePublicationScreen
@@ -36,13 +37,13 @@ fun PublishScreen(
     val publishViewModel: PublishViewModel = koinViewModel()
 
     val condominiumName by publishViewModel.condominiumName.collectAsStateWithLifecycle()
-    val userUuid by publishViewModel.userUuid.collectAsStateWithLifecycle()
+    val userUiModel by publishViewModel.user.collectAsStateWithLifecycle()
 
     CondoSpaceTheme {
         PublishScreenContent(
             navController = navController,
             condominiumName = condominiumName,
-            userUuid = userUuid,
+            userUiModel = userUiModel,
             publishViewModel = publishViewModel,
             navigateToPublicationSelected = navigateToPublicationSelected,
             navigateToEditPublication = navigateToEditPublication,
@@ -56,7 +57,7 @@ fun PublishScreen(
 fun PublishScreenContent(
     navController: NavHostController,
     condominiumName: String,
-    userUuid: String,
+    userUiModel: UserUiModel,
     publishViewModel: PublishViewModel,
     navigateToPublicationSelected: () -> Unit,
     navigateToEditPublication: (String) -> Unit,
@@ -68,7 +69,7 @@ fun PublishScreenContent(
             CondoSpaceTopBar(
                 condominiumName = condominiumName,
                 residenceSelector = {
-                    navigateToSelectCondominium(userUuid)
+                    navigateToSelectCondominium(userUiModel.uuid)
                 }
             )
         }
@@ -84,6 +85,7 @@ fun PublishScreenContent(
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
                 CreatePublicationScreen(
+                    userUiModel,
                     onPublicationCreated = { publication ->
                         publishViewModel.createPublication(publication)
                         Log.e("Publicacao Criada", "$publication")
@@ -121,7 +123,7 @@ fun PublishScreenPreview() {
         PublishScreenContent(
             navController,
             condominiumName = "Condomínio Exemplo",
-            userUuid = "123",
+            userUiModel = UserUiModel(),
             publishViewModel,
             navigateToPublicationSelected = {},
             navigateToEditPublication = {}

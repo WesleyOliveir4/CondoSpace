@@ -2,10 +2,12 @@ package com.example.condospace.presentation.ui.feature.publish.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.condospace.data.mapper.toEntity
 import com.example.condospace.domain.repository.ImageRepository
 import com.example.condospace.domain.repository.PublicationRepository
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.model.toEntity
 import com.example.condospace.presentation.model.toUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,14 +42,15 @@ class PublishViewModel(
             initialValue = "Carregando..."
         )
 
-    val userUuid: StateFlow<String> = userPreferencesRepository.userData
-        .map { user -> user?.uuid ?: "" }
+    val user: StateFlow<UserUiModel> = userPreferencesRepository.userData
+        .map { user ->
+            user?.toEntity()?.toUiModel() ?: UserUiModel()
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ""
+            initialValue = UserUiModel()
         )
-
     fun createPublication(publication: PublicationUiModel) {
         _publishState.value = PublishState.Loading
         viewModelScope.launch {
