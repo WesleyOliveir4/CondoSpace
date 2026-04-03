@@ -6,6 +6,7 @@ import com.example.condospace.di.favorites.favoritesModule
 import com.example.condospace.di.home.homeModule
 import com.example.condospace.di.login.loginModule
 import com.example.condospace.di.profile.profileModule
+import com.example.condospace.di.publications.publicationsModule
 import com.example.condospace.di.publish.publishModule
 import com.example.condospace.di.register.registerModule
 import org.koin.android.ext.koin.androidContext
@@ -23,7 +24,8 @@ class CondoSpaceApp : Application() {
                 homeModule,
                 favoritesModule,
                 profileModule,
-                publishModule
+                publishModule,
+                publicationsModule
             )
         }
     }

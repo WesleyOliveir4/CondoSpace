@@ -1,6 +1,5 @@
 package com.example.condospace.presentation.ui.feature.publish.components
 
-import android.R.attr.category
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.UserUiModel
@@ -55,26 +55,37 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublicationForm(
     title: String,
     publicationType: PublicationType,
     onPublish: (PublicationUiModel) -> Unit,
-    initialImages: List<Uri> = emptyList(),
+    initialPublication: PublicationUiModel? = null,
     user: UserUiModel
 ) {
 
-    var titleState by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<CategoryType?>(null) }
-    var descriptionState by remember { mutableStateOf("") }
+    var titleState by remember { mutableStateOf(initialPublication?.title ?: "") }
+    var selectedCategory by remember { 
+        mutableStateOf(
+            if (publicationType == PublicationType.PRODUCT) {
+                CategoryType.entries.find { it.title == initialPublication?.publicationType }
+            } else null
+        ) 
+    }
+    var descriptionState by remember { mutableStateOf(initialPublication?.description ?: "") }
     var locationState by remember { mutableStateOf("") }
-    var contactState by remember { mutableStateOf("") }
-    var priceState by remember { mutableStateOf("") }
-    var providerNameState by remember { mutableStateOf("") }
+    var contactState by remember { mutableStateOf(initialPublication?.contact ?: "") }
+    var priceState by remember { mutableStateOf(initialPublication?.price?.toString() ?: "") }
+    var providerNameState by remember { mutableStateOf(initialPublication?.serviceProvider ?: "") }
 
-    var images by remember { mutableStateOf(initialImages) }
+    var images by remember { 
+        mutableStateOf(
+            initialPublication?.imagesSelectList ?: 
+            initialPublication?.imageUrlList?.map { it.url.toUri() } ?:
+            emptyList()
+        ) 
+    }
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -86,10 +97,8 @@ fun PublicationForm(
 
     val isButtonEnabled = when (publicationType) {
         PublicationType.PRODUCT -> {
-            publicationType.value = selectedCategory?.title ?: ""
-
             titleState.isNotBlank() &&
-                    selectedCategory != null &&
+                    (selectedCategory != null || (initialPublication != null && titleState.isNotBlank())) &&
                     descriptionState.isNotBlank() &&
                     images.isNotEmpty() &&
                     priceState.isNotBlank()
@@ -107,7 +116,7 @@ fun PublicationForm(
         }
     }
 
-    val isEditMode = initialImages.isNotEmpty()
+    val isEditMode = initialPublication != null
 
     Card(
         modifier = Modifier
@@ -142,7 +151,7 @@ fun PublicationForm(
                 ) {
 
                     OutlinedTextField(
-                        value = selectedCategory?.title ?: "",
+                        value = selectedCategory?.title ?: initialPublication?.publicationType ?: "",
                         onValueChange = {},
                         readOnly = true,
                         placeholder = { Text("Selecione a categoria") },
@@ -251,22 +260,23 @@ fun PublicationForm(
 
             Button(
                 onClick = {
-                    val date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                    val date = initialPublication?.date ?: LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
                     val publication = PublicationUiModel(
-                        id = UUID.randomUUID().toString(),
+                        id = initialPublication?.id ?: UUID.randomUUID().toString(),
                         publicationOwnerUuid = user.uuid,
                         publicationCondominiumId = user.condominium?.id ?: "",
                         publicationOwner = user.name,
                         serviceProvider = providerNameState,
                         contact = contactState,
                         price = priceState.toDoubleOrNull() ?: 0.0,
-                        imagesSelectList = images.map { it },
+                        imagesSelectList = images,
                         title = titleState,
                         description = descriptionState,
-                        publicationType = publicationType.value,
-                        likes = 0,
+                        publicationType = selectedCategory?.title ?: initialPublication?.publicationType ?: publicationType.value,
+                        likes = initialPublication?.likes ?: 0,
                         date = date,
+                        imageUrlList = if (images.all { it.toString().startsWith("http") }) initialPublication?.imageUrlList else null
                     )
                     onPublish(publication)
                 },

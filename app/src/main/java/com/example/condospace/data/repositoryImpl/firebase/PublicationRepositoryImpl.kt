@@ -56,4 +56,22 @@ class PublicationRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun getPublicationById(id: String): Result<PublicationEntity> {
+        return try {
+            val snapshot = firestore.collection("publications")
+                .document(id)
+                .get()
+                .await()
+            
+            val publication = snapshot.toObject(Publication::class.java)
+            if (publication != null) {
+                Result.success(publication.toEntity())
+            } else {
+                Result.failure(Exception("Publicação não encontrada"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

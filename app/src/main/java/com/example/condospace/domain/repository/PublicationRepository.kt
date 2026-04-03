@@ -6,4 +6,5 @@ interface PublicationRepository {
     suspend fun createPublication(publication: PublicationEntity): Result<Unit>
     suspend fun getPublicationsByCondominium(condominiumName: String): Result<List<PublicationEntity>>
     suspend fun getPublicationsByUser(userId: String): Result<List<PublicationEntity>>
+    suspend fun getPublicationById(id: String): Result<PublicationEntity>
 }
