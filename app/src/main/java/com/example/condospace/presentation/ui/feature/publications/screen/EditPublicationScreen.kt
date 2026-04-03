@@ -23,7 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
-import com.example.condospace.presentation.ui.feature.publications.viewmodel.EditPublicationState
+import com.example.condospace.presentation.ui.feature.publications.state.EditPublicationUiState
 import com.example.condospace.presentation.ui.feature.publications.viewmodel.EditPublicationViewModel
 import com.example.condospace.presentation.ui.feature.publish.components.PublicationForm
 import com.example.condospace.presentation.ui.feature.publish.components.PublicationType
@@ -41,17 +41,24 @@ fun EditPublicationScreen(
     val publishViewModel: PublishViewModel = koinViewModel()
     
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val user by publishViewModel.user.collectAsStateWithLifecycle()
+    val publishUiState by publishViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(publicationId) {
         viewModel.loadPublication(publicationId)
+    }
+
+    LaunchedEffect(publishUiState.publishSuccess) {
+        if (publishUiState.publishSuccess) {
+            publishViewModel.resetActionState()
+            navController.popBackStack()
+        }
     }
 
     CondoSpaceTheme {
         EditPublicationScreenContent(
             navController = navController,
             uiState = uiState,
-            user = user,
+            user = publishUiState.user,
             onUpdatePublication = { updatedPublication ->
                 publishViewModel.createPublication(updatedPublication)
             }
@@ -63,7 +70,7 @@ fun EditPublicationScreen(
 @Composable
 fun EditPublicationScreenContent(
     navController: NavHostController,
-    uiState: EditPublicationState,
+    uiState: EditPublicationUiState,
     user: UserUiModel,
     onUpdatePublication: (PublicationUiModel) -> Unit
 ) {
@@ -82,18 +89,15 @@ fun EditPublicationScreenContent(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            when (uiState) {
-                is EditPublicationState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-                is EditPublicationState.Error -> {
-                    Text(
-                        text = uiState.message,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                is EditPublicationState.Success -> {
-                    val publication = uiState.publication
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (uiState.error != null) {
+                Text(
+                    text = uiState.error!!,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                uiState.publication?.let { publication ->
                     val currentPublicationType = remember(publication.publicationType) {
                         PublicationType.entries.find { it.value == publication.publicationType }
                             ?: PublicationType.PRODUCT
@@ -132,7 +136,7 @@ fun EditPublicationScreenPreview() {
     CondoSpaceTheme {
         EditPublicationScreenContent(
             navController = navController,
-            uiState = EditPublicationState.Error(""),
+            uiState = EditPublicationUiState(),
             user = UserUiModel(),
             onUpdatePublication = {}
         )
