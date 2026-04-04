@@ -27,10 +27,33 @@ class PublicationRepositoryImpl(
         }
     }
 
-    override suspend fun getPublicationsByCondominium(condominiumName: String): Result<List<PublicationEntity>> {
+    override suspend fun getPublicationsByCondominium(condominiumId: String): Result<List<PublicationEntity>> {
         return try {
             val snapshot = firestore.collection("publications")
+                .whereEqualTo("publicationCondominiumId", condominiumId)
                 .orderBy("date", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val publications = snapshot.toObjects(Publication::class.java).map {
+                it.toEntity()
+            }
+            Result.success(publications)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getPublicationsByCondominiumAndType(condominiumId: String, type: String?): Result<List<PublicationEntity>> {
+        return try {
+            var query = firestore.collection("publications")
+                .whereEqualTo("publicationCondominiumId", condominiumId)
+            
+            if (type != null && type != "Todos") {
+                query = query.whereEqualTo("publicationType", type)
+            }
+            
+            val snapshot = query.orderBy("date", Query.Direction.DESCENDING)
                 .get()
                 .await()
             

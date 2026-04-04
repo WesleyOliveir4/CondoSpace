@@ -54,8 +54,8 @@ fun NavNavigation() {
         composable<NavRoutes.Home> {
             HomeScreen(
                 navController,
-                navigateToPublishList = {
-                    navController.navigate(NavRoutes.PublicationsList)
+                navigateToPublishList = { categoryType ->
+                    navController.navigate(NavRoutes.PublicationsList(categoryType = categoryType))
                 },
                 navigateToPublicationSelected = { publicationId ->
                     navController.navigate(NavRoutes.PublicationSelected(publicationId = publicationId))
@@ -111,12 +111,16 @@ fun NavNavigation() {
             )
         }
 
-        composable<NavRoutes.PublicationsList> {
+        composable<NavRoutes.PublicationsList> { backStackEntry ->
+
+            val route = backStackEntry.toRoute<NavRoutes.PublicationsList>()
+
             PublicationsListScreen(
                 navController,
                 navigateToPublicationSelected = { publicationId ->
                     navController.navigate(NavRoutes.PublicationSelected(publicationId = publicationId))
-                }
+                },
+                categoryType = route.categoryType
             )
         }
 

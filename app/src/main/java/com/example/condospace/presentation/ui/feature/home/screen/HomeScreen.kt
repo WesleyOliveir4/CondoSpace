@@ -25,6 +25,7 @@ import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.component.navBar.NavBar
+import com.example.condospace.presentation.ui.enums.CategoryType
 import com.example.condospace.presentation.ui.feature.home.components.CategoriesSection
 import com.example.condospace.presentation.ui.feature.home.components.PublicationsSection
 import com.example.condospace.presentation.ui.feature.home.state.HomeUiState
@@ -35,7 +36,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    navigateToPublishList: () -> Unit = {},
+    navigateToPublishList: (String) -> Unit = {},
     navigateToPublicationSelected: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
 ) {
@@ -58,7 +59,7 @@ fun HomeScreen(
 fun HomeScreenContent(
     navController: NavHostController,
     uiState: HomeUiState,
-    navigateToPublishList: () -> Unit,
+    navigateToPublishList: (String) -> Unit,
     navigateToPublicationSelected: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit
 ) {
@@ -89,8 +90,8 @@ fun HomeScreenContent(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
                     CategoriesSection(
-                        onCategoryClick = {
-                            navigateToPublishList()
+                        onCategoryClick = { categoryType ->
+                            navigateToPublishList(categoryType.title)
                         }
                     )
 
@@ -106,7 +107,7 @@ fun HomeScreenContent(
                         title = "Recomendados pelo seu condomínio",
                         publications = uiState.publications,
                         onSeeMoreClick = {
-                            navigateToPublishList()
+                            navigateToPublishList(CategoryType.SERVICES.title)
                         },
                         onItemClick = {id ->
                             navigateToPublicationSelected(id)
@@ -117,7 +118,7 @@ fun HomeScreenContent(
                         title = "Serviços em destaque na região",
                         publications = uiState.publications.reversed(),
                         onSeeMoreClick = {
-                            navigateToPublishList()
+                            navigateToPublishList(CategoryType.SERVICES.title)
                         },
                         onItemClick = { id ->
                             navigateToPublicationSelected(id)
