@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -45,11 +46,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.enums.CategoryType
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,18 +61,31 @@ fun PublicationForm(
     title: String,
     publicationType: PublicationType,
     onPublish: (PublicationUiModel) -> Unit,
-    initialImages: List<Uri> = emptyList()
+    initialPublication: PublicationUiModel? = null,
+    user: UserUiModel
 ) {
 
-    var titleState by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<CategoryType?>(null) }
-    var descriptionState by remember { mutableStateOf("") }
+    var titleState by remember { mutableStateOf(initialPublication?.title ?: "") }
+    var selectedCategory by remember { 
+        mutableStateOf(
+            if (publicationType == PublicationType.PRODUCT) {
+                CategoryType.entries.find { it.title == initialPublication?.publicationType }
+            } else null
+        ) 
+    }
+    var descriptionState by remember { mutableStateOf(initialPublication?.description ?: "") }
     var locationState by remember { mutableStateOf("") }
-    var contactState by remember { mutableStateOf("") }
-    var priceState by remember { mutableStateOf("") }
-    var providerNameState by remember { mutableStateOf("") }
+    var contactState by remember { mutableStateOf(initialPublication?.contact ?: "") }
+    var priceState by remember { mutableStateOf(initialPublication?.price?.toString() ?: "") }
+    var providerNameState by remember { mutableStateOf(initialPublication?.serviceProvider ?: "") }
 
-    var images by remember { mutableStateOf(initialImages) }
+    var images by remember { 
+        mutableStateOf(
+            initialPublication?.imagesSelectList ?: 
+            initialPublication?.imageUrlList?.map { it.url.toUri() } ?:
+            emptyList()
+        ) 
+    }
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -81,7 +98,7 @@ fun PublicationForm(
     val isButtonEnabled = when (publicationType) {
         PublicationType.PRODUCT -> {
             titleState.isNotBlank() &&
-                    selectedCategory != null &&
+                    (selectedCategory != null || (initialPublication != null && titleState.isNotBlank())) &&
                     descriptionState.isNotBlank() &&
                     images.isNotEmpty() &&
                     priceState.isNotBlank()
@@ -99,7 +116,7 @@ fun PublicationForm(
         }
     }
 
-    val isEditMode = initialImages.isNotEmpty()
+    val isEditMode = initialPublication != null
 
     Card(
         modifier = Modifier
@@ -134,14 +151,16 @@ fun PublicationForm(
                 ) {
 
                     OutlinedTextField(
-                        value = selectedCategory?.title ?: "",
+                        value = selectedCategory?.title ?: initialPublication?.publicationType ?: "",
                         onValueChange = {},
                         readOnly = true,
                         placeholder = { Text("Selecione a categoria") },
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded)
                         },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
 
                     ExposedDropdownMenu(
@@ -202,7 +221,6 @@ fun PublicationForm(
             )
 
             if (publicationType == PublicationType.PRODUCT) {
-
                 Spacer(Modifier.height(12.dp))
                 Text("Preço")
 
@@ -242,24 +260,30 @@ fun PublicationForm(
 
             Button(
                 onClick = {
+                    val date = initialPublication?.date ?: LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
                     val publication = PublicationUiModel(
-                        id = UUID.randomUUID().toString(),
-                        publicationOwnerUuid = "123456789",
-                        publicationCondominiumId = "123456789",
-                        publicationOwner = "Morador CondoSpace",
+                        id = initialPublication?.id ?: UUID.randomUUID().toString(),
+                        publicationOwnerUuid = user.uuid,
+                        publicationCondominiumId = user.condominium?.id ?: "",
+                        publicationOwner = user.name,
                         serviceProvider = providerNameState,
                         contact = contactState,
                         price = priceState.toDoubleOrNull() ?: 0.0,
-                        imagesSelectList = images.map { it },
+                        imagesSelectList = images,
                         title = titleState,
                         description = descriptionState,
-                        publicationType = publicationType.toString(),
-                        likes = 0,
-                        date = "24/05/2024",
+                        publicationType = selectedCategory?.title ?: initialPublication?.publicationType ?: publicationType.value,
+                        likes = initialPublication?.likes ?: 0,
+                        date = date,
+                        imageUrlList = if (images.all { it.toString().startsWith("http") }) initialPublication?.imageUrlList else null
                     )
                     onPublish(publication)
                 },
                 enabled = isButtonEnabled,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF354EAB)
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)

@@ -32,8 +32,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.model.UserUiModel
 
-enum class PublicationType(val value: String) {
+enum class PublicationType(var value: String) {
     PRODUCT("produto"),
     SERVICE("serviço"),
     RECOMMENDATION("recomendação")
@@ -157,6 +158,7 @@ fun PublicationTypeItem(
 
 @Composable
 fun CreatePublicationScreen(
+    userUiModel: UserUiModel,
     onPublicationCreated: (PublicationUiModel) -> Unit = {}
 ) {
     var selectedType by remember { mutableStateOf<PublicationType?>(null) }
@@ -177,6 +179,7 @@ fun CreatePublicationScreen(
 
         if (selectedType != null) {
             PublicationForm(
+                user = userUiModel,
                 title = when (selectedType) {
                     PublicationType.PRODUCT -> "Informações do anúncio"
                     PublicationType.SERVICE -> "Informações do serviço"
@@ -186,7 +189,7 @@ fun CreatePublicationScreen(
                 publicationType = selectedType!!,
                 onPublish = { publication ->
                     onPublicationCreated(publication)
-                    selectedType = null // Fecha o formulário após a publicação
+                    selectedType = null
                 }
             )
         }

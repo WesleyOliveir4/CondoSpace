@@ -1,6 +1,7 @@
 package com.example.condospace.presentation.ui.feature.publish.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,12 +39,10 @@ fun PublicationCardList(
     title: String,
     publications: List<PublicationUiModel>,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
     onEditClick: (PublicationUiModel) -> Unit = {},
     onDeleteClick: (PublicationUiModel) -> Unit = {}
 ) {
-    if (publications.isEmpty()) {
-        return
-    }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -64,15 +64,28 @@ fun PublicationCardList(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                publications.forEach { publication ->
-                    PublicationCardItem(
-                        publication = publication,
-                        onEditClick = { onEditClick(publication) },
-                        onDeleteClick = { onDeleteClick(publication) }
-                    )
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(modifier = Modifier.size(30.dp))
+                }
+            } else if (publications.isEmpty()) {
+                Text(
+                    text = "Nenhuma publicação encontrada",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    publications.forEach { publication ->
+                        PublicationCardItem(
+                            publication = publication,
+                            onEditClick = { onEditClick(publication) },
+                            onDeleteClick = { onDeleteClick(publication) }
+                        )
+                    }
                 }
             }
         }
@@ -103,7 +116,7 @@ fun PublicationCardItem(
         ) {
 
             AsyncImage(
-                model = publication.imageUrlList?.firstOrNull(),
+                model = publication.imageUrlList?.firstOrNull()?.url ?: publication.imagesSelectList?.firstOrNull(),
                 contentDescription = publication.title,
                 modifier = Modifier
                     .size(70.dp)
@@ -126,7 +139,9 @@ fun PublicationCardItem(
 
                 Text(
                     text = publication.description,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))

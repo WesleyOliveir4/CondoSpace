@@ -6,6 +6,9 @@ import com.example.condospace.domain.entity.PublicationEntity
 import com.example.condospace.domain.repository.PublicationRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class PublicationRepositoryImpl(
@@ -40,18 +43,37 @@ class PublicationRepositoryImpl(
         }
     }
 
-    override suspend fun getPublicationsByUser(userId: String): Result<List<PublicationEntity>> {
+    override fun getPublicationsByUser(userId: String): Flow<Result<List<PublicationEntity>>> = callbackFlow {
+        val subscription = firestore.collection("publications")
+            .whereEqualTo("publicationOwnerUuid", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Result.failure(error))
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val publications = snapshot.toObjects(Publication::class.java).map {
+                        it.toEntity()
+                    }
+                    trySend(Result.success(publications))
+                }
+            }
+        awaitClose { subscription.remove() }
+    }
+
+    override suspend fun getPublicationById(id: String): Result<PublicationEntity> {
         return try {
             val snapshot = firestore.collection("publications")
-                .whereEqualTo("publicationOwnerUuid", userId)
-                .orderBy("date", Query.Direction.DESCENDING)
+                .document(id)
                 .get()
                 .await()
             
-            val publications = snapshot.toObjects(Publication::class.java).map {
-                it.toEntity()
+            val publication = snapshot.toObject(Publication::class.java)
+            if (publication != null) {
+                Result.success(publication.toEntity())
+            } else {
+                Result.failure(Exception("Publicação não encontrada"))
             }
-            Result.success(publications)
         } catch (e: Exception) {
             Result.failure(e)
         }
