@@ -83,8 +83,10 @@ fun NavNavigation() {
         composable<NavRoutes.Publish> {
             PublishScreen(
                 navController,
-                navigateToPublicationSelected = {
-                    navController.navigate(NavRoutes.PublicationSelected)
+                navigateToPublicationSelected = { publicationId: String ->
+                    navController.navigate(
+                        NavRoutes.PublicationSelected(publicationId = publicationId)
+                    )
                 },
                 navigateToEditPublication = { publicationId: String ->
                     navController.navigate(
@@ -118,8 +120,13 @@ fun NavNavigation() {
             )
         }
 
-        composable<NavRoutes.PublicationSelected> {
-            PublicationSelectedScreen(navController)
+        composable<NavRoutes.PublicationSelected> { backStackEntry ->
+
+            val route = backStackEntry.toRoute<NavRoutes.PublicationSelected>()
+            PublicationSelectedScreen(
+                navController,
+                publicationId = route.publicationId
+            )
         }
 
         composable<NavRoutes.EditPublicationScreen> { backStackEntry ->

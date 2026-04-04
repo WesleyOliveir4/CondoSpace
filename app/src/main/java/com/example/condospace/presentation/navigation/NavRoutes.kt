@@ -27,7 +27,7 @@ sealed class NavRoutes {
     object PublicationsList : NavRoutes()
     
     @Serializable
-    object PublicationSelected : NavRoutes()
+    data class PublicationSelected(val publicationId: String) : NavRoutes()
     
     @Serializable
     data class EditPublicationScreen(val publicationId: String) : NavRoutes()

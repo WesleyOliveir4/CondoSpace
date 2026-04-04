@@ -1,5 +1,6 @@
 package com.example.condospace.presentation.ui.feature.publish.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,10 +30,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 
 @Composable
 fun PublicationCardList(
@@ -40,6 +43,7 @@ fun PublicationCardList(
     publications: List<PublicationUiModel>,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    onItemClick: (PublicationUiModel) -> Unit = {},
     onEditClick: (PublicationUiModel) -> Unit = {},
     onDeleteClick: (PublicationUiModel) -> Unit = {}
 ) {
@@ -82,6 +86,7 @@ fun PublicationCardList(
                     publications.forEach { publication ->
                         PublicationCardItem(
                             publication = publication,
+                            onClick = { onItemClick(publication) },
                             onEditClick = { onEditClick(publication) },
                             onDeleteClick = { onDeleteClick(publication) }
                         )
@@ -95,6 +100,7 @@ fun PublicationCardList(
 @Composable
 fun PublicationCardItem(
     publication: PublicationUiModel,
+    onClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -102,7 +108,9 @@ fun PublicationCardItem(
     Card(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(1.dp),
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = Color.White,
             contentColor = Color.Black
@@ -175,6 +183,50 @@ fun PublicationCardItem(
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PublicationCardListPreview() {
+    val mockPublications = listOf(
+        PublicationUiModel(
+            id = "1",
+            publicationOwnerUuid = "user1",
+            publicationCondominiumId = "condo1",
+            publicationOwner = "João Silva",
+            title = "Venda de Bicicleta",
+            description = "Bicicleta semi-nova, 21 marchas, em ótimo estado de conservação.",
+            publicationType = "Venda",
+            price = 500.0,
+            likes = 10,
+            date = "10/10/2023"
+        ),
+        PublicationUiModel(
+            id = "2",
+            publicationOwnerUuid = "user1",
+            publicationCondominiumId = "condo1",
+            publicationOwner = "João Silva",
+            title = "Aula de Violão",
+            description = "Aulas particulares para iniciantes. Horários flexíveis.",
+            publicationType = "Serviço",
+            price = 50.0,
+            likes = 5,
+            date = "11/10/2023"
+        )
+    )
+
+    CondoSpaceTheme {
+        Column {
+            PublicationCardList(
+                title = "Minhas Publicações",
+                publications = mockPublications
+            )
+            PublicationCardList(
+                title = "Sem Publicações",
+                publications = emptyList()
+            )
         }
     }
 }
