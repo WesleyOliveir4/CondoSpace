@@ -78,4 +78,16 @@ class PublicationRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun deletePublication(publicationId: String): Result<Unit> {
+        return try {
+            firestore.collection("publications")
+                .document(publicationId)
+                .delete()
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

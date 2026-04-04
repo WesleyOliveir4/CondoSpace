@@ -107,7 +107,9 @@ fun PublishScreenContent(
                             publication.id
                         )
                     },
-                    onDeleteClick = { /* deletar */ }
+                    onDeleteClick = { publication ->
+                        publishViewModel.deletePublication(publication.id)
+                    }
                 )
 
             }

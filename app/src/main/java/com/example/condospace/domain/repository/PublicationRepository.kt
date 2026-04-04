@@ -8,4 +8,5 @@ interface PublicationRepository {
     suspend fun getPublicationsByCondominium(condominiumName: String): Result<List<PublicationEntity>>
     fun getPublicationsByUser(userId: String): Flow<Result<List<PublicationEntity>>>
     suspend fun getPublicationById(id: String): Result<PublicationEntity>
+    suspend fun deletePublication(publicationId: String): Result<Unit>
 }
