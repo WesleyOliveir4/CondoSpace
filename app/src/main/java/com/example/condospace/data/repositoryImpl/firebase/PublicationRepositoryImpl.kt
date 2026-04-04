@@ -6,6 +6,9 @@ import com.example.condospace.domain.entity.PublicationEntity
 import com.example.condospace.domain.repository.PublicationRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class PublicationRepositoryImpl(
@@ -40,21 +43,22 @@ class PublicationRepositoryImpl(
         }
     }
 
-    override suspend fun getPublicationsByUser(userId: String): Result<List<PublicationEntity>> {
-        return try {
-            val snapshot = firestore.collection("publications")
-                .whereEqualTo("publicationOwnerUuid", userId)
-                .orderBy("date", Query.Direction.DESCENDING)
-                .get()
-                .await()
-            
-            val publications = snapshot.toObjects(Publication::class.java).map {
-                it.toEntity()
+    override fun getPublicationsByUser(userId: String): Flow<Result<List<PublicationEntity>>> = callbackFlow {
+        val subscription = firestore.collection("publications")
+            .whereEqualTo("publicationOwnerUuid", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Result.failure(error))
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val publications = snapshot.toObjects(Publication::class.java).map {
+                        it.toEntity()
+                    }
+                    trySend(Result.success(publications))
+                }
             }
-            Result.success(publications)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        awaitClose { subscription.remove() }
     }
 
     override suspend fun getPublicationById(id: String): Result<PublicationEntity> {

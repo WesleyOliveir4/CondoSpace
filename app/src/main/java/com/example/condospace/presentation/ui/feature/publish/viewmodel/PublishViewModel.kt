@@ -11,6 +11,7 @@ import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.toEntity
 import com.example.condospace.presentation.model.toUiModel
 import com.example.condospace.presentation.ui.feature.publish.state.PublishUiState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +28,8 @@ class PublishViewModel(
 
     private val _uiState = MutableStateFlow(PublishUiState())
     val uiState: StateFlow<PublishUiState> = _uiState.asStateFlow()
+
+    private var publicationsJob: Job? = null
 
     init {
         observeUserData()
@@ -51,19 +54,21 @@ class PublishViewModel(
     }
 
     fun loadMyPublications(userId: String) {
-        viewModelScope.launch {
+        publicationsJob?.cancel()
+        publicationsJob = viewModelScope.launch {
             _uiState.update { it.copy(isListLoading = true) }
-            val result = getPublicationsByUserUseCase(userId)
-            result.onSuccess { list ->
-                _uiState.update { it.copy(
-                    myPublications = list.map { it.toUiModel() },
-                    isListLoading = false
-                ) }
-            }.onFailure { e ->
-                _uiState.update { it.copy(
-                    error = e.message ?: "Erro ao carregar publicações",
-                    isListLoading = false
-                ) }
+            getPublicationsByUserUseCase(userId).collect { result ->
+                result.onSuccess { list ->
+                    _uiState.update { it.copy(
+                        myPublications = list.map { it.toUiModel() },
+                        isListLoading = false
+                    ) }
+                }.onFailure { e ->
+                    _uiState.update { it.copy(
+                        error = e.message ?: "Erro ao carregar publicações",
+                        isListLoading = false
+                    ) }
+                }
             }
         }
     }
@@ -98,7 +103,6 @@ class PublishViewModel(
                 
                 if (saveResult.isSuccess) {
                     _uiState.update { it.copy(isPublishing = false, publishSuccess = true) }
-                    loadMyPublications(_uiState.value.user.uuid)
                 } else {
                     _uiState.update { it.copy(
                         isPublishing = false, 
