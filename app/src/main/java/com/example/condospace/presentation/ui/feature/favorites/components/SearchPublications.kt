@@ -41,7 +41,7 @@ import com.example.condospace.presentation.model.PublicationUiModel
 @Composable
 fun SearchPublications(
     publications: List<PublicationUiModel>,
-    onPublicationClick: (PublicationUiModel) -> Unit = {}
+    onPublicationClick: (String) -> Unit = {}
 ) {
 
     var searchText by remember { mutableStateOf("") }
@@ -78,7 +78,7 @@ fun SearchPublications(
             items(filteredList) { publication ->
                 PublicationItem(
                     publication = publication,
-                    onClick = { onPublicationClick(publication) }
+                    onClick = { onPublicationClick(publication.id) }
                 )
             }
         }
@@ -111,7 +111,7 @@ fun PublicationItem(
         ) {
 
             AsyncImage(
-                model = publication.imageUrlList?.firstOrNull(),
+                model = publication.imageUrlList?.firstOrNull()?.url,
                 contentDescription = publication.title,
                 modifier = Modifier
                     .size(70.dp)
@@ -132,12 +132,8 @@ fun PublicationItem(
 
                 Text(
                     publication.description,
-                    style = MaterialTheme.typography.bodySmall
-                )
-
-                Text(
-                    publication.description,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))

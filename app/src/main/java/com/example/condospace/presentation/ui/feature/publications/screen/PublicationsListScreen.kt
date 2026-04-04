@@ -20,7 +20,7 @@ import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 @Composable
 fun PublicationsListScreen(
     navController: NavHostController,
-    navigateToPublicationSelected: () -> Unit
+    navigateToPublicationSelected: (String) -> Unit
 ) {
     CondoSpaceTheme {
         PublicationsListScreenContent(
@@ -35,7 +35,7 @@ fun PublicationsListScreen(
 @Composable
 fun PublicationsListScreenContent(
     navController: NavHostController,
-    navigateToPublicationSelected: () -> Unit = {}
+    navigateToPublicationSelected: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -54,7 +54,9 @@ fun PublicationsListScreenContent(
         ) {
             SearchPublications(
                 publications = PublicationsMocks().getFavoritedPublications(),
-                onPublicationClick = { navigateToPublicationSelected() }
+                onPublicationClick = { id ->
+                    navigateToPublicationSelected(id)
+                }
             )
         }
     }

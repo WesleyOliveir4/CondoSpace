@@ -1,27 +1,34 @@
 package com.example.condospace.presentation.ui.feature.home.screen
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.condospace.presentation.model.CondominiumUiModel
+import com.example.condospace.presentation.model.UserUiModel
+import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.feature.home.components.CategoriesSection
-import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.feature.home.components.PublicationsSection
+import com.example.condospace.presentation.ui.feature.home.state.HomeUiState
 import com.example.condospace.presentation.ui.feature.home.viewmodel.HomeViewModel
-import com.example.condospace.presentation.ui.mocks.PublicationsMocks
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -29,19 +36,16 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(
     navController: NavHostController,
     navigateToPublishList: () -> Unit = {},
-    navigateToPublicationSelected: () -> Unit,
+    navigateToPublicationSelected: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
 ) {
     val viewModel: HomeViewModel = koinViewModel()
-
-    val condominiumName by viewModel.condominiumName.collectAsStateWithLifecycle()
-    val userUuid by viewModel.userUuid.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CondoSpaceTheme {
         HomeScreenContent(
             navController = navController,
-            condominiumName = condominiumName,
-            userUuid = userUuid,
+            uiState = uiState,
             navigateToPublishList = navigateToPublishList,
             navigateToPublicationSelected = navigateToPublicationSelected,
             navigateToSelectCondominium = navigateToSelectCondominium
@@ -49,27 +53,22 @@ fun HomeScreen(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
     navController: NavHostController,
-    condominiumName: String,
-    userUuid: String,
+    uiState: HomeUiState,
     navigateToPublishList: () -> Unit,
-    navigateToPublicationSelected: () -> Unit,
+    navigateToPublicationSelected: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit
-)
-{
+) {
     Scaffold(
         bottomBar = { NavBar(navController, "Home") },
         topBar = {
             CondoSpaceTopBar(
-                condominiumName = condominiumName,
+                condominiumName = uiState.condominiumName,
                 residenceSelector = {
-                    navigateToSelectCondominium(
-                        userUuid
-                    )
+                    navigateToSelectCondominium(uiState.user.uuid)
                 }
             )
         }
@@ -81,44 +80,54 @@ fun HomeScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                CategoriesSection(
-                    onCategoryClick = {
-                        navigateToPublishList()
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+                    CategoriesSection(
+                        onCategoryClick = {
+                            navigateToPublishList()
+                        }
+                    )
+
+                    if (uiState.error != null) {
+                        Text(
+                            text = uiState.error,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(16.dp)
+                        )
                     }
-                )
 
+                    PublicationsSection(
+                        title = "Recomendados pelo seu condomínio",
+                        publications = uiState.publications,
+                        onSeeMoreClick = {
+                            navigateToPublishList()
+                        },
+                        onItemClick = {id ->
+                            navigateToPublicationSelected(id)
+                        }
+                    )
 
-                PublicationsSection(
-                    title = "Recomendados pelo seu condomínio",
-                    publications = PublicationsMocks().getPublications(),
-                    onSeeMoreClick = {
-                        navigateToPublishList()
-                    },
-                    onItemClick = {
-                        navigateToPublicationSelected()
-                    }
-                )
-
-
-                PublicationsSection(
-                    title = "Serviços em destaque na região",
-                    publications = PublicationsMocks().getExternalPublications(),
-                    onSeeMoreClick = {
-                        navigateToPublishList()
-                    },
-                    onItemClick = {
-                        navigateToPublicationSelected()
-                    }
-                )
+                    PublicationsSection(
+                        title = "Serviços em destaque na região",
+                        publications = uiState.publications.reversed(),
+                        onSeeMoreClick = {
+                            navigateToPublishList()
+                        },
+                        onItemClick = { id ->
+                            navigateToPublicationSelected(id)
+                        }
+                    )
+                }
             }
         }
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable
@@ -127,11 +136,13 @@ fun HomeScreenPreview() {
     CondoSpaceTheme {
         HomeScreenContent(
             navController = navController,
-            condominiumName = "Condomínio Exemplo",
+            uiState = HomeUiState(
+                condominiumName = "Condomínio Exemplo",
+                user = UserUiModel(uuid = "123", condominium = CondominiumUiModel(name = "Exemplo", cep = "00000-000"))
+            ),
             navigateToPublishList = {},
             navigateToPublicationSelected = {},
-            navigateToSelectCondominium = {},
-            userUuid = "Condomínio Exemplo"
+            navigateToSelectCondominium = {}
         )
     }
 }

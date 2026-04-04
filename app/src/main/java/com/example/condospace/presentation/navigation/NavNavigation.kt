@@ -57,8 +57,8 @@ fun NavNavigation() {
                 navigateToPublishList = {
                     navController.navigate(NavRoutes.PublicationsList)
                 },
-                navigateToPublicationSelected = {
-                    navController.navigate(NavRoutes.PublicationSelected)
+                navigateToPublicationSelected = { publicationId ->
+                    navController.navigate(NavRoutes.PublicationSelected(publicationId = publicationId))
                 },
                 navigateToSelectCondominium = { userId: String ->
                     navController.navigate(NavRoutes.SelectCondominiumScreen(
@@ -71,8 +71,8 @@ fun NavNavigation() {
         composable<NavRoutes.Favorites> {
             FavoritesScreen(
                 navController,
-                navigateToPublicationSelected = {
-                    navController.navigate(NavRoutes.PublicationSelected)
+                navigateToPublicationSelected = { publicationId ->
+                    navController.navigate(NavRoutes.PublicationSelected(publicationId))
                 },
                 navigateToSelectCondominium = {
                     navController.navigate(NavRoutes.SelectCondominiumScreen)
@@ -114,8 +114,8 @@ fun NavNavigation() {
         composable<NavRoutes.PublicationsList> {
             PublicationsListScreen(
                 navController,
-                navigateToPublicationSelected = {
-                    navController.navigate(NavRoutes.PublicationSelected)
+                navigateToPublicationSelected = { publicationId ->
+                    navController.navigate(NavRoutes.PublicationSelected(publicationId = publicationId))
                 }
             )
         }

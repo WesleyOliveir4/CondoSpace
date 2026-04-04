@@ -15,7 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
@@ -28,14 +28,16 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.condospace.presentation.model.PublicationImageUiModel
 import com.example.condospace.presentation.model.PublicationUiModel
 
 @Composable
 fun PublicationsCard(
     publication: PublicationUiModel,
-    onClick: (PublicationUiModel) -> Unit
+    onClick: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -43,7 +45,7 @@ fun PublicationsCard(
             .height(240.dp)
             .padding(end = 12.dp)
             .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp), ambientColor = Color.Black)
-            .clickable { onClick(publication) },
+            .clickable { onClick(publication.id) },
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
             containerColor = Color.White,
@@ -55,7 +57,7 @@ fun PublicationsCard(
         Column {
 
             AsyncImage(
-                model = publication.imageUrlList?.firstOrNull(),
+                model = publication.imageUrlList?.firstOrNull()?.url,
                 contentDescription = publication.title,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,20 +88,16 @@ fun PublicationsCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
                     Icon(
-                        imageVector = Icons.Default.Star,
+                        imageVector = Icons.Default.Favorite,
                         contentDescription = null,
-                        tint = Color(0xFFFFB400),
+                        tint = Color.Red,
                         modifier = Modifier.size(16.dp)
                     )
 
                     Spacer(modifier = Modifier.width(4.dp))
 
-                    Text("${publication.likes}")
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
                     Text(
-                        "(${publication.likes})",
+                        text = "${publication.likes}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -113,7 +111,7 @@ fun PublicationsSection(
     title: String,
     publications: List<PublicationUiModel>,
     onSeeMoreClick: () -> Unit = {},
-    onItemClick: (PublicationUiModel) -> Unit = {}
+    onItemClick: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier.padding(vertical = 16.dp)
@@ -146,9 +144,32 @@ fun PublicationsSection(
             items(publications) { publication ->
                 PublicationsCard(
                     publication = publication,
-                    onClick = { onItemClick(publication) }
+                    onClick = { onItemClick(it) }
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PublicationsCardPreview() {
+    MaterialTheme {
+        PublicationsCard(
+            publication = PublicationUiModel(
+                id = "1",
+                publicationOwnerUuid = "uuid",
+                publicationCondominiumId = "condoId",
+                publicationOwner = "João Silva",
+                title = "Pintura Residencial",
+                description = "Ofereço serviços de pintura interna e externa com ótimo acabamento e preço justo.",
+                publicationType = "Serviço",
+                price = 150.0,
+                likes = 42,
+                date = "2023-10-27",
+                imageUrlList = listOf(PublicationImageUiModel(url = "https://example.com/image.jpg", publicId = "1"))
+            ),
+            onClick = {}
+        )
     }
 }
