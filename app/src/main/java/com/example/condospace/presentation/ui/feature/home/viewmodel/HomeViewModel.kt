@@ -2,29 +2,73 @@ package com.example.condospace.presentation.ui.feature.home.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.condospace.data.mapper.toEntity
 import com.example.condospace.domain.repository.UserPreferencesRepository
-import kotlinx.coroutines.flow.SharingStarted
+import com.example.condospace.domain.usecase.publication.GetPublicationsByCondominiumUseCase
+import com.example.condospace.presentation.model.UserUiModel
+import com.example.condospace.presentation.model.toUiModel
+import com.example.condospace.presentation.ui.enums.ServiceType
+import com.example.condospace.presentation.ui.feature.home.state.HomeUiState
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val getPublicationsByCondominiumUseCase: GetPublicationsByCondominiumUseCase
 ) : ViewModel() {
 
-    val condominiumName: StateFlow<String> = userPreferencesRepository.userData
-        .map { user -> user?.condominium?.name ?: "Selecionar Condomínio" }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = "Carregando..."
-        )
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    val userUuid: StateFlow<String> = userPreferencesRepository.userData
-        .map { user -> user?.uuid ?: "" }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ""
-        )
+    init {
+        observeUserData()
+    }
+
+    private fun observeUserData() {
+        viewModelScope.launch {
+            userPreferencesRepository.userData.collectLatest { userModel ->
+                val userEntity = userModel?.toEntity()
+                val uiModel = userEntity?.toUiModel() ?: UserUiModel()
+                
+                _uiState.update { it.copy(
+                    user = uiModel,
+                    condominiumName = uiModel.condominium?.name ?: "Selecionar Condomínio"
+                ) }
+
+                val condominiumId = uiModel.condominium?.id
+                if (!condominiumId.isNullOrBlank()) {
+                    loadServicePublications(condominiumId)
+                }
+            }
+        }
+    }
+
+    fun loadServicePublications(condominiumId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val result = getPublicationsByCondominiumUseCase(condominiumId)
+            result.onSuccess { list ->
+                _uiState.update { it.copy(
+                    publications = list.filter { it.publicationType == ServiceType.SERVICE.value }.map { it.toUiModel() },
+                    isLoading = false
+                ) }
+            }.onFailure { e ->
+                _uiState.update { it.copy(
+                    error = e.message ?: "Erro ao carregar publicações",
+                    isLoading = false
+                ) }
+            }
+        }
+    }
+
+    fun refreshPublications() {
+        val currentCondoId = _uiState.value.user.condominium?.id
+        if (!currentCondoId.isNullOrBlank()) {
+            loadServicePublications(currentCondoId)
+        }
+    }
 }

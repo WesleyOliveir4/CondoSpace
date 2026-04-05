@@ -6,6 +6,7 @@ import com.example.condospace.data.mapper.toEntity
 import com.example.condospace.domain.repository.ImageRepository
 import com.example.condospace.domain.repository.PublicationRepository
 import com.example.condospace.domain.repository.UserPreferencesRepository
+import com.example.condospace.domain.usecase.publication.DeletePublicationImagesUseCase
 import com.example.condospace.domain.usecase.publication.GetPublicationsByUserUseCase
 import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.toEntity
@@ -23,7 +24,8 @@ class PublishViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val publicationRepository: PublicationRepository,
     private val imageRepository: ImageRepository,
-    private val getPublicationsByUserUseCase: GetPublicationsByUserUseCase
+    private val getPublicationsByUserUseCase: GetPublicationsByUserUseCase,
+    private val deletePublicationImagesUseCase: DeletePublicationImagesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PublishUiState())
@@ -111,6 +113,33 @@ class PublishViewModel(
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isPublishing = false, error = e.message ?: "Erro desconhecido") }
+            }
+        }
+    }
+
+    fun deletePublication(publicationId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isListLoading = true) }
+            
+            val getResult = publicationRepository.getPublicationById(publicationId)
+            
+            getResult.onSuccess { entity ->
+                val publicIds = entity.imageUrlList?.map { it.publicId } ?: emptyList()
+                
+                deletePublicationImagesUseCase(publicationId, publicIds)
+
+                val deleteResult = publicationRepository.deletePublication(publicationId)
+                deleteResult.onFailure { e ->
+                    _uiState.update { it.copy(
+                        error = e.message ?: "Erro ao deletar publicação",
+                        isListLoading = false
+                    ) }
+                }
+            }.onFailure { e ->
+                _uiState.update { it.copy(
+                    error = "Erro ao buscar publicação para exclusão: ${e.message}",
+                    isListLoading = false
+                ) }
             }
         }
     }

@@ -54,11 +54,11 @@ fun NavNavigation() {
         composable<NavRoutes.Home> {
             HomeScreen(
                 navController,
-                navigateToPublishList = {
-                    navController.navigate(NavRoutes.PublicationsList)
+                navigateToPublishList = { categoryType ->
+                    navController.navigate(NavRoutes.PublicationsList(categoryType = categoryType))
                 },
-                navigateToPublicationSelected = {
-                    navController.navigate(NavRoutes.PublicationSelected)
+                navigateToPublicationSelected = { publicationId ->
+                    navController.navigate(NavRoutes.PublicationSelected(publicationId = publicationId))
                 },
                 navigateToSelectCondominium = { userId: String ->
                     navController.navigate(NavRoutes.SelectCondominiumScreen(
@@ -71,8 +71,8 @@ fun NavNavigation() {
         composable<NavRoutes.Favorites> {
             FavoritesScreen(
                 navController,
-                navigateToPublicationSelected = {
-                    navController.navigate(NavRoutes.PublicationSelected)
+                navigateToPublicationSelected = { publicationId ->
+                    navController.navigate(NavRoutes.PublicationSelected(publicationId))
                 },
                 navigateToSelectCondominium = {
                     navController.navigate(NavRoutes.SelectCondominiumScreen)
@@ -83,8 +83,10 @@ fun NavNavigation() {
         composable<NavRoutes.Publish> {
             PublishScreen(
                 navController,
-                navigateToPublicationSelected = {
-                    navController.navigate(NavRoutes.PublicationSelected)
+                navigateToPublicationSelected = { publicationId: String ->
+                    navController.navigate(
+                        NavRoutes.PublicationSelected(publicationId = publicationId)
+                    )
                 },
                 navigateToEditPublication = { publicationId: String ->
                     navController.navigate(
@@ -109,17 +111,26 @@ fun NavNavigation() {
             )
         }
 
-        composable<NavRoutes.PublicationsList> {
+        composable<NavRoutes.PublicationsList> { backStackEntry ->
+
+            val route = backStackEntry.toRoute<NavRoutes.PublicationsList>()
+
             PublicationsListScreen(
                 navController,
-                navigateToPublicationSelected = {
-                    navController.navigate(NavRoutes.PublicationSelected)
-                }
+                navigateToPublicationSelected = { publicationId ->
+                    navController.navigate(NavRoutes.PublicationSelected(publicationId = publicationId))
+                },
+                categoryType = route.categoryType
             )
         }
 
-        composable<NavRoutes.PublicationSelected> {
-            PublicationSelectedScreen(navController)
+        composable<NavRoutes.PublicationSelected> { backStackEntry ->
+
+            val route = backStackEntry.toRoute<NavRoutes.PublicationSelected>()
+            PublicationSelectedScreen(
+                navController,
+                publicationId = route.publicationId
+            )
         }
 
         composable<NavRoutes.EditPublicationScreen> { backStackEntry ->

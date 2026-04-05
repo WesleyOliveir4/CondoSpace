@@ -24,10 +24,10 @@ sealed class NavRoutes {
     object Profile : NavRoutes()
     
     @Serializable
-    object PublicationsList : NavRoutes()
+    data class PublicationsList(val categoryType: String) : NavRoutes()
     
     @Serializable
-    object PublicationSelected : NavRoutes()
+    data class PublicationSelected(val publicationId: String) : NavRoutes()
     
     @Serializable
     data class EditPublicationScreen(val publicationId: String) : NavRoutes()

@@ -35,9 +35,9 @@ import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.UserUiModel
 
 enum class PublicationType(var value: String) {
-    PRODUCT("produto"),
-    SERVICE("serviço"),
-    RECOMMENDATION("recomendação")
+    PRODUCT("Produto"),
+    SERVICE("Serviço"),
+    RECOMMENDATION("Recomendação")
 }
 
 @Composable
