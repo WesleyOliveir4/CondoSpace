@@ -7,8 +7,8 @@ import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.usecase.publication.GetPublicationsByCondominiumUseCase
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.model.toUiModel
+import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.ui.feature.home.state.HomeUiState
-import com.example.condospace.presentation.ui.feature.publish.components.PublicationType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,7 +53,7 @@ class HomeViewModel(
             val result = getPublicationsByCondominiumUseCase(condominiumId)
             result.onSuccess { list ->
                 _uiState.update { it.copy(
-                    publications = list.filter { it.publicationType == PublicationType.SERVICE.value }.map { it.toUiModel() },
+                    publications = list.filter { it.publicationType == ServiceType.SERVICE.value }.map { it.toUiModel() },
                     isLoading = false
                 ) }
             }.onFailure { e ->

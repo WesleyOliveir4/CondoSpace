@@ -16,50 +16,66 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun BottomContactBar(
     price: Double,
     onClick: () -> Unit
-) {    Surface(
-    shadowElevation = 8.dp,
-    color = MaterialTheme.colorScheme.surface
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    val priceText = if (price > 0.0) "R$ %.2f".format(price) else "Preço a combinar"
+
+    Surface(
+        shadowElevation = 8.dp,
+        color = MaterialTheme.colorScheme.surface
     ) {
-        Column(
-            modifier = Modifier.weight(1f)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Preço",
-                style = MaterialTheme.typography.labelSmall
-            )
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Preço:",
+                    style = MaterialTheme.typography.labelSmall
+                )
 
-            Text(
-                text = "R$ %.2f".format(price),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
+                Text(
+                    text = priceText,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-        Button(
-            onClick = onClick,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonColors(
-                containerColor = Color.Blue,
-                contentColor = Color.White,
-                disabledContainerColor = Color.Gray,
-                disabledContentColor = Color.Black
-            )
-        ) {
-            Text("Falar com vendedor")
+            Button(
+                onClick = onClick,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonColors(
+                    containerColor = Color.Blue,
+                    contentColor = Color.White,
+                    disabledContainerColor = Color.Gray,
+                    disabledContentColor = Color.Black
+                )
+            ) {
+                Text("Falar com vendedor")
+            }
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun BottomContactBarPreview() {
+    BottomContactBar(price = 150.0, onClick = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BottomContactBarZeroPreview() {
+    BottomContactBar(price = 0.0, onClick = {})
 }
