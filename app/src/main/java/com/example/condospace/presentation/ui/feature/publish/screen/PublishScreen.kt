@@ -91,7 +91,6 @@ fun PublishScreenContent(
                     uiState.user,
                     onPublicationCreated = { publication ->
                         publishViewModel.createPublication(publication)
-                        Log.e("Publicacao Criada", "$publication")
                     }
                 )
 

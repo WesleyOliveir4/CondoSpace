@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -61,6 +62,9 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
+/**
+ * Componente Stateful que gerencia a lógica e o estado do formulário.
+ */
 @Composable
 fun PublicationForm(
     title: String,
@@ -69,18 +73,20 @@ fun PublicationForm(
     initialPublication: PublicationUiModel? = null,
     user: UserUiModel
 ) {
+    // --- Estados ---
     var titleState by remember { mutableStateOf(initialPublication?.title ?: "") }
     var descriptionState by remember { mutableStateOf(initialPublication?.description ?: "") }
     var priceState by remember {
         mutableStateOf(
-            initialPublication?.price?.let { 
+            initialPublication?.price?.let {
                 val cents = (it * 100).toLong().toString()
                 CurrencyUtils.formatToBRL(cents)
             } ?: ""
         )
     }
-    var contactState by remember { 
-        mutableStateOf(initialPublication?.contact?.filter { it.isDigit() } ?: "") 
+    // contactState armazena apenas números. Usado manualmente apenas em RECOMMENDATION.
+    var contactState by remember {
+        mutableStateOf(if (publicationType == PublicationType.RECOMMENDATION) initialPublication?.contact?.filter { it.isDigit() } ?: "" else "")
     }
     var providerNameState by remember { mutableStateOf(initialPublication?.serviceProvider ?: "") }
     var locationState by remember { mutableStateOf("") }
@@ -95,27 +101,27 @@ fun PublicationForm(
 
     var images by remember {
         mutableStateOf(
-            initialPublication?.imagesSelectList ?: 
+            initialPublication?.imagesSelectList ?:
             initialPublication?.imageUrlList?.map { it.url.toUri() } ?:
             emptyList()
         )
     }
 
+    // --- Auxiliares ---
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris: List<Uri> -> images = images + uris }
 
     val isButtonEnabled = remember(publicationType, titleState, descriptionState, images, priceState, providerNameState, selectedCategory, contactState) {
+        val baseValid = titleState.isNotBlank() && descriptionState.isNotBlank() && images.isNotEmpty()
         when (publicationType) {
-            PublicationType.PRODUCT -> 
-                titleState.isNotBlank() && selectedCategory != null && descriptionState.isNotBlank() && images.isNotEmpty() && priceState.isNotBlank()
-            PublicationType.SERVICE -> 
-                titleState.isNotBlank() && descriptionState.isNotBlank() && images.isNotEmpty()
-            PublicationType.RECOMMENDATION -> 
-                titleState.isNotBlank() && descriptionState.isNotBlank() && providerNameState.isNotBlank() && images.isNotEmpty() && contactState.length >= 10
+            PublicationType.PRODUCT -> baseValid && selectedCategory != null && priceState.isNotBlank()
+            PublicationType.SERVICE -> baseValid
+            PublicationType.RECOMMENDATION -> baseValid && providerNameState.isNotBlank() && contactState.length >= 10
         }
     }
 
+    // --- Configuração Dinâmica baseada no PublicationType ---
     val finalPublicationType = when (publicationType) {
         PublicationType.PRODUCT -> selectedCategory?.title ?: initialPublication?.publicationType ?: ""
         PublicationType.SERVICE -> ServiceType.SERVICE.value
@@ -135,14 +141,19 @@ fun PublicationForm(
         isButtonEnabled = isButtonEnabled,
         onButtonClick = {
             val date = initialPublication?.date ?: LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-            
+
             val publication = PublicationUiModel(
                 id = initialPublication?.id ?: UUID.randomUUID().toString(),
                 publicationOwnerUuid = user.uuid,
                 publicationCondominiumId = user.condominium?.id ?: "",
                 publicationOwner = user.name,
                 serviceProvider = providerNameState,
-                contact = contactState, // Valor puro (apenas dígitos)
+                // Regra: RECOMMENDATION usa contactState, SERVICE e PRODUCT usam user.phoneNumber
+                contact = if (publicationType == PublicationType.RECOMMENDATION) {
+                    PhoneUtils.removeMask(contactState)
+                } else {
+                    PhoneUtils.removeMask(user.phoneNumber)
+                },
                 price = CurrencyUtils.currencyToDouble(priceState),
                 imagesSelectList = images,
                 title = titleState,
@@ -154,25 +165,36 @@ fun PublicationForm(
             )
             onPublish(publication)
         },
+        // --- Parâmetros de Configuração de Campos ---
         showCategorySelector = publicationType == PublicationType.PRODUCT,
         selectedCategory = selectedCategory,
         onCategorySelected = { selectedCategory = it },
+
         showProviderField = publicationType == PublicationType.RECOMMENDATION,
         providerValue = providerNameState,
         onProviderChange = { providerNameState = it },
+
         showPriceField = publicationType == PublicationType.PRODUCT,
         priceValue = priceState,
         onPriceChange = { priceState = CurrencyUtils.formatToBRL(it) },
+
         showLocationField = publicationType == PublicationType.SERVICE,
         locationValue = locationState,
         onLocationChange = { locationState = it },
+
         showContactField = publicationType == PublicationType.RECOMMENDATION,
         contactValue = contactState,
-        onContactChange = { if (it.length <= 11) contactState = it.filter { char -> char.isDigit() } },
+        onContactChange = { input ->
+            val digits = input.filter { it.isDigit() }
+            if (digits.length <= 11) contactState = digits
+        },
         contactVisualTransformation = PhoneUtils.phoneVisualTransformation
     )
 }
 
+/**
+ * Componente Stateless (Dumb) que define a estrutura visual do Card do formulário.
+ */
 @Composable
 fun PublicationFormCard(
     formTitle: String,
@@ -186,39 +208,60 @@ fun PublicationFormCard(
     buttonText: String,
     isButtonEnabled: Boolean,
     onButtonClick: () -> Unit,
+
+    // Configurações de visibilidade e valores específicos
     showCategorySelector: Boolean = false,
     selectedCategory: CategoryType? = null,
     onCategorySelected: (CategoryType) -> Unit = {},
+
     showProviderField: Boolean = false,
     providerValue: String = "",
     onProviderChange: (String) -> Unit = {},
+
     showPriceField: Boolean = false,
     priceValue: String = "",
     onPriceChange: (String) -> Unit = {},
+
     showLocationField: Boolean = false,
     locationValue: String = "",
     onLocationChange: (String) -> Unit = {},
+
     showContactField: Boolean = false,
     contactValue: String = "",
     onContactChange: (String) -> Unit = {},
     contactVisualTransformation: VisualTransformation = VisualTransformation.None
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(2.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             Text(text = formTitle, style = MaterialTheme.typography.titleMedium)
 
-            FormField(label = "Título", value = titleValue, onValueChange = onTitleChange, placeholder = "Ex: Título do seu anúncio")
+            FormField(
+                label = "Título",
+                value = titleValue,
+                onValueChange = onTitleChange,
+                placeholder = "Ex: Título do seu anúncio"
+            )
 
             if (showCategorySelector) {
                 CategorySelector(selectedCategory, onCategorySelected)
             }
 
             if (showProviderField) {
-                FormField(label = "Nome do prestador", value = providerValue, onValueChange = onProviderChange, placeholder = "Quem você está indicando?")
+                FormField(
+                    label = "Nome do prestador",
+                    value = providerValue,
+                    onValueChange = onProviderChange,
+                    placeholder = "Quem você está indicando?"
+                )
             }
 
             FormField(
@@ -231,14 +274,29 @@ fun PublicationFormCard(
             )
 
             Text(text = "Fotos", style = MaterialTheme.typography.labelMedium)
-            PhotoCarousel(images = images, onAddPhoto = onAddPhoto, onRemovePhoto = onRemovePhoto)
+            PhotoCarousel(
+                images = images,
+                onAddPhoto = onAddPhoto,
+                onRemovePhoto = onRemovePhoto
+            )
 
             if (showPriceField) {
-                FormField(label = "Preço em R$", value = priceValue, onValueChange = onPriceChange, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), placeholder = "0,00")
+                FormField(
+                    label = "Preço em R$",
+                    value = priceValue,
+                    onValueChange = onPriceChange,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    placeholder = "0,00"
+                )
             }
 
             if (showLocationField) {
-                FormField(label = "Localização / Atendimento", value = locationValue, onValueChange = onLocationChange, placeholder = "Onde você atende?")
+                FormField(
+                    label = "Localização / Atendimento",
+                    value = locationValue,
+                    onValueChange = onLocationChange,
+                    placeholder = "Onde você atende?"
+                )
             }
 
             if (showContactField) {
@@ -258,13 +316,17 @@ fun PublicationFormCard(
                 onClick = onButtonClick,
                 enabled = isButtonEnabled,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF354EAB)),
-                modifier = Modifier.fillMaxWidth().height(50.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
             ) {
                 Text(buttonText)
             }
         }
     }
 }
+
+// --- Componentes de Apoio ---
 
 @Composable
 fun FormField(
@@ -308,7 +370,9 @@ fun CategorySelector(selectedCategory: CategoryType?, onCategorySelected: (Categ
                 readOnly = true,
                 placeholder = { Text("Selecione a categoria") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             )
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -334,20 +398,35 @@ fun PhotoCarousel(images: List<Uri>, onAddPhoto: () -> Unit, onRemovePhoto: (Uri
                 AsyncImage(
                     model = image,
                     contentDescription = null,
-                    modifier = Modifier.size(100.dp).clip(RoundedCornerShape(12.dp)),
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Crop
                 )
                 IconButton(
                     onClick = { onRemovePhoto(image) },
-                    modifier = Modifier.align(Alignment.TopEnd).size(32.dp).padding(4.dp).background(Color.White.copy(alpha = 0.7f), CircleShape)
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(32.dp)
+                        .padding(4.dp)
+                        .background(Color.White.copy(alpha = 0.7f), CircleShape)
                 ) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = null, tint = Color.Red, modifier = Modifier.size(16.dp))
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null,
+                        tint = Color.Red,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
         }
         item {
             Box(
-                modifier = Modifier.size(100.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFE0E0E0)).clickable { onAddPhoto() },
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFE0E0E0))
+                    .clickable { onAddPhoto() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Adicionar foto")
@@ -355,6 +434,8 @@ fun PhotoCarousel(images: List<Uri>, onAddPhoto: () -> Unit, onRemovePhoto: (Uri
         }
     }
 }
+
+// --- Previews ---
 
 @Preview(showBackground = true, name = "Product Form")
 @Composable
@@ -365,7 +446,7 @@ fun PreviewProductForm() {
                 title = "Anunciar Produto",
                 publicationType = PublicationType.PRODUCT,
                 onPublish = {},
-                user = UserUiModel(name = "Usuário Teste")
+                user = UserUiModel(name = "Usuário Teste", phoneNumber = "11999999999")
             )
         }
     }
@@ -380,7 +461,7 @@ fun PreviewServiceForm() {
                 title = "Oferecer Serviço",
                 publicationType = PublicationType.SERVICE,
                 onPublish = {},
-                user = UserUiModel(name = "Usuário Teste")
+                user = UserUiModel(name = "Usuário Teste", phoneNumber = "11999999999")
             )
         }
     }
@@ -395,7 +476,7 @@ fun PreviewRecommendationForm() {
                 title = "Indicar Serviço",
                 publicationType = PublicationType.RECOMMENDATION,
                 onPublish = {},
-                user = UserUiModel(name = "Usuário Teste")
+                user = UserUiModel(name = "Usuário Teste", phoneNumber = "11999999999")
             )
         }
     }
