@@ -53,7 +53,8 @@ class HomeViewModel(
             val result = getPublicationsByCondominiumUseCase(condominiumId)
             result.onSuccess { list ->
                 _uiState.update { it.copy(
-                    publications = list.filter { it.publicationType == ServiceType.SERVICE.value }.map { it.toUiModel() },
+                    publicationsService = list.filter { it.publicationType == ServiceType.SERVICE.value }.map { it.toUiModel() },
+                    publicationsRecommendation = list.filter { it.publicationType == ServiceType.RECOMMENDATION.value }.map { it.toUiModel() },
                     isLoading = false
                 ) }
             }.onFailure { e ->
