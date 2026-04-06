@@ -3,18 +3,22 @@ package com.example.condospace.presentation.ui.feature.profile.screen
 
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,26 +29,38 @@ import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
 import com.example.condospace.presentation.ui.feature.profile.components.UserDataHeader
 import com.example.condospace.presentation.ui.feature.profile.components.UserDataInfoCard
+import com.example.condospace.presentation.ui.feature.profile.state.UserDataUiState
+import com.example.condospace.presentation.ui.feature.profile.viewmodel.UserDataViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun UserDataScreen(
     navController: NavHostController,
+    viewModel: UserDataViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     CondoSpaceTheme {
         UserDataScreenContent(
             navController = navController,
+            uiState = uiState,
+            onNameChange = { viewModel.updateUserName(it) },
+            onPhoneChange = { viewModel.updateUserPhone(it) },
+            onImageSelected = { viewModel.updateProfilePicture(it) }
         )
     }
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserDataScreenContent(
     navController: NavHostController,
+    uiState: UserDataUiState,
+    onNameChange: (String) -> Unit = {},
+    onPhoneChange: (String) -> Unit = {},
+    onImageSelected: (Uri) -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -61,19 +77,18 @@ fun UserDataScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            UserDetailsComponent(
-                user = UserUiModel(
-                    uuid = Uuid.random().toString(),
-                    name = "João Silva",
-                    phoneNumber = "(11) 98999-2000",
-                    profilePicture = null,
-                    email = "john.jay@example.com",
-                    condominium = CondominiumUiModel(
-                        name = "Condomínio Exemplo",
-                        cep = "12345-678",
-                    )
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                UserDetailsComponent(
+                    user = uiState.user,
+                    onNameChange = onNameChange,
+                    onPhoneChange = onPhoneChange,
+                    onImageSelected = onImageSelected
                 )
-            )
+            }
         }
     }
 
@@ -81,10 +96,11 @@ fun UserDataScreenContent(
 
 @Composable
 fun UserDetailsComponent(
-    user: UserUiModel
+    user: UserUiModel,
+    onNameChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onImageSelected: (Uri) -> Unit
 ) {
-    var profileImage by remember { mutableStateOf<Uri?>(null) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -92,16 +108,15 @@ fun UserDetailsComponent(
     ) {
         UserDataHeader(
             user = user,
-            profileImageUri = profileImage,
+            profileImageUri = null,
             isEditable = true,
-            onImageSelected = { newUri ->
-                profileImage = newUri
-            }
+            onImageSelected = onImageSelected,
         )
 
         UserDataInfoCard(
             user = user,
-            onPhoneChangeConfirmed = { /* TODO: Implement update */ }
+            onPhoneChangeConfirmed = onPhoneChange,
+            onNameChangeConfirmed = onNameChange
         )
     }
 }
@@ -113,7 +128,18 @@ fun UserDataScreenPreview() {
 
     CondoSpaceTheme {
         UserDataScreenContent(
-            navController,
+            navController = navController,
+            uiState = UserDataUiState(
+                user = UserUiModel(
+                    name = "João Silva",
+                    phoneNumber = "(11) 98999-2000",
+                    email = "john.jay@example.com",
+                    condominium = CondominiumUiModel(
+                        name = "Condomínio Exemplo",
+                        cep = "12345-678",
+                    )
+                )
+            )
         )
     }
 }
