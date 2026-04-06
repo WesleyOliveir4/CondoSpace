@@ -15,9 +15,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
+import com.example.condospace.presentation.ui.feature.favorites.components.PublicationItem
 import com.example.condospace.presentation.ui.feature.favorites.components.SearchPublications
+import com.example.condospace.presentation.ui.feature.favorites.state.FavoritesUiState
 import com.example.condospace.presentation.ui.feature.favorites.viewmodel.FavoritesViewModel
-import com.example.condospace.presentation.ui.mocks.PublicationsMocks
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -28,14 +29,12 @@ fun FavoritesScreen(
     navigateToSelectCondominium: (String) -> Unit,
     viewModel: FavoritesViewModel = koinViewModel()
 ) {
-    val condominiumName by viewModel.condominiumName.collectAsStateWithLifecycle()
-    val userUuid by viewModel.userUuid.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CondoSpaceTheme {
         FavoritesScreenContent(
             navController = navController,
-            condominiumName = condominiumName,
-            userUuid = userUuid,
+            uiState = uiState,
             navigateToPublicationSelected = navigateToPublicationSelected,
             navigateToSelectCondominium = navigateToSelectCondominium
         )
@@ -47,8 +46,7 @@ fun FavoritesScreen(
 @Composable
 fun FavoritesScreenContent(
     navController: NavHostController,
-    condominiumName: String,
-    userUuid: String,
+    uiState: FavoritesUiState,
     navigateToPublicationSelected: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit
 ) {
@@ -56,9 +54,9 @@ fun FavoritesScreenContent(
         bottomBar = { NavBar(navController, "Favorites") },
         topBar = {
             CondoSpaceTopBar(
-                condominiumName = condominiumName,
+                condominiumName = uiState.condominiumName,
                 residenceSelector = {
-                    navigateToSelectCondominium(userUuid)
+                    navigateToSelectCondominium(uiState.userUuid)
                 }
             )
         }
@@ -71,11 +69,13 @@ fun FavoritesScreenContent(
             color = MaterialTheme.colorScheme.background
         ) {
             SearchPublications(
-                PublicationsMocks().getFavoritedPublications(),
-                onPublicationClick = { publication ->
-                    navigateToPublicationSelected(publication)
-                }
-            )
+                publications = uiState.publications
+            ) { publication ->
+                PublicationItem(
+                    publication = publication,
+                    onClick = { navigateToPublicationSelected(publication.id) }
+                )
+            }
         }
     }
 
@@ -89,8 +89,10 @@ fun FavoritesScreenPreview() {
     CondoSpaceTheme {
         FavoritesScreenContent(
             navController = navController,
-            condominiumName = "Condomínio Exemplo",
-            userUuid = "123",
+            uiState = FavoritesUiState(
+                condominiumName = "Condomínio Exemplo",
+                userUuid = "123"
+            ),
             navigateToPublicationSelected = {},
             navigateToSelectCondominium = {}
         )
