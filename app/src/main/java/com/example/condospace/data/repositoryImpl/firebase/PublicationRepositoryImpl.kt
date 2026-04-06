@@ -4,6 +4,7 @@ import com.example.condospace.data.mapper.toEntity
 import com.example.condospace.data.model.Publication
 import com.example.condospace.domain.entity.PublicationEntity
 import com.example.condospace.domain.repository.PublicationRepository
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
@@ -107,6 +108,18 @@ class PublicationRepositoryImpl(
             firestore.collection("publications")
                 .document(publicationId)
                 .delete()
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updatePublicationLikes(publicationId: String, increment: Int): Result<Unit> {
+        return try {
+            firestore.collection("publications")
+                .document(publicationId)
+                .update("likes", FieldValue.increment(increment.toLong()))
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {

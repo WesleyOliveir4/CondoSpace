@@ -22,10 +22,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.model.CondominiumUiModel
+import com.example.condospace.presentation.model.PublicationImageUiModel
+import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.enums.CategoryType
+import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.ui.feature.home.components.CategoriesSection
 import com.example.condospace.presentation.ui.feature.home.components.PublicationsSection
 import com.example.condospace.presentation.ui.feature.home.state.HomeUiState
@@ -104,10 +107,21 @@ fun HomeScreenContent(
                     }
 
                     PublicationsSection(
-                        title = "Recomendados pelo seu condomínio",
-                        publications = uiState.publications,
+                        title = "Oferecidos pelo seu condomínio",
+                        publications = uiState.publicationsService,
                         onSeeMoreClick = {
-                            navigateToPublishList(CategoryType.SERVICES.title)
+                            navigateToPublishList(ServiceType.SERVICE.value)
+                        },
+                        onItemClick = {id ->
+                            navigateToPublicationSelected(id)
+                        }
+                    )
+
+                    PublicationsSection(
+                        title = "Recomendados pelo seu condomínio",
+                        publications = uiState.publicationsRecommendation,
+                        onSeeMoreClick = {
+                            navigateToPublishList(ServiceType.RECOMMENDATION.value)
                         },
                         onItemClick = {id ->
                             navigateToPublicationSelected(id)
@@ -116,7 +130,7 @@ fun HomeScreenContent(
 
                     PublicationsSection(
                         title = "Serviços em destaque na região",
-                        publications = uiState.publications.reversed(),
+                        publications = uiState.publicationsService.reversed(),
                         onSeeMoreClick = {
                             navigateToPublishList(CategoryType.SERVICES.title)
                         },
@@ -133,13 +147,56 @@ fun HomeScreenContent(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
+    val listMockUi  = listOf(
+        PublicationUiModel(
+            id = "1",
+            publicationOwnerUuid = "uuid",
+            publicationCondominiumId = "condoId",
+            publicationOwner = "João Silva",
+            title = "Pintura Residencial",
+            description = "Ofereço serviços de pintura interna e externa com ótimo acabamento e preço justo.",
+            publicationType = "Serviço",
+            price = 150.0,
+            likes = 42,
+            date = "2023-10-27",
+            imageUrlList = listOf(PublicationImageUiModel(url = "https://example.com/image.jpg", publicId = "1"))
+        ),
+        PublicationUiModel(
+            id = "2",
+            publicationOwnerUuid = "uuid",
+            publicationCondominiumId = "condoId",
+            publicationOwner = "João Silva",
+            title = "Pintura Residencial",
+            description = "Ofereço serviços de pintura interna e externa com ótimo acabamento e preço justo.",
+            publicationType = "Serviço",
+            price = 150.0,
+            likes = 42,
+            date = "2023-10-27",
+            imageUrlList = listOf(PublicationImageUiModel(url = "https://example.com/image.jpg", publicId = "1"))
+        ),
+        PublicationUiModel(
+            id = "3",
+            publicationOwnerUuid = "uuid",
+            publicationCondominiumId = "condoId",
+            publicationOwner = "João Silva",
+            title = "Pintura Residencial",
+            description = "Ofereço serviços de pintura interna e externa com ótimo acabamento e preço justo.",
+            publicationType = "Serviço",
+            price = 150.0,
+            likes = 42,
+            date = "2023-10-27",
+            imageUrlList = listOf(PublicationImageUiModel(url = "https://example.com/image.jpg", publicId = "1"))
+        )
+    )
     val navController = rememberNavController()
     CondoSpaceTheme {
         HomeScreenContent(
             navController = navController,
             uiState = HomeUiState(
                 condominiumName = "Condomínio Exemplo",
-                user = UserUiModel(uuid = "123", condominium = CondominiumUiModel(name = "Exemplo", cep = "00000-000"))
+                user = UserUiModel(uuid = "123", condominium = CondominiumUiModel(name = "Exemplo", cep = "00000-000")),
+                publicationsService = listMockUi,
+                publicationsRecommendation = listMockUi
             ),
             navigateToPublishList = {},
             navigateToPublicationSelected = {},

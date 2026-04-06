@@ -46,7 +46,8 @@ fun PublicationSelectedScreen(
     CondoSpaceTheme {
         PublicationSelectedScreenContent(
             navController = navController,
-            uiState = uiState
+            uiState = uiState,
+            onFavoriteClick = { viewModel.onFavoriteClick() }
         )
     }
 }
@@ -55,7 +56,8 @@ fun PublicationSelectedScreen(
 @Composable
 fun PublicationSelectedScreenContent(
     navController: NavHostController,
-    uiState: PublicationSelectedUiState
+    uiState: PublicationSelectedUiState,
+    onFavoriteClick: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -104,8 +106,8 @@ fun PublicationSelectedScreenContent(
                         PublicationDetails(
                             publication = publication,
                             isFavorite = uiState.isFavorite,
-                            onLikeClick = {
-                                // Lógica de favoritar futuramente
+                            onFavoriteClick = {
+                                onFavoriteClick()
                             },
                             modifier = Modifier
                         )

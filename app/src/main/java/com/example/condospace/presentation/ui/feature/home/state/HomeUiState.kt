@@ -6,7 +6,8 @@ import com.example.condospace.presentation.model.UserUiModel
 data class HomeUiState(
     val user: UserUiModel = UserUiModel(),
     val condominiumName: String = "Selecionar Condomínio",
-    val publications: List<PublicationUiModel> = emptyList(),
+    val publicationsService: List<PublicationUiModel> = emptyList(),
+    val publicationsRecommendation: List<PublicationUiModel> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
