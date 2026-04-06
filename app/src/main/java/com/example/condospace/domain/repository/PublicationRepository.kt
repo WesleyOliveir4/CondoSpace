@@ -10,4 +10,5 @@ interface PublicationRepository {
     fun getPublicationsByUser(userId: String): Flow<Result<List<PublicationEntity>>>
     suspend fun getPublicationById(id: String): Result<PublicationEntity>
     suspend fun deletePublication(publicationId: String): Result<Unit>
+    suspend fun updatePublicationLikes(publicationId: String, increment: Int): Result<Unit>
 }

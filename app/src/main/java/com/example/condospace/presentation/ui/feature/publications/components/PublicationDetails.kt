@@ -32,7 +32,7 @@ import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 fun PublicationDetails(
     publication: PublicationUiModel,
     isFavorite: Boolean,
-    onLikeClick: (Boolean) -> Unit = {},
+    onFavoriteClick: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -55,7 +55,7 @@ fun PublicationDetails(
                 LikesRow(
                     likes = publication.likes,
                     isFavorite = isFavorite,
-                    onLikeClick = onLikeClick
+                    onFavoriteClick = onFavoriteClick
                 )
             }
         }
@@ -104,14 +104,14 @@ fun PublicationDetails(
 private fun LikesRow(
     likes: Int,
     isFavorite: Boolean,
-    onLikeClick: (Boolean) -> Unit
+    onFavoriteClick: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier.offset(x = (-12).dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = { onLikeClick(!isFavorite) },
+            onClick = { onFavoriteClick(!isFavorite) },
         ) {
             Icon(
                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Outlined.FavoriteBorder,

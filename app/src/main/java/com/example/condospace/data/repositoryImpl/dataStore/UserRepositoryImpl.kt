@@ -58,4 +58,19 @@ class UserRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun updateFavoritePublications(
+        userId: String,
+        publicationsIds: List<String>
+    ): Result<Unit> {
+        return try {
+            firestore.collection("users")
+                .document(userId)
+                .update("publicationsIdFavored", publicationsIds)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
