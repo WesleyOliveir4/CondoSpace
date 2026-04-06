@@ -23,6 +23,15 @@ object CurrencyUtils {
         }
     }
 
+    fun Double.formatToBRLWithoutSymbol(): String {
+        return NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+            .format(this)        .replace("R$", "")
+            .trim()
+    }
+
+    fun Double.formatToBRL(): String {
+        return NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(this)
+    }
     /**
      * Converte a string formatada de volta para Double para envio ao backend.
      * Ex: "1.250,50" -> 1250.5

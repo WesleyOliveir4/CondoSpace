@@ -18,13 +18,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.condospace.presentation.utils.CurrencyUtils.formatToBRL
 
 @Composable
 fun BottomContactBar(
     price: Double,
     onClick: () -> Unit
 ) {
-    val priceText = if (price > 0.0) "R$ %.2f".format(price) else "Preço a combinar"
+    val priceText = if (price > 0.0) price.formatToBRL() else "Preço a combinar"
 
     Surface(
         shadowElevation = 8.dp,

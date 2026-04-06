@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.TopBarReturn
+import com.example.condospace.presentation.ui.feature.favorites.components.PublicationItem
 import com.example.condospace.presentation.ui.feature.favorites.components.SearchPublications
 import com.example.condospace.presentation.ui.feature.publications.state.PublicationsListUiState
 import com.example.condospace.presentation.ui.feature.publications.viewmodel.PublicationsListViewModel
@@ -90,8 +91,11 @@ fun PublicationsListScreenContent(
                 else -> {
                     SearchPublications(
                         publications = uiState.publications,
-                        onPublicationClick = { id ->
-                            navigateToPublicationSelected(id)
+                        itemContent = { publication ->
+                            PublicationItem(
+                                publication = publication,
+                                onClick = { navigateToPublicationSelected(publication.id) }
+                            )
                         }
                     )
                 }
