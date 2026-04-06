@@ -2,29 +2,40 @@ package com.example.condospace.presentation.ui.feature.profile.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.condospace.data.mapper.toEntity
 import com.example.condospace.domain.repository.UserPreferencesRepository
-import kotlinx.coroutines.flow.SharingStarted
+import com.example.condospace.presentation.model.UserUiModel
+import com.example.condospace.presentation.model.toUiModel
+import com.example.condospace.presentation.ui.feature.profile.state.ProfileUiState
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
-    val condominiumName: StateFlow<String> = userPreferencesRepository.userData
-        .map { user -> user?.condominium?.name ?: "Selecionar Condomínio" }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = "Carregando..."
-        )
+    private val _uiState = MutableStateFlow(ProfileUiState())
+    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    val userUuid: StateFlow<String> = userPreferencesRepository.userData
-        .map { user -> user?.uuid ?: "" }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ""
-        )
+    init {
+        observeUserData()
+    }
+
+    private fun observeUserData() {
+        viewModelScope.launch {
+            userPreferencesRepository.userData.collectLatest { userModel ->
+                val userEntity = userModel?.toEntity()
+                val uiModel = userEntity?.toUiModel() ?: UserUiModel()
+
+                _uiState.update { it.copy(
+                    user = uiModel,
+                    condominiumName = uiModel.condominium?.name ?: "Selecionar Condomínio"
+                ) }
+            }
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.condospace.presentation.ui.feature.profile.screen
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -22,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -30,11 +33,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
+import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.feature.profile.components.ContactCard
 import com.example.condospace.presentation.ui.feature.profile.components.OptionsCard
 import com.example.condospace.presentation.ui.feature.profile.components.ProfileHeader
-import com.example.condospace.presentation.ui.component.navBar.NavBar
+import com.example.condospace.presentation.ui.feature.profile.state.ProfileUiState
 import com.example.condospace.presentation.ui.feature.profile.viewmodel.ProfileViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 import org.koin.androidx.compose.koinViewModel
@@ -46,14 +51,12 @@ fun ProfileScreen(
     navigateToSelectCondominium: (String) -> Unit,
     viewModel: ProfileViewModel = koinViewModel()
 ) {
-    val condominiumName by viewModel.condominiumName.collectAsStateWithLifecycle()
-    val userUuid by viewModel.userUuid.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CondoSpaceTheme {
         ProfileScreenContent(
             navController = navController,
-            condominiumName = condominiumName,
-            userUuid = userUuid,
+            uiState = uiState,
             navigateToUserData = navigateToUserData,
             navigateToSelectCondominium = navigateToSelectCondominium
         )
@@ -64,8 +67,7 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenContent(
     navController: NavHostController,
-    condominiumName: String,
-    userUuid: String,
+    uiState: ProfileUiState,
     navigateToUserData: () -> Unit,
     navigateToSelectCondominium: (String) -> Unit
 ) {
@@ -73,9 +75,9 @@ fun ProfileScreenContent(
         bottomBar = { NavBar(navController, "Profile") },
         topBar = {
             CondoSpaceTopBar(
-                condominiumName = condominiumName,
+                condominiumName = uiState.condominiumName,
                 residenceSelector = {
-                    navigateToSelectCondominium(userUuid)
+                    navigateToSelectCondominium(uiState.user.uuid)
                 }
             )
         }
@@ -87,41 +89,57 @@ fun ProfileScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
+                    ProfileHeader(
+                        user = uiState.user,
+                        condominiumName = uiState.condominiumName
+                    )
 
-                ProfileHeader()
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    ContactCard(user = uiState.user)
 
-                ContactCard()
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    OptionsCard(
+                        onMyDataClick = navigateToUserData,
+                        onChangePasswordClick = { },
+                        onSettingsClick = { }
+                    )
 
-                OptionsCard(
-                    onMyDataClick = navigateToUserData,
-                    onChangePasswordClick = {  },
-                    onSettingsClick = {  }
-                )
+                    if (uiState.error != null) {
+                        Text(
+                            text = uiState.error,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                LogoutButton()
+                    LogoutButton()
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                Text(
-                    text = "Condo Market v1.0.0",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodySmall
-                )
+                    Text(
+                        text = "Condo Market v1.0.0",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
-
         }
     }
 }
@@ -165,12 +183,14 @@ fun ProfileScreenPreview() {
     val navController = rememberNavController()
 
     CondoSpaceTheme {
-            ProfileScreenContent(
-                navController,
-                condominiumName = "Condominio Exemplo",
-                userUuid = "123",
-                navigateToUserData = {},
-                navigateToSelectCondominium = {}
-            )
+        ProfileScreenContent(
+            navController,
+            uiState = ProfileUiState(
+                user = UserUiModel(name = "Usuário Teste", email = "teste@email.com"),
+                condominiumName = "Condomínio Exemplo"
+            ),
+            navigateToUserData = {},
+            navigateToSelectCondominium = {}
+        )
     }
 }

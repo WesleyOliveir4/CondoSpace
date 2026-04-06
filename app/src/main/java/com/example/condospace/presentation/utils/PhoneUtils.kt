@@ -47,4 +47,20 @@ object PhoneUtils {
 
         TransformedText(AnnotatedString(out), phoneNumberOffsetMapping)
     }
+
+    /**
+     * Extension function para formatar uma String como telefone: (00) 00000-0000
+     */
+    fun String.applyPhoneMask(): String {
+        val digits = this.filter { it.isDigit() }
+        val trimmed = if (digits.length > 11) digits.substring(0, 11) else digits
+        val out = StringBuilder()
+        for (i in trimmed.indices) {
+            if (i == 0) out.append("(")
+            if (i == 2) out.append(") ")
+            if (i == 7) out.append("-")
+            out.append(trimmed[i])
+        }
+        return out.toString()
+    }
 }

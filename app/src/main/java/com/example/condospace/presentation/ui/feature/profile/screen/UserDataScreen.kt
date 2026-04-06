@@ -3,45 +3,28 @@ package com.example.condospace.presentation.ui.feature.profile.screen
 
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.data.model.User
 import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
-import com.example.condospace.presentation.ui.feature.profile.components.InfoItem
+import com.example.condospace.presentation.ui.feature.profile.components.UserDataHeader
+import com.example.condospace.presentation.ui.feature.profile.components.UserDataInfoCard
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -83,7 +66,7 @@ fun UserDataScreenContent(
                     uuid = Uuid.random().toString(),
                     name = "João Silva",
                     phoneNumber = "(11) 98999-2000",
-                    profilePicture = "R.drawable.img_person",
+                    profilePicture = null,
                     email = "john.jay@example.com",
                     condominium = CondominiumUiModel(
                         name = "Condomínio Exemplo",
@@ -100,104 +83,32 @@ fun UserDataScreenContent(
 fun UserDetailsComponent(
     user: UserUiModel
 ) {
+    var profileImage by remember { mutableStateOf<Uri?>(null) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF6F6F6))
     ) {
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF2962FF),
-                            Color(0xFF1E4ED8)
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                var profileImage by remember { mutableStateOf<Uri?>(null) }
-//
-//                EditableProfileImage(
-//                    imageUri = profileImage,
-//                    imageRes = user.profilePicture,
-//                    onImageSelected = { newUri ->
-//                        profileImage = newUri
-//                    }
-//                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = user.name,
-                    color = Color.White,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text(
-                    text = user.condominium?.name ?: "",
-                    color = Color.White.copy(alpha = 0.8f),
-                    style = MaterialTheme.typography.bodySmall
-                )
+        UserDataHeader(
+            user = user,
+            profileImageUri = profileImage,
+            isEditable = true,
+            onImageSelected = { newUri ->
+                profileImage = newUri
             }
-        }
+        )
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(y = (-30).dp)
-                .padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(20.dp),
-            elevation = CardDefaults.cardElevation(4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            )
-        ) {
-
-            Column(modifier = Modifier.padding(16.dp)) {
-
-                InfoItem(
-                    icon = Icons.Default.Phone,
-                    title = "Telefone",
-                    value = user.phoneNumber,
-                    showEditOption = true
-                )
-
-                InfoItem(
-                    icon = Icons.Default.Email,
-                    title = "E-mail",
-                    value = user.email
-                )
-
-                InfoItem(
-                    icon = Icons.Default.LocationOn,
-                    title = "CEP",
-                    value = user.condominium?.cep ?: ""
-                )
-
-                InfoItem(
-                    icon = Icons.Default.Home,
-                    title = "Condomínio",
-                    value = user.condominium?.name ?: ""
-                )
-            }
-        }
+        UserDataInfoCard(
+            user = user,
+            onPhoneChangeConfirmed = { /* TODO: Implement update */ }
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun  UserDataScreenPreview() {
+fun UserDataScreenPreview() {
     val navController = rememberNavController()
 
     CondoSpaceTheme {

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">CondoSpace</string>
+    <string name="confirm">Confirmar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="edit">Editar</string>
+    <string name="phone">Telefone</string>
+    <string name="full_name">Nome Completo</string>
 </resources>

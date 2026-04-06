@@ -1,74 +1,56 @@
 package com.example.condospace.presentation.ui.feature.profile.components
 
-import androidx.compose.foundation.Image
+import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.condospace.R
 import com.example.condospace.presentation.model.UserUiModel
+import com.example.condospace.presentation.ui.feature.publications.components.EditableProfileImage
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 
 @Composable
-fun ProfileHeader(
+fun UserDataHeader(
     user: UserUiModel,
-    condominiumName: String
+    profileImageUri: Uri?,
+    isEditable: Boolean = true,
+    onImageSelected: (Uri) -> Unit = {}
 ) {
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
+            .height(220.dp)
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFF2962FF), Color(0xFF1E4ED8))
+                    colors = listOf(
+                        Color(0xFF2962FF),
+                        Color(0xFF1E4ED8)
+                    )
                 )
             ),
         contentAlignment = Alignment.Center
     ) {
-
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-            if (!user.profilePicture.isNullOrBlank()) {
-                AsyncImage(
-                    model = user.profilePicture,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(90.dp)
-                        .clip(CircleShape)
-                        .border(3.dp, Color.White, CircleShape),
-                    contentScale = ContentScale.Crop,
-                    placeholder = painterResource(R.drawable.img_person),
-                    error = painterResource(R.drawable.img_person)
-                )
-            } else {
-                Image(
-                    painter = painterResource(R.drawable.img_person_default),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(90.dp)
-                        .clip(CircleShape)
-                        .border(3.dp, Color.White, CircleShape),
-                )
-            }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            EditableProfileImage(
+                imageUri = profileImageUri,
+                imageRes = R.drawable.img_person_default,
+                isEditable = isEditable,
+                onImageSelected = onImageSelected
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -79,7 +61,7 @@ fun ProfileHeader(
             )
 
             Text(
-                text = condominiumName,
+                text = user.condominium?.name ?: "",
                 color = Color.White.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.bodySmall
             )
@@ -89,11 +71,26 @@ fun ProfileHeader(
 
 @Preview(showBackground = true)
 @Composable
-fun ProfileHeaderPreview() {
+fun UserDataHeaderPreview() {
     CondoSpaceTheme {
-        ProfileHeader(
+        UserDataHeader(
             user = UserUiModel(name = "João Silva"),
-            condominiumName = "Residencial Green Park"
+            profileImageUri = null,
+            isEditable = false,
+            onImageSelected = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserDataHeaderEditablePreview() {
+    CondoSpaceTheme {
+        UserDataHeader(
+            user = UserUiModel(name = "João Silva"),
+            profileImageUri = null,
+            isEditable = true,
+            onImageSelected = {}
         )
     }
 }

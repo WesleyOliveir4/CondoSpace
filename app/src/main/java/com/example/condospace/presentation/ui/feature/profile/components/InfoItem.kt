@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.condospace.R
+import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 
 @Composable
 fun InfoItem(
@@ -38,6 +45,8 @@ fun InfoItem(
     title: String,
     value: String,
     showEditOption: Boolean = false,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onValueChangeConfirmed: (String) -> Unit = {}
 ) {
 
@@ -81,12 +90,25 @@ fun InfoItem(
 
             if (isEditing) {
 
-                OutlinedTextField(
-                    value = editedValue,
-                    onValueChange = { editedValue = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
+                if (visualTransformation != VisualTransformation.None){
+                    OutlinedTextField(
+                        value = "",
+                        onValueChange = { editedValue = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        visualTransformation = visualTransformation,
+                        keyboardOptions = keyboardOptions
+                    )
+                }else{
+                    OutlinedTextField(
+                        value = editedValue,
+                        onValueChange = { editedValue = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        visualTransformation = visualTransformation,
+                        keyboardOptions = keyboardOptions
+                    )
+                }
 
             } else {
 
@@ -110,7 +132,7 @@ fun InfoItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Confirmar",
+                            contentDescription = stringResource(R.string.confirm),
                             tint = Color(0xFF2962FF)
                         )
                     }
@@ -123,7 +145,7 @@ fun InfoItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Cancelar",
+                            contentDescription = stringResource(R.string.cancel),
                             tint = Color.Red
                         )
                     }
@@ -139,11 +161,26 @@ fun InfoItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar",
+                        contentDescription = stringResource(R.string.edit),
                         tint = Color.Gray
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun InfoItemPreview() {
+    CondoSpaceTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            InfoItem(
+                icon = Icons.Default.Person,
+                title = stringResource(R.string.full_name),
+                value = "João da Silva Sauro",
+                showEditOption = true
+            )
         }
     }
 }

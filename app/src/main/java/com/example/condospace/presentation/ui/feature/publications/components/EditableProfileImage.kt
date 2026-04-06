@@ -34,7 +34,8 @@ fun EditableProfileImage(
     imageUri: Uri? = null,
     imageRes: Int? = null,
     size: Dp = 90.dp,
-    onImageSelected: (Uri) -> Unit
+    isEditable: Boolean = true,
+    onImageSelected: (Uri) -> Unit = {}
 ) {
 
     var selectedImage by remember { mutableStateOf(imageUri) }
@@ -77,21 +78,23 @@ fun EditableProfileImage(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .offset(x = (-4).dp, y = (-4).dp)
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-                .clickable { launcher.launch("image/*") },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Editar foto",
-                tint = Color(0xFF2962FF),
-                modifier = Modifier.size(16.dp)
-            )
+        if (isEditable) {
+            Box(
+                modifier = Modifier
+                    .offset(x = (-4).dp, y = (-4).dp)
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .clickable { launcher.launch("image/*") },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Editar foto",
+                    tint = Color(0xFF2962FF),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }

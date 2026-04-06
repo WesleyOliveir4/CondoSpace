@@ -27,16 +27,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.condospace.presentation.model.UserUiModel
+import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import com.example.condospace.presentation.utils.PhoneUtils.applyPhoneMask
 
 @Composable
-fun ContactCard() {
+fun ContactCard(user: UserUiModel) {
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .offset(y = (-30).dp), // sobe sobre o header
+            .offset(y = (-30).dp),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(
@@ -46,9 +50,21 @@ fun ContactCard() {
 
         Column(modifier = Modifier.padding(16.dp)) {
 
-            ContactItem(Icons.Default.Phone, "Telefone", "(11) 98765-4321")
-            ContactItem(Icons.Default.Email, "E-mail", "joao.silva@email.com")
-            ContactItem(Icons.Default.Home, "Unidade", "Bloco A - Apto 301")
+            ContactItem(
+                icon = Icons.Default.Phone,
+                label = "Telefone",
+                value = user.phoneNumber.applyPhoneMask().ifBlank { "Não informado" }
+            )
+            ContactItem(
+                icon = Icons.Default.Email,
+                label = "E-mail",
+                value = user.email.ifBlank { "Não informado" }
+            )
+            ContactItem(
+                icon = Icons.Default.Home,
+                label = "Unidade",
+                value = user.condominium?.cep?.ifBlank { "Não informado" } ?: "Não informado"
+            )
         }
     }
 }
@@ -77,5 +93,18 @@ fun ContactItem(icon: ImageVector, label: String, value: String) {
             Text(label, style = MaterialTheme.typography.bodySmall)
             Text(value, style = MaterialTheme.typography.bodyMedium)
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ContactCardPreview() {
+    CondoSpaceTheme {
+        ContactCard(
+            user = UserUiModel(
+                phoneNumber = "(11) 98888-7777",
+                email = "joao.silva@email.com"
+            )
+        )
     }
 }
