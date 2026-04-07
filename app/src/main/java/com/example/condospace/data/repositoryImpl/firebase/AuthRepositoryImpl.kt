@@ -39,4 +39,13 @@ class AuthRepositoryImpl(
     override fun getCurrentUserUid(): String? {
         return auth.currentUser?.uid
     }
+
+    override suspend fun signOut(): Result<Unit> {
+        return try {
+            auth.signOut()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

@@ -11,5 +11,6 @@ data class User (
     val email: String = "",
     val condominium: Condominium? = null,
     val publicationsIdFavored: List<String>? = null,
-    val notificationsEnabled: Boolean = true
+    val notificationsEnabled: Boolean = true,
+    val userIsLogged: Boolean = true
 )

@@ -16,7 +16,7 @@ val profileModule = module {
     factory { UpdateUserUseCase(get(), get()) }
     single<PublicationRepository> { PublicationRepositoryImpl(get()) }
 
-    viewModel { ProfileViewModel(get()) }
+    viewModel { ProfileViewModel(get(), get()) }
     viewModel { UserDataViewModel(get(), get(), get(), get(), get()) }
     viewModel { ChangePasswordViewModel(get()) }
     viewModel { SettingsViewModel(get(), get()) }

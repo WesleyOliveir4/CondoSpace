@@ -20,7 +20,8 @@ fun User.toEntity(): UserEntity {
             cep = this.condominium?.cep ?:""
         ),
         publicationsIdFavored = this.publicationsIdFavored,
-        notificationsEnabled = this.notificationsEnabled
+        notificationsEnabled = this.notificationsEnabled,
+        userIsLogged = this.userIsLogged
     )
 }
 
@@ -38,6 +39,7 @@ fun UserEntity.toModel(): User {
             cep = this.condominiumEntity?.cep ?: ""
         ),
         publicationsIdFavored = this.publicationsIdFavored,
-        notificationsEnabled = this.notificationsEnabled
+        notificationsEnabled = this.notificationsEnabled,
+        userIsLogged = this.userIsLogged
     )
 }

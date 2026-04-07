@@ -8,5 +8,6 @@ data class UserEntity(
     val email: String,
     val condominiumEntity: CondominiumEntity? = null,
     val publicationsIdFavored: List<String>? = null,
-    val notificationsEnabled: Boolean = true
+    val notificationsEnabled: Boolean = true,
+    val userIsLogged: Boolean = true
 )

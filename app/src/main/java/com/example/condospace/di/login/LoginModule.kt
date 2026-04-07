@@ -1,5 +1,6 @@
 package com.example.condospace.di.login
 
+import com.example.condospace.domain.usecase.login.LogoutUseCase
 import com.example.condospace.domain.usecase.login.SignInUseCase
 import com.example.condospace.presentation.ui.feature.login.viewmodel.LoginViewModel
 import org.koin.core.module.dsl.viewModel
@@ -7,6 +8,7 @@ import org.koin.dsl.module
 
 val loginModule = module {
     factory { SignInUseCase(get()) }
+    factory { LogoutUseCase(get(), get(), get()) }
     
     viewModel { 
         LoginViewModel(

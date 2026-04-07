@@ -22,6 +22,19 @@ class LoginViewModel(
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Unauthenticated)
     val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
 
+    init {
+        checkUserLoggedIn()
+    }
+
+    private fun checkUserLoggedIn() {
+        viewModelScope.launch {
+            val user = userPreferencesRepository.getUserData()
+            if (user != null && user.userIsLogged) {
+                _loginState.value = LoginState.Authenticated
+            }
+        }
+    }
+
     fun login(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
             _loginState.value = LoginState.Error("Email or password can't be empty")
@@ -45,7 +58,9 @@ class LoginViewModel(
             val userResult = userRepository.getUser(uid)
             userResult.onSuccess { user ->
                 user?.let {
-                    userPreferencesRepository.saveUserData(it)
+                    val loggedUser = it.copy(userIsLogged = true)
+                    userRepository.updateUser(loggedUser)
+                    userPreferencesRepository.saveUserData(loggedUser)
                 }
             }
         }

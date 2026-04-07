@@ -123,6 +123,9 @@ fun NavNavigation() {
                 },
                 navigateToSettings = {
                     navController.navigate(NavRoutes.SettingsScreen)
+                },
+                navigateToLogin = {
+                    navController.navigate(NavRoutes.LoginScreen)
                 }
             )
         }
