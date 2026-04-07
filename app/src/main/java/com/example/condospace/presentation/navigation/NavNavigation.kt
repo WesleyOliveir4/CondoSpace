@@ -76,8 +76,10 @@ fun NavNavigation() {
                 navigateToPublicationSelected = { publicationId ->
                     navController.navigate(NavRoutes.PublicationSelected(publicationId))
                 },
-                navigateToSelectCondominium = {
-                    navController.navigate(NavRoutes.SelectCondominiumScreen)
+                navigateToSelectCondominium = { userId: String ->
+                    navController.navigate(NavRoutes.SelectCondominiumScreen(
+                        userId = userId,
+                    ))
                 }
             )
         }
@@ -95,8 +97,10 @@ fun NavNavigation() {
                         NavRoutes.EditPublicationScreen(publicationId = publicationId)
                     )
                 },
-                navigateToSelectCondominium = {
-                    navController.navigate(NavRoutes.SelectCondominiumScreen)
+                navigateToSelectCondominium = { userId: String ->
+                    navController.navigate(NavRoutes.SelectCondominiumScreen(
+                        userId = userId,
+                    ))
                 }
             )
         }
@@ -115,8 +119,10 @@ fun NavNavigation() {
                 navigateToUserData = {
                     navController.navigate(NavRoutes.UserDataScreen)
                 },
-                navigateToSelectCondominium = {
-                    navController.navigate(NavRoutes.SelectCondominiumScreen)
+                navigateToSelectCondominium = { userId: String ->
+                    navController.navigate(NavRoutes.SelectCondominiumScreen(
+                        userId = userId,
+                    ))
                 },
                 navigateToChangePassword = {
                     navController.navigate(NavRoutes.ChangePasswordScreen)

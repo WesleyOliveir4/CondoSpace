@@ -19,7 +19,7 @@ class LoginViewModel(
     private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
-    private val _loginState = MutableStateFlow<LoginState>(LoginState.Unauthenticated)
+    private val _loginState = MutableStateFlow<LoginState>(LoginState.Checking)
     val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
 
     init {
@@ -31,6 +31,8 @@ class LoginViewModel(
             val user = userPreferencesRepository.getUserData()
             if (user != null && user.userIsLogged) {
                 _loginState.value = LoginState.Authenticated
+            } else {
+                _loginState.value = LoginState.Unauthenticated
             }
         }
     }

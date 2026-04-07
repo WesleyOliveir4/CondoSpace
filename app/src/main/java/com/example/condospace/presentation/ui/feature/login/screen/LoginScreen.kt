@@ -1,7 +1,6 @@
 package com.example.condospace.presentation.ui.feature.login.screen
 
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,14 +60,50 @@ fun LoginScreen(
     val loginViewModel: LoginViewModel = koinViewModel()
     val loginState by loginViewModel.loginState.collectAsState()
 
+    LaunchedEffect(loginState) {
+        if (loginState is LoginState.Authenticated) {
+            navigateToHome()
+        }
+    }
+
     CondoSpaceTheme {
-        LoginScreenContent(
-            navController = navController,
-            loginViewModel = loginViewModel,
-            loginState = loginState,
-            navigateToRegister = navigateToRegister,
-            navigateToHome = navigateToHome
-        )
+        when (loginState) {
+            is LoginState.Checking, is LoginState.Authenticated -> {
+                SplashLoadingScreen()
+            }
+            else -> {
+                LoginScreenContent(
+                    navController = navController,
+                    loginViewModel = loginViewModel,
+                    loginState = loginState,
+                    navigateToRegister = navigateToRegister,
+                    navigateToHome = navigateToHome
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SplashLoadingScreen() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(id = R.drawable.img_condospace_logo),
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(100.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                CircularProgressIndicator(color = Color(0xFF354EAB))
+            }
+        }
     }
 }
 
@@ -107,20 +143,14 @@ fun LoginScreenContent(
                     isLoading = loginState is LoginState.Loading
                 )
 
-                when (loginState) {
-                    is LoginState.Error -> {
-                        Text(
-                            text = loginState.message,
-                            color = Color.Red,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(16.dp)
-                        )
-                    }
-                    is LoginState.Authenticated -> {
-                        navigateToHome()
-                    }
-                    else -> Unit
+                if (loginState is LoginState.Error) {
+                    Text(
+                        text = loginState.message,
+                        color = Color.Red,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
+                    )
                 }
             }
         }
@@ -277,13 +307,11 @@ fun LoginComponent(
 @Composable
 fun  LoginScreenPreview() {
     val navController = rememberNavController()
-    val loginViewModel: LoginViewModel = koinViewModel()
-
 
     CondoSpaceTheme {
         LoginScreenContent(
             navController = navController,
-            loginViewModel = loginViewModel,
+            loginViewModel = koinViewModel(),
             loginState = LoginState.Unauthenticated,
             navigateToRegister = {},
             navigateToHome = {}

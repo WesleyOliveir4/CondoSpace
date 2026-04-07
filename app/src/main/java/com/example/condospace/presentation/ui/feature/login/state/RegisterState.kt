@@ -1,8 +1,8 @@
 package com.example.condospace.presentation.ui.feature.login.state
 
-sealed class LoginState{
-    object Authenticated : LoginState()
-    object Unauthenticated : LoginState()
-    object Loading : LoginState()
-    data class Error(val message : String) : LoginState()
+sealed class RegisterState {
+    object Idle : RegisterState()
+    object Loading : RegisterState()
+    object Success : RegisterState()
+    data class Error(val message: String) : RegisterState()
 }

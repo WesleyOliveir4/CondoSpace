@@ -8,6 +8,6 @@ data class HomeUiState(
     val condominiumName: String = "Selecionar Condomínio",
     val publicationsService: List<PublicationUiModel> = emptyList(),
     val publicationsRecommendation: List<PublicationUiModel> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val error: String? = null
 )
