@@ -27,9 +27,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.condospace.R
 import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.utils.CepUtils.applyCepMask
 
@@ -57,7 +59,7 @@ fun CurrentCondominiumCard(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Condomínio Atual",
+                    text = stringResource(id = R.string.condominium_current_label),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold
@@ -92,7 +94,7 @@ fun CurrentCondominiumCard(
                                 )
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "CEP: ${selectedCondo.cep.applyCepMask()}",
+                                    text = stringResource(id = R.string.cep_label, selectedCondo.cep.applyCepMask()),
                                     color = Color.Gray,
                                     style = MaterialTheme.typography.bodySmall
                                 )
@@ -107,7 +109,7 @@ fun CurrentCondominiumCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = "Editar condomínio",
+                                contentDescription = stringResource(id = R.string.condominium_edit_description),
                                 tint = Color.Gray
                             )
                         }
@@ -117,7 +119,7 @@ fun CurrentCondominiumCard(
 
             if (selectedCondo == null) {
                 Text(
-                    text = "Você ainda não selecionou um condomínio.",
+                    text = stringResource(id = R.string.condominium_not_selected),
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     style = MaterialTheme.typography.bodyMedium
                 )

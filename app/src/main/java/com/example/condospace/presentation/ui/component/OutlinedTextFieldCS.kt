@@ -29,6 +29,7 @@ fun OutlinedTextFieldCS(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    leadingIcon: @Composable (() -> Unit)? = null,
     singleLine: Boolean = true,
     enabled: Boolean = true,
     isError: Boolean = false,
@@ -58,12 +59,16 @@ fun OutlinedTextFieldCS(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color(0xFF354EAB),
                 unfocusedBorderColor = Color(0xFFE0E0E0),
+                disabledBorderColor = Color(0xFFE0E0E0),
                 cursorColor = Color.Black,
                 focusedLabelColor = Color(0xFF354EAB),
                 unfocusedLabelColor = Color.Gray,
                 focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
-            )
+                unfocusedContainerColor = Color.White,
+                disabledContainerColor = Color.White,
+                errorContainerColor = Color.White,
+            ),
+            leadingIcon = leadingIcon
         )
     }
 }

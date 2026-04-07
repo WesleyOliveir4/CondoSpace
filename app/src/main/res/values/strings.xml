@@ -10,6 +10,9 @@
     <string name="password_hint_length">Mínimo de 6 caracteres</string>
     <string name="password_hint_complexity">Use letras e números</string>
     <string name="password_hint_avoid_personal">Evite datas de nascimento</string>
+    <string name="success">Sucesso!</string>
+    <string name="ok">OK</string>
+    <string name="cep_label">CEP: %1$s</string>
 
     <!-- Login -->
     <string name="login_welcome_subtitle">Marketplace do seu condomínio</string>
@@ -22,6 +25,7 @@
     <string name="login_register_action">Cadastrar</string>
 
     <!-- Register -->
+    <string name="register_toolbar_title">Cadastro</string>
     <string name="register_title">Criar Conta</string>
     <string name="register_subtitle">Junte-se ao marketplace do seu condomínio</string>
     <string name="register_username_label">Nome do usuário</string>
@@ -33,6 +37,24 @@
     <string name="register_phone_label">Telefone</string>
     <string name="register_phone_placeholder">(00) 00000-0000</string>
     <string name="register_button_text">Criar conta</string>
+
+    <!-- Condominium -->
+    <string name="condominium_title">Condomínio</string>
+    <string name="condominium_config_address">Configuração de Endereço</string>
+    <string name="condominium_config_subtitle">Vincule-se ao seu condomínio para acessar todas as publicações.</string>
+    <string name="condominium_current_label">Condomínio Atual</string>
+    <string name="condominium_not_selected">Você ainda não selecionou um condomínio.</string>
+    <string name="condominium_edit_description">Editar condomínio</string>
+    <string name="condominium_search_title">Buscar Novo Condomínio</string>
+    <string name="condominium_cep_label">Digite o CEP</string>
+    <string name="condominium_cep_placeholder">Ex: 15234-042</string>
+    <string name="condominium_search_button">Pesquisar</string>
+    <string name="condominium_results_label">Condomínios encontrados:</string>
+    <string name="condominium_not_found">Nenhum condomínio cadastrado neste CEP.</string>
+    <string name="condominium_name_label">Nome do condomínio</string>
+    <string name="condominium_name_placeholder">Digite o nome para cadastrar</string>
+    <string name="condominium_register_select_button">Cadastrar e Selecionar</string>
+    <string name="condominium_update_success">Condomínio atualizado com sucesso!</string>
 
     <!-- Content Descriptions -->
     <string name="content_description_logo">Logo</string>
