@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.TopBarReturn
+import com.example.condospace.presentation.ui.component.error.EmptyState
 import com.example.condospace.presentation.ui.feature.favorites.components.PublicationItem
 import com.example.condospace.presentation.ui.feature.favorites.components.SearchPublications
 import com.example.condospace.presentation.ui.feature.publications.state.PublicationsListUiState
@@ -91,6 +92,11 @@ fun PublicationsListScreenContent(
                 else -> {
                     SearchPublications(
                         publications = uiState.publications,
+                        emptyState = {
+                            EmptyState(
+                                title = "Nenhuma publicação encontrada."
+                            )
+                        },
                         itemContent = { publication ->
                             PublicationItem(
                                 publication = publication,

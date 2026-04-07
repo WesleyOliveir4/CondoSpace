@@ -1,6 +1,8 @@
 package com.example.condospace.presentation.ui.feature.favorites.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,12 +24,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.ui.component.error.EmptyState
 import com.example.condospace.presentation.ui.mocks.PublicationsMocks
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 
 @Composable
 fun SearchPublications(
     publications: List<PublicationUiModel>,
+    emptyState: @Composable () -> Unit = {},
     itemContent: @Composable (PublicationUiModel) -> Unit
 ) {
 
@@ -38,7 +42,7 @@ fun SearchPublications(
                 it.description.contains(searchText, ignoreCase = true)
     }
 
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
 
         OutlinedTextField(
             value = searchText,
@@ -61,9 +65,15 @@ fun SearchPublications(
             )
         )
 
-        LazyColumn {
-            items(filteredList) { publication ->
-                itemContent(publication)
+        if (filteredList.isEmpty()) {
+            Box(modifier = Modifier.weight(1f)) {
+                emptyState()
+            }
+        } else {
+            LazyColumn {
+                items(filteredList) { publication ->
+                    itemContent(publication)
+                }
             }
         }
     }
@@ -74,7 +84,13 @@ fun SearchPublications(
 fun SearchPublicationsPreview() {
     CondoSpaceTheme {
         SearchPublications(
-            publications = PublicationsMocks().getFavoritedPublications()
+            publications = PublicationsMocks().getFavoritedPublications(),
+            emptyState = {
+                EmptyState(
+                    title = "Nenhuma publicação\npara o seu condomínio.",
+                    subtitle = "Venha ser o primeiro!"
+                )
+            }
         ) { publication ->
             PublicationItem(publication = publication)
         }

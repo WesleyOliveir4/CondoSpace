@@ -13,8 +13,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
+import com.example.condospace.presentation.ui.component.error.EmptyState
+import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.feature.favorites.components.PublicationItem
 import com.example.condospace.presentation.ui.feature.favorites.components.SearchPublications
 import com.example.condospace.presentation.ui.feature.favorites.state.FavoritesUiState
@@ -69,7 +70,12 @@ fun FavoritesScreenContent(
             color = MaterialTheme.colorScheme.background
         ) {
             SearchPublications(
-                publications = uiState.publications
+                publications = uiState.publications,
+                emptyState = {
+                    EmptyState(
+                        title = "Nenhuma publicação\n favoritada."
+                    )
+                }
             ) { publication ->
                 PublicationItem(
                     publication = publication,
