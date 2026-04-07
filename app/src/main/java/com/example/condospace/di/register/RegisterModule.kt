@@ -32,7 +32,7 @@ val registerModule = module {
     factory { GetUserCondominiumUseCase(get()) }
     factory { SearchCondominiumByCepUseCase(get()) }
     factory { SaveCondominiumUseCase(get(), get()) }
-    factory { UpdateUserCondominiumUseCase(get()) }
+    factory { UpdateUserCondominiumUseCase(get(), get()) }
 
     viewModel { RegisterViewModel(
         createUserUseCase = get(),
