@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.condospace.presentation.model.PublicationImageUiModel
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.ui.feature.home.mocks.PublicationsMocksPreview
 
 @Composable
 fun PublicationsCard(
@@ -113,6 +114,7 @@ fun PublicationsSection(
     onSeeMoreClick: () -> Unit = {},
     onItemClick: (String) -> Unit = {}
 ) {
+    if (publications.isEmpty()) return
     Column(
         modifier = Modifier.padding(vertical = 16.dp)
     ) {
@@ -170,6 +172,28 @@ fun PublicationsCardPreview() {
                 imageUrlList = listOf(PublicationImageUiModel(url = "https://example.com/image.jpg", publicId = "1"))
             ),
             onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PublicationsSectionPreview() {
+    MaterialTheme {
+        PublicationsSection(
+            title = "Serviços em destaque na região",
+            publications = PublicationsMocksPreview().listMockUi
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PublicationsSectionEmptyPreview() {
+    MaterialTheme {
+        PublicationsSection(
+            title = "Serviços em destaque na região",
+            publications = emptyList()
         )
     }
 }
