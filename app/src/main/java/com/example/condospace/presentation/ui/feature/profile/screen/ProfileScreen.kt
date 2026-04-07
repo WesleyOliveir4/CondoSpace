@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -22,8 +23,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,7 +54,10 @@ fun ProfileScreen(
     navController: NavHostController,
     navigateToUserData: () -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
-    viewModel: ProfileViewModel = koinViewModel()
+    viewModel: ProfileViewModel = koinViewModel(),
+    navigateToChangePassword: () -> Unit,
+    navigateToSettings: () -> Unit,
+    navigateToLogin: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -58,7 +66,14 @@ fun ProfileScreen(
             navController = navController,
             uiState = uiState,
             navigateToUserData = navigateToUserData,
-            navigateToSelectCondominium = navigateToSelectCondominium
+            navigateToSelectCondominium = navigateToSelectCondominium,
+            navigateToChangePassword = navigateToChangePassword,
+            navigateToSettings = navigateToSettings,
+            onLogoutConfirm = {
+                viewModel.logout {
+                    navigateToLogin()
+                }
+            }
         )
     }
 }
@@ -69,8 +84,23 @@ fun ProfileScreenContent(
     navController: NavHostController,
     uiState: ProfileUiState,
     navigateToUserData: () -> Unit,
-    navigateToSelectCondominium: (String) -> Unit
+    navigateToSelectCondominium: (String) -> Unit,
+    navigateToChangePassword: () -> Unit,
+    navigateToSettings: () -> Unit,
+    onLogoutConfirm: () -> Unit
 ) {
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    if (showLogoutDialog) {
+        LogoutConfirmationDialog(
+            onConfirm = {
+                showLogoutDialog = false
+                onLogoutConfirm()
+            },
+            onDismiss = { showLogoutDialog = false }
+        )
+    }
+
     Scaffold(
         bottomBar = { NavBar(navController, "Profile") },
         topBar = {
@@ -113,8 +143,8 @@ fun ProfileScreenContent(
 
                     OptionsCard(
                         onMyDataClick = navigateToUserData,
-                        onChangePasswordClick = { },
-                        onSettingsClick = { }
+                        onChangePasswordClick = { navigateToChangePassword() },
+                        onSettingsClick = { navigateToSettings() }
                     )
 
                     if (uiState.error != null) {
@@ -128,7 +158,7 @@ fun ProfileScreenContent(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    LogoutButton()
+                    LogoutButton(onClick = { showLogoutDialog = true })
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -145,10 +175,10 @@ fun ProfileScreenContent(
 }
 
 @Composable
-fun LogoutButton() {
+fun LogoutButton(onClick: () -> Unit) {
 
     OutlinedButton(
-        onClick = { },
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
@@ -177,6 +207,28 @@ fun LogoutButton() {
     }
 }
 
+@Composable
+fun LogoutConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Sair da conta") },
+        text = { Text(text = "Tem certeza que deseja sair da sua conta?") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = "Sair", color = Color.Red)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Cancelar")
+            }
+        }
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
@@ -190,7 +242,10 @@ fun ProfileScreenPreview() {
                 condominiumName = "Condomínio Exemplo"
             ),
             navigateToUserData = {},
-            navigateToSelectCondominium = {}
+            navigateToSelectCondominium = {},
+            navigateToChangePassword = {},
+            navigateToSettings = {},
+            onLogoutConfirm = {}
         )
     }
 }

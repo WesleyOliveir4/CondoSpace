@@ -1,6 +1,7 @@
 package com.example.condospace.data.repositoryImpl.firebase
 
 import com.example.condospace.data.mapper.toEntity
+import com.example.condospace.data.mapper.toModel
 import com.example.condospace.data.model.Publication
 import com.example.condospace.domain.entity.PublicationEntity
 import com.example.condospace.domain.repository.PublicationRepository
@@ -120,6 +121,18 @@ class PublicationRepositoryImpl(
             firestore.collection("publications")
                 .document(publicationId)
                 .update("likes", FieldValue.increment(increment.toLong()))
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updatePublication(publication: PublicationEntity): Result<Unit> {
+        return try {
+            firestore.collection("publications")
+                .document(publication.id)
+                .set(publication.toModel())
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {

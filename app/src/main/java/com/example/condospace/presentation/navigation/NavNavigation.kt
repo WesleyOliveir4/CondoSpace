@@ -9,7 +9,9 @@ import com.example.condospace.presentation.ui.feature.condominium.screen.SelectC
 import com.example.condospace.presentation.ui.feature.favorites.screen.FavoritesScreen
 import com.example.condospace.presentation.ui.feature.home.screen.HomeScreen
 import com.example.condospace.presentation.ui.feature.login.screen.LoginScreen
+import com.example.condospace.presentation.ui.feature.profile.screen.ChangePasswordScreen
 import com.example.condospace.presentation.ui.feature.profile.screen.ProfileScreen
+import com.example.condospace.presentation.ui.feature.profile.screen.SettingsScreen
 import com.example.condospace.presentation.ui.feature.profile.screen.UserDataScreen
 import com.example.condospace.presentation.ui.feature.publications.screen.EditPublicationScreen
 import com.example.condospace.presentation.ui.feature.publications.screen.PublicationSelectedScreen
@@ -74,8 +76,10 @@ fun NavNavigation() {
                 navigateToPublicationSelected = { publicationId ->
                     navController.navigate(NavRoutes.PublicationSelected(publicationId))
                 },
-                navigateToSelectCondominium = {
-                    navController.navigate(NavRoutes.SelectCondominiumScreen)
+                navigateToSelectCondominium = { userId: String ->
+                    navController.navigate(NavRoutes.SelectCondominiumScreen(
+                        userId = userId,
+                    ))
                 }
             )
         }
@@ -93,10 +97,20 @@ fun NavNavigation() {
                         NavRoutes.EditPublicationScreen(publicationId = publicationId)
                     )
                 },
-                navigateToSelectCondominium = {
-                    navController.navigate(NavRoutes.SelectCondominiumScreen)
+                navigateToSelectCondominium = { userId: String ->
+                    navController.navigate(NavRoutes.SelectCondominiumScreen(
+                        userId = userId,
+                    ))
                 }
             )
+        }
+
+        composable<NavRoutes.ChangePasswordScreen> {
+            ChangePasswordScreen(navController)
+        }
+
+        composable<NavRoutes.SettingsScreen> {
+            SettingsScreen(navController)
         }
 
         composable<NavRoutes.Profile> {
@@ -105,8 +119,19 @@ fun NavNavigation() {
                 navigateToUserData = {
                     navController.navigate(NavRoutes.UserDataScreen)
                 },
-                navigateToSelectCondominium = {
-                    navController.navigate(NavRoutes.SelectCondominiumScreen)
+                navigateToSelectCondominium = { userId: String ->
+                    navController.navigate(NavRoutes.SelectCondominiumScreen(
+                        userId = userId,
+                    ))
+                },
+                navigateToChangePassword = {
+                    navController.navigate(NavRoutes.ChangePasswordScreen)
+                },
+                navigateToSettings = {
+                    navController.navigate(NavRoutes.SettingsScreen)
+                },
+                navigateToLogin = {
+                    navController.navigate(NavRoutes.LoginScreen)
                 }
             )
         }

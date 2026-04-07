@@ -38,3 +38,31 @@ fun List<PublicationImage>.toEntity(): List<PublicationImageEntity>{
         )
     }
 }
+
+fun PublicationEntity.toModel(): Publication {
+    return Publication(
+        id = this.id,
+        publicationOwnerUuid = this.publicationOwnerUuid,
+        publicationCondominiumId = this.publicationCondominiumId,
+        publicationOwner = this.publicationOwner,
+        serviceProvider = this.serviceProvider,
+        contact = this.contact,
+        imageUrlList = this.imageUrlList?.toModel(),
+        imagesSelectList = this.imagesSelectList,
+        title = this.title,
+        description = this.description,
+        publicationType = this.publicationType,
+        price = this.price,
+        likes = this.likes,
+        date = this.date
+    )
+}
+
+fun List<PublicationImageEntity>.toModel(): List<PublicationImage>{
+    return this.map {
+        PublicationImage(
+            url = it.url,
+            publicId = it.publicId
+        )
+    }
+}

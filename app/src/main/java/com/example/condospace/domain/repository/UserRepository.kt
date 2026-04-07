@@ -8,4 +8,5 @@ interface UserRepository {
     suspend fun getUser(userId: String): Result<UserEntity?>
     suspend fun updateUserCondominium(userId: String, condominium: CondominiumEntity): Result<Unit>
     suspend fun updateFavoritePublications(userId: String, publicationsIds: List<String>): Result<Unit>
+    suspend fun updateUser(user: UserEntity): Result<Unit>
 }

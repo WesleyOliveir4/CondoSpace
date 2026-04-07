@@ -1,7 +1,6 @@
 package com.example.condospace.presentation.ui.feature.profile.screen
 
-
-import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,41 +12,53 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
-import com.example.condospace.presentation.ui.feature.profile.components.UserDataHeader
-import com.example.condospace.presentation.ui.feature.profile.components.UserDataInfoCard
+import com.example.condospace.presentation.ui.feature.profile.components.ChangePasswordCard
 import com.example.condospace.presentation.ui.feature.profile.state.UserDataUiState
-import com.example.condospace.presentation.ui.feature.profile.viewmodel.UserDataViewModel
+import com.example.condospace.presentation.ui.feature.profile.viewmodel.ChangePasswordViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun UserDataScreen(
+fun ChangePasswordScreen(
     navController: NavHostController,
-    viewModel: UserDataViewModel = koinViewModel()
+    viewModel: ChangePasswordViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            navController.popBackStack()
+        }
+    }
+
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.clearMessages()
+        }
+    }
 
     CondoSpaceTheme {
-        UserDataScreenContent(
+        ChangePasswordScreenContent(
             navController = navController,
             uiState = uiState,
-            onNameChange = { viewModel.updateUserName(it) },
-            onPhoneChange = { viewModel.updateUserPhone(it) },
-            onImageSelected = { viewModel.updateProfilePicture(it) }
+            onPasswordChange = { viewModel.updatePassword(it) }
         )
     }
 }
@@ -55,17 +66,15 @@ fun UserDataScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDataScreenContent(
+fun ChangePasswordScreenContent(
     navController: NavHostController,
     uiState: UserDataUiState,
-    onNameChange: (String) -> Unit = {},
-    onPhoneChange: (String) -> Unit = {},
-    onImageSelected: (Uri) -> Unit = {}
+    onPasswordChange: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopBarReturn(
-                title = "Meus dados",
+                title = "Alterar Senha",
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -82,12 +91,7 @@ fun UserDataScreenContent(
                     CircularProgressIndicator()
                 }
             } else {
-                UserDetailsComponent(
-                    user = uiState.user,
-                    onNameChange = onNameChange,
-                    onPhoneChange = onPhoneChange,
-                    onImageSelected = onImageSelected
-                )
+                ChangePasswordComponent(onPasswordChange = onPasswordChange)
             }
         }
     }
@@ -95,39 +99,27 @@ fun UserDataScreenContent(
 }
 
 @Composable
-fun UserDetailsComponent(
-    user: UserUiModel,
-    onNameChange: (String) -> Unit,
-    onPhoneChange: (String) -> Unit,
-    onImageSelected: (Uri) -> Unit
-) {
+fun ChangePasswordComponent(onPasswordChange: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF6F6F6))
+            .padding(top = 16.dp)
     ) {
-        UserDataHeader(
-            user = user,
-            profileImageUri = null,
-            isEditable = true,
-            onImageSelected = onImageSelected,
-        )
 
-        UserDataInfoCard(
-            user = user,
-            onPhoneChangeConfirmed = onPhoneChange,
-            onNameChangeConfirmed = onNameChange
+        ChangePasswordCard(
+            onPasswordChangeConfirmed = onPasswordChange
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun UserDataScreenPreview() {
+fun ChangePasswordScreenPreview() {
     val navController = rememberNavController()
 
     CondoSpaceTheme {
-        UserDataScreenContent(
+        ChangePasswordScreenContent(
             navController = navController,
             uiState = UserDataUiState(
                 user = UserUiModel(
@@ -139,7 +131,8 @@ fun UserDataScreenPreview() {
                         cep = "12345-678",
                     )
                 )
-            )
+            ),
+            onPasswordChange = {}
         )
     }
 }

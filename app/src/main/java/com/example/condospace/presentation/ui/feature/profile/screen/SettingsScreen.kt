@@ -1,7 +1,5 @@
 package com.example.condospace.presentation.ui.feature.profile.screen
 
-
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,62 +13,51 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.presentation.model.CondominiumUiModel
-import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
-import com.example.condospace.presentation.ui.feature.profile.components.UserDataHeader
-import com.example.condospace.presentation.ui.feature.profile.components.UserDataInfoCard
-import com.example.condospace.presentation.ui.feature.profile.state.UserDataUiState
-import com.example.condospace.presentation.ui.feature.profile.viewmodel.UserDataViewModel
+import com.example.condospace.presentation.ui.feature.profile.components.SettingsCard
+import com.example.condospace.presentation.ui.feature.profile.state.SettingsUiState
+import com.example.condospace.presentation.ui.feature.profile.viewmodel.SettingsViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun UserDataScreen(
+fun SettingsScreen(
     navController: NavHostController,
-    viewModel: UserDataViewModel = koinViewModel()
 ) {
+    val viewModel: SettingsViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
     CondoSpaceTheme {
-        UserDataScreenContent(
+        SettingsScreenContent(
             navController = navController,
             uiState = uiState,
-            onNameChange = { viewModel.updateUserName(it) },
-            onPhoneChange = { viewModel.updateUserPhone(it) },
-            onImageSelected = { viewModel.updateProfilePicture(it) }
+            onNotificationsToggled = { viewModel.toggleNotifications(it) }
         )
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDataScreenContent(
+fun SettingsScreenContent(
     navController: NavHostController,
-    uiState: UserDataUiState,
-    onNameChange: (String) -> Unit = {},
-    onPhoneChange: (String) -> Unit = {},
-    onImageSelected: (Uri) -> Unit = {}
+    uiState: SettingsUiState,
+    onNotificationsToggled: (Boolean) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopBarReturn(
-                title = "Meus dados",
+                title = "Configurações",
                 onBackClick = { navController.popBackStack() }
             )
         }
     ) { innerPadding ->
-
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -82,64 +69,42 @@ fun UserDataScreenContent(
                     CircularProgressIndicator()
                 }
             } else {
-                UserDetailsComponent(
-                    user = uiState.user,
-                    onNameChange = onNameChange,
-                    onPhoneChange = onPhoneChange,
-                    onImageSelected = onImageSelected
+                SettingsComponent(
+                    notificationsEnabled = uiState.notificationsEnabled,
+                    onNotificationsToggled = onNotificationsToggled
                 )
             }
         }
     }
-
 }
 
 @Composable
-fun UserDetailsComponent(
-    user: UserUiModel,
-    onNameChange: (String) -> Unit,
-    onPhoneChange: (String) -> Unit,
-    onImageSelected: (Uri) -> Unit
+fun SettingsComponent(
+    notificationsEnabled: Boolean,
+    onNotificationsToggled: (Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF6F6F6))
+            .padding(top = 16.dp)
     ) {
-        UserDataHeader(
-            user = user,
-            profileImageUri = null,
-            isEditable = true,
-            onImageSelected = onImageSelected,
-        )
-
-        UserDataInfoCard(
-            user = user,
-            onPhoneChangeConfirmed = onPhoneChange,
-            onNameChangeConfirmed = onNameChange
+        SettingsCard(
+            notificationsEnabled = notificationsEnabled,
+            onNotificationsToggled = onNotificationsToggled
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun UserDataScreenPreview() {
+fun SettingsScreenPreview() {
     val navController = rememberNavController()
-
     CondoSpaceTheme {
-        UserDataScreenContent(
+        SettingsScreenContent(
             navController = navController,
-            uiState = UserDataUiState(
-                user = UserUiModel(
-                    name = "João Silva",
-                    phoneNumber = "(11) 98999-2000",
-                    email = "john.jay@example.com",
-                    condominium = CondominiumUiModel(
-                        name = "Condomínio Exemplo",
-                        cep = "12345-678",
-                    )
-                )
-            )
+            uiState = SettingsUiState(notificationsEnabled = true),
+            onNotificationsToggled = {}
         )
     }
 }

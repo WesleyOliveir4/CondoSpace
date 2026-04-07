@@ -73,4 +73,17 @@ class UserRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun updateUser(user: UserEntity): Result<Unit> {
+        return try {
+            val userModel = user.toModel()
+            firestore.collection("users")
+                .document(userModel.uuid)
+                .set(userModel)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

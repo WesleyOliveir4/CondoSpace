@@ -10,7 +10,8 @@ data class UserUiModel (
     val profilePicture: String? = null,
     val email: String = "",
     val condominium: CondominiumUiModel? = null,
-    val publicationsIdFavored: List<String>? = null
+    val publicationsIdFavored: List<String>? = null,
+    val userIsLogged: Boolean = true
 )
 
 fun UserEntity.toUiModel(): UserUiModel{
@@ -21,7 +22,8 @@ fun UserEntity.toUiModel(): UserUiModel{
         profilePicture = profilePicture,
         email = email,
         condominium = condominiumEntity?.toUiModel(),
-        publicationsIdFavored = publicationsIdFavored
+        publicationsIdFavored = publicationsIdFavored,
+        userIsLogged = userIsLogged
     )
 }
 
@@ -33,6 +35,7 @@ fun UserUiModel.toEntity(): UserEntity{
         profilePicture = profilePicture,
         email = email,
         condominiumEntity = condominium?.toEntity(),
-        publicationsIdFavored = publicationsIdFavored
+        publicationsIdFavored = publicationsIdFavored,
+        userIsLogged = userIsLogged
     )
 }

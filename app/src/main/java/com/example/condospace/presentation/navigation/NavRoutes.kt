@@ -22,7 +22,11 @@ sealed class NavRoutes {
 
     @Serializable
     object Profile : NavRoutes()
-    
+    @Serializable
+    object ChangePasswordScreen : NavRoutes()
+    @Serializable
+        object SettingsScreen : NavRoutes()
+
     @Serializable
     data class PublicationsList(val categoryType: String) : NavRoutes()
     
