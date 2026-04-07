@@ -20,15 +20,13 @@ object CepUtils {
 
         val cepOffsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                if (offset <= 4) return offset
-                if (offset <= 8) return offset + 1
-                return 9
+                if (offset <= 5) return offset.coerceAtMost(out.length)
+                return (offset + 1).coerceAtMost(out.length)
             }
 
             override fun transformedToOriginal(offset: Int): Int {
-                if (offset <= 5) return offset
-                if (offset <= 9) return offset - 1
-                return 8
+                if (offset <= 5) return offset.coerceAtMost(text.text.length)
+                return (offset - 1).coerceAtMost(text.text.length)
             }
         }
 

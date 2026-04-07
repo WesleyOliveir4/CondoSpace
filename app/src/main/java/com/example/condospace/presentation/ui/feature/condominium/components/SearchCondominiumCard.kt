@@ -42,6 +42,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.condospace.presentation.model.CondominiumUiModel
+import com.example.condospace.presentation.utils.CepUtils
+import com.example.condospace.presentation.utils.CepUtils.applyCepMask
 
 @Composable
 fun SearchCondominiumCard(
@@ -75,13 +77,17 @@ fun SearchCondominiumCard(
 
             OutlinedTextField(
                 value = cep,
-                onValueChange = { if (it.length <= 8) cep = it },
+                onValueChange = { 
+                    val digits = it.filter { char -> char.isDigit() }
+                    if (digits.length <= 8) cep = digits 
+                },
                 label = { Text("Digite o CEP") },
-                placeholder = { Text("Ex: 12345678") },
+                placeholder = { Text("Ex: 12345-678") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isSearching && !isSaving,
                 shape = RoundedCornerShape(12.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                visualTransformation = CepUtils.cepVisualTransformation,
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = null)
                 }
@@ -186,7 +192,7 @@ private fun CondoItem(
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = "CEP: ${condo.cep}",
+                text = "CEP: ${condo.cep.applyCepMask()}",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
