@@ -25,11 +25,18 @@ class SelectCondominiumViewModel(
     private val updateUserCondominiumUseCase: UpdateUserCondominiumUseCase
 ) : ViewModel() {
 
-    private val _condominiumState = MutableStateFlow<CondominiumState>(CondominiumState.Loading)
+    private val _condominiumState = MutableStateFlow<CondominiumState>(CondominiumState.Idle)
     val condominiumState: StateFlow<CondominiumState> = _condominiumState.asStateFlow()
 
     private val _searchResults = MutableStateFlow<List<CondominiumUiModel>>(emptyList())
     val searchResults: StateFlow<List<CondominiumUiModel>> = _searchResults.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
+    fun resetState() {
+        _condominiumState.value = CondominiumState.Idle
+    }
 
     fun fetchUserCondominium(userId: String) {
         viewModelScope.launch {
@@ -50,6 +57,8 @@ class SelectCondominiumViewModel(
 
     fun searchCondominiumByCep(cep: String) {
         viewModelScope.launch {
+            _isSearching.value = true
+            _searchResults.value = emptyList()
             searchCondominiumByCepUseCase(cep)
                 .onSuccess { list ->
                     _searchResults.value = list.toUiModel()
@@ -57,6 +66,7 @@ class SelectCondominiumViewModel(
                 .onFailure {
                     _searchResults.value = emptyList()
                 }
+            _isSearching.value = false
         }
     }
 

@@ -234,7 +234,8 @@ fun LoginComponent(
                         placeholder = { Text("seu@email.com") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = !isLoading
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -249,7 +250,8 @@ fun LoginComponent(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = !isLoading
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -257,7 +259,7 @@ fun LoginComponent(
                     Text(
                         text = "Esqueci minha senha",
                         color = Color(0xFF2962FF),
-                        modifier = Modifier.clickable { onForgotPasswordClick() }
+                        modifier = Modifier.clickable(enabled = !isLoading) { onForgotPasswordClick() }
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -294,7 +296,7 @@ fun LoginComponent(
                         Text(
                             text = "Cadastrar",
                             color = Color(0xFF2962FF),
-                            modifier = Modifier.clickable { onRegisterClick() }
+                            modifier = Modifier.clickable(enabled = !isLoading) { onRegisterClick() }
                         )
                     }
                 }

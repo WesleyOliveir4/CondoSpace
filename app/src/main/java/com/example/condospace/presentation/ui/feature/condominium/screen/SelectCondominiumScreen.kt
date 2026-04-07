@@ -1,30 +1,27 @@
 package com.example.condospace.presentation.ui.feature.condominium.screen
 
-
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,9 +39,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.data.model.Condominium
 import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
+import com.example.condospace.presentation.ui.feature.condominium.components.CurrentCondominiumCard
+import com.example.condospace.presentation.ui.feature.condominium.components.SearchCondominiumCard
+import com.example.condospace.presentation.ui.feature.condominium.components.SuccessDialog
 import com.example.condospace.presentation.ui.feature.condominium.state.CondominiumState
 import com.example.condospace.presentation.ui.feature.condominium.viewmodel.SelectCondominiumViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
@@ -57,56 +56,79 @@ fun SelectCondominiumScreen(
     navigateToLogin: () -> Unit,
     registerFlow: Boolean,
 ) {
-    val condominiumViewModel : SelectCondominiumViewModel = koinViewModel()
+    val condominiumViewModel: SelectCondominiumViewModel = koinViewModel()
     val condominiumState by condominiumViewModel.condominiumState.collectAsState()
     val searchResults by condominiumViewModel.searchResults.collectAsState()
+    val isSearching by condominiumViewModel.isSearching.collectAsState()
+    
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(userId) {
         condominiumViewModel.fetchUserCondominium(userId)
     }
 
-    CondoSpaceTheme {
-        SelectCondominiumScreenContent(
-            navController = navController,
-            registerFlow = registerFlow,
-            navigateToLogin = navigateToLogin,
-            condominiumState = condominiumState,
-            searchResults = searchResults,
-            onSearchClick = { cep ->
-                condominiumViewModel.searchCondominiumByCep(cep)
-            },
-            onSaveCondominiumSelectedClick = { condo ->
-                condominiumViewModel.saveCondominiumSelected(userId, condo)
-            },
-            onSaveCondominiumCreateClick = { condo ->
-                condominiumViewModel.saveCondominiumCreated(userId, condo)
+    LaunchedEffect(condominiumState) {
+        when (val state = condominiumState) {
+            is CondominiumState.CondominiumSaved -> {
+                showSuccessDialog = true
+            }
+            is CondominiumState.Error -> {
+                snackbarHostState.showSnackbar(state.message)
+            }
+            else -> {}
+        }
+    }
+
+    if (showSuccessDialog) {
+        SuccessDialog(
+            onConfirm = {
+                showSuccessDialog = false
+                condominiumViewModel.resetState()
+                if (registerFlow) {
+                    navigateToLogin()
+                } else {
+                    navController.popBackStack()
+                }
             }
         )
     }
-}
 
+    CondoSpaceTheme {
+        SelectCondominiumScreenContent(
+            navController = navController,
+            snackbarHostState = snackbarHostState,
+            condominiumState = condominiumState,
+            searchResults = searchResults,
+            isSearching = isSearching,
+            onSearchClick = { condominiumViewModel.searchCondominiumByCep(it) },
+            onSaveCondominiumSelectedClick = { condominiumViewModel.saveCondominiumSelected(userId, it) },
+            onSaveCondominiumCreateClick = { condominiumViewModel.saveCondominiumCreated(userId, it) }
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectCondominiumScreenContent(
     navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
     condominiumState: CondominiumState,
     searchResults: List<CondominiumUiModel>,
+    isSearching: Boolean,
     onSearchClick: (String) -> Unit,
     onSaveCondominiumSelectedClick: (CondominiumUiModel) -> Unit,
     onSaveCondominiumCreateClick: (CondominiumUiModel) -> Unit,
-    registerFlow: Boolean,
-    navigateToLogin: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopBarReturn(
-                title = "Endereço",
+                title = "Condomínio",
                 onBackClick = { navController.navigateUp() }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
-
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -114,256 +136,103 @@ fun SelectCondominiumScreenContent(
             color = MaterialTheme.colorScheme.background
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                when (condominiumState) {
-                    is CondominiumState.Loading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = Color(0xFF354EAB))
-                        }
+                if (condominiumState is CondominiumState.Loading && searchResults.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
-                    is CondominiumState.CondominiumFound -> {
-                        SelectCondominiumComponent(
-                            initialCondo = condominiumState.condominium,
-                            searchResults = searchResults,
-                            onSearchClick = onSearchClick,
-                            onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
-                            onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
-                        )
+                } else {
+                    val currentCondo = when (condominiumState) {
+                        is CondominiumState.CondominiumFound -> condominiumState.condominium
+                        is CondominiumState.CondominiumSaved -> condominiumState.condominium
+                        else -> null
                     }
-                    is CondominiumState.CondominiumSaved -> {
-                        if (registerFlow) {
-                            navigateToLogin()
-                        }else{
-                            SelectCondominiumComponent(
-                                initialCondo = condominiumState.condominium,
-                                searchResults = searchResults,
-                                onSearchClick = onSearchClick,
-                                onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
-                                onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
-                            )
-                        }
-                    }
-                    is CondominiumState.CondominiumNotFound -> {
-                        SelectCondominiumComponent(
-                            initialCondo = null,
-                            searchResults = searchResults,
-                            onSearchClick = onSearchClick,
-                            onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
-                            onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
-                        )
-                    }
-                    is CondominiumState.Error -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize().padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = condominiumState.message, color = Color.Red)
-                        }
-                    }
+
+                    SelectCondominiumLayout(
+                        currentCondo = currentCondo,
+                        searchResults = searchResults,
+                        isSearching = isSearching,
+                        isSaving = condominiumState is CondominiumState.Loading,
+                        onSearchClick = onSearchClick,
+                        onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
+                        onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
+                    )
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun SelectCondominiumComponent(
-    initialCondo: CondominiumUiModel?,
+fun SelectCondominiumLayout(
+    currentCondo: CondominiumUiModel?,
     searchResults: List<CondominiumUiModel>,
+    isSearching: Boolean,
+    isSaving: Boolean,
     onSearchClick: (String) -> Unit,
     onSaveCondominiumSelectedClick: (CondominiumUiModel) -> Unit,
     onSaveCondominiumCreateClick: (CondominiumUiModel) -> Unit
 ) {
-
-    var selectedCondo by remember(initialCondo) { mutableStateOf<CondominiumUiModel?>(initialCondo) }
-    var isEditing by remember(initialCondo) { mutableStateOf(initialCondo == null) }
-
-    var cep by remember { mutableStateOf("") }
-    var manualName by remember { mutableStateOf("") }
-    var hasSearched by remember { mutableStateOf(false) }
+    // Se temos um condomínio e não estamos salvando um novo, mostramos apenas o card.
+    // O usuário pode clicar em editar para abrir a busca novamente.
+    var isEditing by remember(currentCondo) { mutableStateOf(currentCondo == null) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF6F6F6))
-            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Selecione seu condomínio",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFF354EAB),
-                fontWeight = FontWeight.Bold
+                text = "Configuração de Local",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = "Vincule-se ao seu condomínio para acessar as funcionalidades.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        CurrentCondominiumCard(
+            selectedCondo = currentCondo,
+            onEditClick = { isEditing = true }
+        )
 
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            )
-        ) {
-
-            Column(modifier = Modifier.padding(16.dp)) {
-
-                Text("Seu condomínio", style = MaterialTheme.typography.titleMedium)
-
-                Spacer(Modifier.height(12.dp))
-
-                if (selectedCondo != null) {
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-
-                        Column(modifier = Modifier.weight(1f)) {
-
-                            Text(selectedCondo!!.name)
-                            Text(
-                                selectedCondo!!.cep,
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        IconButton(
-                            onClick = { isEditing = true }
-                        ) {
-                            Icon(Icons.Default.Edit, contentDescription = null)
-                        }
-                    }
-
+        AnimatedContent(
+            targetState = isEditing,
+            transitionSpec = {
+                if (targetState) {
+                    (slideInVertically { it } + fadeIn()) with (slideOutVertically { -it } + fadeOut())
                 } else {
-
-                    Text(
-                        "Nenhum condomínio selecionado",
-                        color = Color.Gray
-                    )
+                    (slideInVertically { -it } + fadeIn()) with (slideOutVertically { it } + fadeOut())
                 }
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        if (isEditing) {
-
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
+            },
+            label = "SearchTransition"
+        ) { editing ->
+            if (editing) {
+                SearchCondominiumCard(
+                    searchResults = searchResults,
+                    isSearching = isSearching,
+                    isSaving = isSaving,
+                    onSearchClick = onSearchClick,
+                    onSaveCondominiumSelectedClick = {
+                        onSaveCondominiumSelectedClick(it)
+                    },
+                    onSaveCondominiumCreateClick = {
+                        onSaveCondominiumCreateClick(it)
+                    }
                 )
-            ) {
-
-                Column(modifier = Modifier.padding(16.dp)) {
-
-                    Text("Buscar condomínio", style = MaterialTheme.typography.titleMedium)
-
-                    Spacer(Modifier.height(12.dp))
-
-                    OutlinedTextField(
-                        value = cep,
-                        onValueChange = { cep = it },
-                        label = { Text("CEP") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    Button(
-                        onClick = {
-                            if (cep.isNotBlank()) {
-                                onSearchClick(cep)
-                                hasSearched = true
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF354EAB),
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text("Pesquisar")
-                    }
-
-                    Spacer(Modifier.height(12.dp))
-
-                    if (searchResults.isNotEmpty()) {
-
-                        searchResults.forEach { condo ->
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        onSaveCondominiumSelectedClick(condo)
-                                        isEditing = false
-                                    }
-                                    .padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-
-                                Column {
-                                    Text(condo.name)
-                                    Text(
-                                        condo.cep,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                        }
-
-                    } else if (hasSearched && searchResults.isEmpty()) {
-
-                        Spacer(Modifier.height(12.dp))
-
-                        Text("Não encontramos seu condomínio")
-
-                        Spacer(Modifier.height(8.dp))
-
-                        OutlinedTextField(
-                            value = manualName,
-                            onValueChange = { manualName = it },
-                            label = { Text("Nome do condomínio") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(Modifier.height(12.dp))
-
-                        Button(
-                            onClick = {
-                                if (manualName.isNotBlank()) {
-                                    onSaveCondominiumCreateClick(CondominiumUiModel(name = manualName, cep =  cep))
-                                    isEditing = false
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF354EAB),
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text("Salvar")
-                        }
-                    }
-                }
+            } else {
+                // Quando não está editando e já selecionou, fica apenas o fundo limpo com o card acima
+                Box(Modifier.fillMaxWidth())
             }
         }
     }
@@ -371,20 +240,18 @@ fun SelectCondominiumComponent(
 
 @Preview(showBackground = true)
 @Composable
-fun  SelectCondominiumScreenPreview() {
+fun SelectCondominiumScreenPreview() {
     val navController = rememberNavController()
-
-
     CondoSpaceTheme {
         SelectCondominiumScreenContent(
             navController = navController,
-            condominiumState = CondominiumState.CondominiumNotFound,
-            searchResults = emptyList<CondominiumUiModel>(),
+            snackbarHostState = remember { SnackbarHostState() },
+            condominiumState = CondominiumState.Idle,
+            searchResults = emptyList(),
+            isSearching = false,
             onSearchClick = {},
             onSaveCondominiumSelectedClick = {},
             onSaveCondominiumCreateClick = {},
-            registerFlow = false,
-            navigateToLogin = {}
         )
     }
 }
