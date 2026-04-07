@@ -7,6 +7,7 @@ import com.example.condospace.domain.usecase.register.CreateUserUseCase
 import com.example.condospace.domain.usecase.register.SignUpUseCase
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.model.toEntity
+import com.example.condospace.presentation.ui.feature.login.state.LoginState
 import com.example.condospace.presentation.ui.feature.register.state.RegisterState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,6 +58,10 @@ class RegisterViewModel(
         } else {
             _registerState.value = RegisterState.Error(result.exceptionOrNull()?.message ?: "Failed to save user data")
         }
+    }
+
+    fun dismissError() {
+        _registerState.value = RegisterState.NotRegistered
     }
 }
 

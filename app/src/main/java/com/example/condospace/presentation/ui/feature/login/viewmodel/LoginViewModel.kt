@@ -55,6 +55,10 @@ class LoginViewModel(
         }
     }
 
+    fun dismissError() {
+        _loginState.value = LoginState.Unauthenticated
+    }
+
     private suspend fun saveUserDataLocally() {
         authRepository.getCurrentUserUid()?.let { uid ->
             val userResult = userRepository.getUser(uid)
