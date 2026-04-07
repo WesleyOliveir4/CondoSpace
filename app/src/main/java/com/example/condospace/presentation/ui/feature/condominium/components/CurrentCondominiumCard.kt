@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.condospace.presentation.model.CondominiumUiModel
+import com.example.condospace.presentation.utils.CepUtils.applyCepMask
 
 @Composable
 fun CurrentCondominiumCard(
@@ -91,7 +92,7 @@ fun CurrentCondominiumCard(
                                 )
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "CEP: ${selectedCondo.cep}",
+                                    text = "CEP: ${selectedCondo.cep.applyCepMask()}",
                                     color = Color.Gray,
                                     style = MaterialTheme.typography.bodySmall
                                 )
@@ -100,14 +101,14 @@ fun CurrentCondominiumCard(
                         IconButton(
                             onClick = onEditClick,
                             modifier = Modifier.background(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                color = Color.Gray.copy(alpha = 0.1f),
                                 shape = RoundedCornerShape(12.dp)
                             )
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Editar condomínio",
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = Color.Gray
                             )
                         }
                     }
