@@ -5,4 +5,9 @@
     <string name="edit">Editar</string>
     <string name="phone">Telefone</string>
     <string name="full_name">Nome Completo</string>
+    <string name="password">Senha</string>
+    <string name="password_hint_title">Dicas para uma senha forte:</string>
+    <string name="password_hint_length">Mínimo de 6 caracteres</string>
+    <string name="password_hint_complexity">Use letras e números</string>
+    <string name="password_hint_avoid_personal">Evite datas de nascimento</string>
 </resources>

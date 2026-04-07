@@ -49,7 +49,9 @@ fun ProfileScreen(
     navController: NavHostController,
     navigateToUserData: () -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
-    viewModel: ProfileViewModel = koinViewModel()
+    viewModel: ProfileViewModel = koinViewModel(),
+    navigateToChangePassword: () -> Unit,
+    navigateToSettings: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -58,7 +60,9 @@ fun ProfileScreen(
             navController = navController,
             uiState = uiState,
             navigateToUserData = navigateToUserData,
-            navigateToSelectCondominium = navigateToSelectCondominium
+            navigateToSelectCondominium = navigateToSelectCondominium,
+            navigateToChangePassword = navigateToChangePassword,
+            navigateToSettings = navigateToSettings
         )
     }
 }
@@ -69,7 +73,9 @@ fun ProfileScreenContent(
     navController: NavHostController,
     uiState: ProfileUiState,
     navigateToUserData: () -> Unit,
-    navigateToSelectCondominium: (String) -> Unit
+    navigateToSelectCondominium: (String) -> Unit,
+    navigateToChangePassword: () -> Unit,
+    navigateToSettings: () -> Unit,
 ) {
     Scaffold(
         bottomBar = { NavBar(navController, "Profile") },
@@ -113,8 +119,8 @@ fun ProfileScreenContent(
 
                     OptionsCard(
                         onMyDataClick = navigateToUserData,
-                        onChangePasswordClick = { },
-                        onSettingsClick = { }
+                        onChangePasswordClick = {navigateToChangePassword() },
+                        onSettingsClick = { navigateToSettings() }
                     )
 
                     if (uiState.error != null) {
@@ -190,7 +196,9 @@ fun ProfileScreenPreview() {
                 condominiumName = "Condomínio Exemplo"
             ),
             navigateToUserData = {},
-            navigateToSelectCondominium = {}
+            navigateToSelectCondominium = {},
+            navigateToChangePassword = {},
+            navigateToSettings = {}
         )
     }
 }

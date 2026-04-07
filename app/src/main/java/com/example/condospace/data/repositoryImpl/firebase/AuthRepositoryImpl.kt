@@ -27,6 +27,15 @@ class AuthRepositoryImpl(
         }
     }
 
+    override suspend fun updatePassword(newPassword: String): Result<Unit> {
+        return try {
+            auth.currentUser?.updatePassword(newPassword)?.await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override fun getCurrentUserUid(): String? {
         return auth.currentUser?.uid
     }

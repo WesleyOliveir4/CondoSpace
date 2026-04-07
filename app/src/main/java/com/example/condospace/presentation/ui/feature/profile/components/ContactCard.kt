@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import com.example.condospace.presentation.utils.CepUtils.applyCepMask
 import com.example.condospace.presentation.utils.PhoneUtils.applyPhoneMask
 
 @Composable
@@ -62,8 +63,8 @@ fun ContactCard(user: UserUiModel) {
             )
             ContactItem(
                 icon = Icons.Default.Home,
-                label = "Unidade",
-                value = user.condominium?.cep?.ifBlank { "Não informado" } ?: "Não informado"
+                label = "CEP",
+                value = user.condominium?.cep?.applyCepMask()?.ifBlank { "Não informado" } ?: "Não informado"
             )
         }
     }

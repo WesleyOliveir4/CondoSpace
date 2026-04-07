@@ -33,11 +33,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.condospace.R
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import com.example.condospace.presentation.utils.PhoneUtils.applyPhoneMask
+import com.example.condospace.presentation.utils.PhoneUtils.removeMask
 
 @Composable
 fun InfoItem(
@@ -52,6 +55,12 @@ fun InfoItem(
 
     var isEditing by remember { mutableStateOf(false) }
     var editedValue by remember { mutableStateOf(value) }
+
+    val isInputValid = if (keyboardOptions.keyboardType == KeyboardType.Password) {
+        editedValue.length >= 6
+    } else {
+        editedValue.isNotBlank()
+    }
 
     Row(
         modifier = Modifier
@@ -89,31 +98,31 @@ fun InfoItem(
             Spacer(modifier = Modifier.height(4.dp))
 
             if (isEditing) {
-
-                if (visualTransformation != VisualTransformation.None){
-                    OutlinedTextField(
-                        value = "",
-                        onValueChange = { editedValue = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        visualTransformation = visualTransformation,
-                        keyboardOptions = keyboardOptions
-                    )
-                }else{
-                    OutlinedTextField(
-                        value = editedValue,
-                        onValueChange = { editedValue = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        visualTransformation = visualTransformation,
-                        keyboardOptions = keyboardOptions
-                    )
-                }
-
+                OutlinedTextField(
+                    value = editedValue,
+                    onValueChange = { newValue ->
+                        if (keyboardOptions.keyboardType == KeyboardType.Phone) {
+                            if (newValue.all { it.isDigit() } && newValue.length <= 11) {
+                                editedValue = newValue
+                            }
+                        } else {
+                            editedValue = newValue
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = !isInputValid && editedValue.isNotEmpty(),
+                    visualTransformation = visualTransformation,
+                    keyboardOptions = keyboardOptions
+                )
             } else {
-
+                val displayValue = if (keyboardOptions.keyboardType == KeyboardType.Phone) {
+                    value.applyPhoneMask()
+                } else {
+                    value
+                }
                 Text(
-                    text = value,
+                    text = displayValue,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -125,15 +134,22 @@ fun InfoItem(
 
                 Row {
                     IconButton(
+                        enabled = isInputValid,
                         onClick = {
                             isEditing = false
-                            onValueChangeConfirmed(editedValue)
+                            // Envia o valor limpo (sem máscara) ao confirmar
+                            val finalValue = if (keyboardOptions.keyboardType == KeyboardType.Phone) {
+                                removeMask(editedValue)
+                            } else {
+                                editedValue
+                            }
+                            onValueChangeConfirmed(finalValue)
                         }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = stringResource(R.string.confirm),
-                            tint = Color(0xFF2962FF)
+                            tint = if (isInputValid) Color(0xFF2962FF) else Color.LightGray
                         )
                     }
 
@@ -156,7 +172,8 @@ fun InfoItem(
                 IconButton(
                     onClick = {
                         isEditing = true
-                        editedValue = value
+                        // Começa vazio se houver transformação visual (como senha)
+                        editedValue = if (visualTransformation != VisualTransformation.None) "" else value
                     }
                 ) {
                     Icon(

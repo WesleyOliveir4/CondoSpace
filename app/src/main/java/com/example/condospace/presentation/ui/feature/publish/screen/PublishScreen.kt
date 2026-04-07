@@ -1,6 +1,5 @@
 package com.example.condospace.presentation.ui.feature.publish.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding

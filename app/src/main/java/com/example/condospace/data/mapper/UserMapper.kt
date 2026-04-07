@@ -19,7 +19,8 @@ fun User.toEntity(): UserEntity {
             name = this.condominium?.name ?:"",
             cep = this.condominium?.cep ?:""
         ),
-        publicationsIdFavored = this.publicationsIdFavored
+        publicationsIdFavored = this.publicationsIdFavored,
+        notificationsEnabled = this.notificationsEnabled
     )
 }
 
@@ -36,6 +37,7 @@ fun UserEntity.toModel(): User {
             name = this.condominiumEntity?.name ?: "",
             cep = this.condominiumEntity?.cep ?: ""
         ),
-        publicationsIdFavored = this.publicationsIdFavored
+        publicationsIdFavored = this.publicationsIdFavored,
+        notificationsEnabled = this.notificationsEnabled
     )
 }

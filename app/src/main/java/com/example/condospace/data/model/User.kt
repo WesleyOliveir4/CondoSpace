@@ -10,5 +10,6 @@ data class User (
     val profilePicture: String? = null,
     val email: String = "",
     val condominium: Condominium? = null,
-    val publicationsIdFavored: List<String>? = null
+    val publicationsIdFavored: List<String>? = null,
+    val notificationsEnabled: Boolean = true
 )
