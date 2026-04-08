@@ -1,6 +1,7 @@
 package com.example.condospace.presentation.ui.feature.profile.screen
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -40,6 +41,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
+import com.example.condospace.presentation.ui.component.error.ErrorDialog
 import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.feature.profile.components.ContactCard
 import com.example.condospace.presentation.ui.feature.profile.components.OptionsCard
@@ -69,6 +71,7 @@ fun ProfileScreen(
             navigateToSelectCondominium = navigateToSelectCondominium,
             navigateToChangePassword = navigateToChangePassword,
             navigateToSettings = navigateToSettings,
+            onClearError = { viewModel.clearError() },
             onLogoutConfirm = {
                 viewModel.logout {
                     navigateToLogin()
@@ -87,8 +90,71 @@ fun ProfileScreenContent(
     navigateToSelectCondominium: (String) -> Unit,
     navigateToChangePassword: () -> Unit,
     navigateToSettings: () -> Unit,
+    onClearError: () -> Unit = {},
     onLogoutConfirm: () -> Unit
 ) {
+
+
+    Scaffold(
+        bottomBar = { NavBar(navController, "Profile") },
+        topBar = {
+            CondoSpaceTopBar(
+                condominiumName = when(uiState) {
+                    is ProfileUiState.Success -> uiState.condominiumName
+                    else -> "Carregando..."
+                },
+                residenceSelector = {
+                    if (uiState is ProfileUiState.Success) {
+                        navigateToSelectCondominium(uiState.user.uuid)
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            when (uiState) {
+                is ProfileUiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is ProfileUiState.Error -> {
+                    ErrorDialog(
+                        message = uiState.message,
+                        onDismiss = onClearError
+                    )
+                }
+
+                is ProfileUiState.Success -> {
+                    ProfileScreenBody(
+                        uiState = uiState,
+                        navigateToUserData = navigateToUserData,
+                        navigateToChangePassword = navigateToChangePassword,
+                        navigateToSettings = navigateToSettings,
+                        onLogoutConfirm = onLogoutConfirm
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileScreenBody(
+    uiState: ProfileUiState.Success,
+    navigateToUserData: () -> Unit,
+    navigateToChangePassword: () -> Unit,
+    navigateToSettings: () -> Unit,
+    onLogoutConfirm: () -> Unit
+){
+
     var showLogoutDialog by remember { mutableStateOf(false) }
 
     if (showLogoutDialog) {
@@ -101,76 +167,41 @@ fun ProfileScreenContent(
         )
     }
 
-    Scaffold(
-        bottomBar = { NavBar(navController, "Profile") },
-        topBar = {
-            CondoSpaceTopBar(
-                condominiumName = uiState.condominiumName,
-                residenceSelector = {
-                    navigateToSelectCondominium(uiState.user.uuid)
-                }
-            )
-        }
-    ) { innerPadding ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
 
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                ) {
+        ProfileHeader(
+            user = uiState.user,
+            condominiumName = uiState.condominiumName
+        )
 
-                    ProfileHeader(
-                        user = uiState.user,
-                        condominiumName = uiState.condominiumName
-                    )
+        Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+        ContactCard(user = uiState.user)
 
-                    ContactCard(user = uiState.user)
+        Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+        OptionsCard(
+            onMyDataClick = navigateToUserData,
+            onChangePasswordClick = { navigateToChangePassword() },
+            onSettingsClick = { navigateToSettings() }
+        )
 
-                    OptionsCard(
-                        onMyDataClick = navigateToUserData,
-                        onChangePasswordClick = { navigateToChangePassword() },
-                        onSettingsClick = { navigateToSettings() }
-                    )
+        Spacer(modifier = Modifier.height(16.dp))
 
-                    if (uiState.error != null) {
-                        Text(
-                            text = uiState.error,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(16.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
+        LogoutButton(onClick = { showLogoutDialog = true })
 
-                    Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-                    LogoutButton(onClick = { showLogoutDialog = true })
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        text = "Condo Market v1.0.0",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
+        Text(
+            text = "Condo Market v1.0.0",
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
 
@@ -237,9 +268,29 @@ fun ProfileScreenPreview() {
     CondoSpaceTheme {
         ProfileScreenContent(
             navController,
-            uiState = ProfileUiState(
+            uiState = ProfileUiState.Success(
                 user = UserUiModel(name = "Usuário Teste", email = "teste@email.com"),
                 condominiumName = "Condomínio Exemplo"
+            ),
+            navigateToUserData = {},
+            navigateToSelectCondominium = {},
+            navigateToChangePassword = {},
+            navigateToSettings = {},
+            onLogoutConfirm = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenErrorPreview() {
+    val navController = rememberNavController()
+
+    CondoSpaceTheme {
+        ProfileScreenContent(
+            navController,
+            uiState = ProfileUiState.Error(
+                message = "Erro ao carregar perfil"
             ),
             navigateToUserData = {},
             navigateToSelectCondominium = {},

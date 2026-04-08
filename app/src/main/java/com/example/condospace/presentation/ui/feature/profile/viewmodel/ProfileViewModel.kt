@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
@@ -20,7 +19,7 @@ class ProfileViewModel(
     private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ProfileUiState())
+    private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
@@ -29,14 +28,15 @@ class ProfileViewModel(
 
     private fun observeUserData() {
         viewModelScope.launch {
+            _uiState.value = ProfileUiState.Loading
             userPreferencesRepository.userData.collectLatest { userModel ->
                 val userEntity = userModel?.toEntity()
                 val uiModel = userEntity?.toUiModel() ?: UserUiModel()
 
-                _uiState.update { it.copy(
+                _uiState.value = ProfileUiState.Success(
                     user = uiModel,
                     condominiumName = uiModel.condominium?.name ?: "Selecionar Condomínio"
-                ) }
+                )
             }
         }
     }
@@ -47,8 +47,20 @@ class ProfileViewModel(
             if (result.isSuccess) {
                 onLogoutSuccess()
             } else {
-                _uiState.update { it.copy(error = "Erro ao sair: ${result.exceptionOrNull()?.message}") }
+                val currentState = _uiState.value
+                if (currentState is ProfileUiState.Success) {
+                    _uiState.value = currentState.copy(error = "Erro ao sair: ${result.exceptionOrNull()?.message}")
+                } else {
+                    _uiState.value = ProfileUiState.Error("Erro ao sair: ${result.exceptionOrNull()?.message}")
+                }
             }
+        }
+    }
+
+    fun clearError() {
+        val currentState = _uiState.value
+        if (currentState is ProfileUiState.Success) {
+            _uiState.value = currentState.copy(error = null)
         }
     }
 }

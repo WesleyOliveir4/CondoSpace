@@ -11,22 +11,27 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
+import com.example.condospace.presentation.ui.component.error.ErrorDialog
 import com.example.condospace.presentation.ui.feature.profile.components.UserDataHeader
 import com.example.condospace.presentation.ui.feature.profile.components.UserDataInfoCard
 import com.example.condospace.presentation.ui.feature.profile.state.UserDataUiState
@@ -47,7 +52,8 @@ fun UserDataScreen(
             uiState = uiState,
             onNameChange = { viewModel.updateUserName(it) },
             onPhoneChange = { viewModel.updateUserPhone(it) },
-            onImageSelected = { viewModel.updateProfilePicture(it) }
+            onImageSelected = { viewModel.updateProfilePicture(it) },
+            onClearMessages = { viewModel.clearMessages() }
         )
     }
 }
@@ -60,8 +66,21 @@ fun UserDataScreenContent(
     uiState: UserDataUiState,
     onNameChange: (String) -> Unit = {},
     onPhoneChange: (String) -> Unit = {},
-    onImageSelected: (Uri) -> Unit = {}
+    onImageSelected: (Uri) -> Unit = {},
+    onClearMessages: () -> Unit = {}
 ) {
+
+    LaunchedEffect(uiState) {
+        if (uiState is UserDataUiState.Success) {
+            uiState.successMessage?.let {
+                onClearMessages()
+            }
+            uiState.error?.let {
+                onClearMessages()
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopBarReturn(
@@ -77,21 +96,46 @@ fun UserDataScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+            when (uiState) {
+                is UserDataUiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
                 }
-            } else {
-                UserDetailsComponent(
-                    user = uiState.user,
-                    onNameChange = onNameChange,
-                    onPhoneChange = onPhoneChange,
-                    onImageSelected = onImageSelected
-                )
+
+                is UserDataUiState.Error -> {
+                    ErrorDialog(
+                        title = "Erro",
+                        message = uiState.message,
+                        onDismiss = { onClearMessages() }
+                    )
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = uiState.message, color = MaterialTheme.colorScheme.error)
+                    }
+                }
+
+                is UserDataUiState.Success -> {
+                    UserDetailsComponent(
+                        user = uiState.user,
+                        onNameChange = onNameChange,
+                        onPhoneChange = onPhoneChange,
+                        onImageSelected = onImageSelected
+                    )
+                    
+                    if (uiState.isUpdating) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
             }
         }
     }
-
 }
 
 @Composable
@@ -129,7 +173,7 @@ fun UserDataScreenPreview() {
     CondoSpaceTheme {
         UserDataScreenContent(
             navController = navController,
-            uiState = UserDataUiState(
+            uiState = UserDataUiState.Success(
                 user = UserUiModel(
                     name = "João Silva",
                     phoneNumber = "(11) 98999-2000",
