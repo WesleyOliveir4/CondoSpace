@@ -98,6 +98,21 @@
     <string name="publish_create_success">Publicação criada com sucesso!</string>
     <string name="publish_delete_success">Publicação excluída com sucesso!</string>
 
+    <!-- Profile -->
+    <string name="profile_loading">Carregando...</string>
+    <string name="profile_version">Condo Market v1.0.0</string>
+    <string name="profile_logout_button">Sair da conta</string>
+    <string name="profile_logout_dialog_title">Sair da conta</string>
+    <string name="profile_logout_dialog_message">Tem certeza que deseja sair da sua conta?</string>
+    <string name="profile_logout_confirm">Sair</string>
+    <string name="profile_error_load">Erro ao carregar perfil</string>
+    <string name="profile_not_informed">Não informado</string>
+    <string name="profile_email">E-mail</string>
+    <string name="profile_cep">CEP</string>
+    <string name="profile_my_data">Meus dados</string>
+    <string name="profile_change_password">Alterar senha</string>
+    <string name="profile_settings">Configurações</string>
+
     <!-- Errors -->
     <string name="error_ops_title">Ops, ocorreu um erro</string>
     <string name="error_ok_button">Ok, entendi!</string>
