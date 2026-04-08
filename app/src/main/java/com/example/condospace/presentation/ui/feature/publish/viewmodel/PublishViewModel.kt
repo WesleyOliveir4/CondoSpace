@@ -102,23 +102,23 @@ class PublishViewModel(
 
     fun deletePublication(publicationId: String) {
         viewModelScope.launch {
-            updateSuccessState { it.copy(isListLoading = true) }
+            updateSuccessState { it.copy(isDeleting = true, deleteSuccess = false, actionError = null) }
             
             val result = deletePublicationUseCase(publicationId)
             
             result.onSuccess {
-                updateSuccessState { it.copy(isListLoading = false) }
+                updateSuccessState { it.copy(isDeleting = false, deleteSuccess = true) }
             }.onFailure { e ->
                 updateSuccessState { it.copy(
                     actionError = e.message ?: "Erro ao deletar publicação",
-                    isListLoading = false
+                    isDeleting = false
                 ) }
             }
         }
     }
 
     fun resetActionState() {
-        updateSuccessState { it.copy(publishSuccess = false, actionError = null) }
+        updateSuccessState { it.copy(publishSuccess = false, deleteSuccess = false, actionError = null) }
     }
 
     private fun updateSuccessState(transform: (PublishUiState.Success) -> PublishUiState.Success) {

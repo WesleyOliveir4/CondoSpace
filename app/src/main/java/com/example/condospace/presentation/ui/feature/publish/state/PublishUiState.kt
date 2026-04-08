@@ -12,8 +12,10 @@ sealed interface PublishUiState {
         val myPublications: List<PublicationUiModel> = emptyList(),
         val isListLoading: Boolean = false,
         val isPublishing: Boolean = false,
+        val isDeleting: Boolean = false,
         val actionError: String? = null,
-        val publishSuccess: Boolean = false
+        val publishSuccess: Boolean = false,
+        val deleteSuccess: Boolean = false
     ) : PublishUiState
 
     data class Error(val message: String) : PublishUiState
