@@ -18,7 +18,7 @@ class FavoritesViewModel(
     private val getFavoritePublicationsUseCase: GetFavoritePublicationsUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(FavoritesUiState())
+    private val _uiState = MutableStateFlow<FavoritesUiState>(FavoritesUiState.Loading)
     val uiState: StateFlow<FavoritesUiState> = _uiState.asStateFlow()
 
     init {
@@ -27,42 +27,81 @@ class FavoritesViewModel(
 
     private fun observeUserData() {
         viewModelScope.launch {
-            userPreferencesRepository.userData.collectLatest { user ->
-                _uiState.update { state ->
-                    state.copy(
-                        condominiumName = user?.condominiumEntity?.name ?: "Selecionar Condomínio",
-                        userUuid = user?.uuid ?: ""
-                    )
+            userPreferencesRepository.userData.collectLatest { userEntity ->
+                if (userEntity == null) {
+                    _uiState.value = FavoritesUiState.Error("Usuário não encontrado")
+                    return@collectLatest
                 }
-                user?.let {
-                    loadFavorites(it.uuid, it.publicationsIdFavored ?: emptyList())
+
+                val userUi = userEntity.toUiModel()
+                val condominiumName = userUi.condominium?.name ?: "Selecionar Condomínio"
+                val favoriteIds = userUi.publicationsIdFavored ?: emptyList()
+
+                _uiState.update { currentState ->
+                    if (currentState is FavoritesUiState.Success) {
+                        currentState.copy(
+                            user = userUi,
+                            condominiumName = condominiumName,
+                            isListLoading = true
+                        )
+                    } else {
+                        FavoritesUiState.Success(
+                            user = userUi,
+                            condominiumName = condominiumName,
+                            isListLoading = true
+                        )
+                    }
                 }
+
+                loadFavorites(userUi.uuid, favoriteIds)
             }
         }
     }
 
     private fun loadFavorites(userId: String, favoriteIds: List<String>) {
         if (favoriteIds.isEmpty()) {
-            _uiState.update { it.copy(publications = emptyList(), isLoading = false) }
+            _uiState.update { currentState ->
+                if (currentState is FavoritesUiState.Success) {
+                    currentState.copy(
+                        publications = emptyList(),
+                        isListLoading = false,
+                        actionError = null
+                    )
+                } else {
+                    _uiState.value = FavoritesUiState.Error("Estado inesperado")
+                    currentState
+                }
+            }
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
             val result = getFavoritePublicationsUseCase(userId, favoriteIds)
             
             result.onSuccess { entities ->
-                _uiState.update { state ->
-                    state.copy(
-                        publications = entities.map { it.toUiModel() },
-                        isLoading = false
-                    )
+                val publications = entities.map { it.toUiModel() }
+                _uiState.update { currentState ->
+                    if (currentState is FavoritesUiState.Success) {
+                        currentState.copy(
+                            publications = publications,
+                            isListLoading = false,
+                            actionError = null
+                        )
+                    } else {
+                        currentState
+                    }
                 }
             }.onFailure { error ->
-                _uiState.update { it.copy(
-                    error = error.message ?: "Erro ao carregar favoritos",
-                    isLoading = false
-                ) }
+                _uiState.update { currentState ->
+                    if (currentState is FavoritesUiState.Success) {
+                        currentState.copy(
+                            isListLoading = false,
+                            actionError = error.message ?: "Erro ao carregar favoritos"
+                        )
+                    } else {
+                        FavoritesUiState.Error(error.message ?: "Erro ao carregar favoritos")
+                    }
+                }
             }
         }
     }

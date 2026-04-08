@@ -2,7 +2,7 @@ package com.example.condospace.presentation.ui.feature.home.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.condospace.data.mapper.toEntity
+import com.example.condospace.domain.entity.PublicationEntity
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.usecase.publication.GetPublicationsByCondominiumUseCase
 import com.example.condospace.presentation.model.UserUiModel
@@ -21,7 +21,7 @@ class HomeViewModel(
     private val getPublicationsByCondominiumUseCase: GetPublicationsByCondominiumUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
@@ -30,45 +30,100 @@ class HomeViewModel(
 
     private fun observeUserData() {
         viewModelScope.launch {
-            userPreferencesRepository.userData.collectLatest { user ->
-                val uiModel = user?.toUiModel() ?: UserUiModel()
-
-                _uiState.update { it.copy(
-                    user = uiModel,
-                    condominiumName = uiModel.condominium?.name ?: "Selecionar Condomínio"
-                ) }
-
-                val condominiumId = uiModel.condominium?.id
-                if (!condominiumId.isNullOrBlank()) {
-                    loadServicePublications(condominiumId)
+            userPreferencesRepository.userData.collectLatest { userEntity ->
+                if (userEntity == null) {
+                    _uiState.value = HomeUiState.Error("Usuário não encontrado")
+                } else {
+                    handleUserUpdate(userEntity.toUiModel())
                 }
             }
         }
     }
 
-    fun loadServicePublications(condominiumId: String) {
+    private fun handleUserUpdate(userUi: UserUiModel) {
+        val condominiumId = userUi.condominium?.id
+        
+        updateSuccessOrInit(userUi)
+
+        if (!condominiumId.isNullOrBlank()) {
+            fetchHomeContent(condominiumId)
+        } else {
+            clearHomeData()
+        }
+    }
+
+    private fun fetchHomeContent(condominiumId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            val result = getPublicationsByCondominiumUseCase(condominiumId)
-            result.onSuccess { list ->
-                _uiState.update { it.copy(
-                    publicationsService = list.filter { it.publicationType == ServiceType.SERVICE.value }.map { it.toUiModel() },
-                    publicationsRecommendation = list.filter { it.publicationType == ServiceType.RECOMMENDATION.value }.map { it.toUiModel() },
-                    isLoading = false
-                ) }
-            }.onFailure { e ->
-                _uiState.update { it.copy(
-                    error = e.message ?: "Erro ao carregar publicações",
-                    isLoading = false
-                ) }
+            updateSuccess { it.copy(isRefreshing = true) }
+            
+            getPublicationsByCondominiumUseCase(condominiumId)
+                .onSuccess { list -> updateHomeData(list) }
+                .onFailure { e -> handleFailure(e) }
+        }
+    }
+
+    private fun updateHomeData(list: List<PublicationEntity>) {
+        val services = list.filter { it.publicationType == ServiceType.SERVICE.value }.map { it.toUiModel() }
+        val recommendations = list.filter { it.publicationType == ServiceType.RECOMMENDATION.value }.map { it.toUiModel() }
+
+        updateSuccess { 
+            it.copy(
+                publicationsService = services,
+                publicationsRecommendation = recommendations,
+                isRefreshing = false,
+                actionError = null
+            )
+        }
+    }
+
+    private fun handleFailure(e: Throwable) {
+        val message = e.message ?: "Erro ao carregar publicações"
+        _uiState.update { currentState ->
+            if (currentState is HomeUiState.Success) {
+                currentState.copy(isRefreshing = false, actionError = message)
+            } else {
+                HomeUiState.Error(message)
             }
         }
     }
 
-    fun refreshPublications() {
-        val currentCondoId = _uiState.value.user.condominium?.id
-        if (!currentCondoId.isNullOrBlank()) {
-            loadServicePublications(currentCondoId)
+    private fun clearHomeData() {
+        updateSuccess { 
+            it.copy(
+                publicationsService = emptyList(), 
+                publicationsRecommendation = emptyList(), 
+                isRefreshing = false 
+            ) 
         }
+    }
+
+    private fun updateSuccessOrInit(userUi: UserUiModel) {
+        val condominiumName = userUi.condominium?.name ?: "Selecionar Condomínio"
+        _uiState.update { currentState ->
+            if (currentState is HomeUiState.Success) {
+                currentState.copy(user = userUi, condominiumName = condominiumName)
+            } else {
+                HomeUiState.Success(user = userUi, condominiumName = condominiumName)
+            }
+        }
+    }
+
+    private fun updateSuccess(block: (HomeUiState.Success) -> HomeUiState.Success) {
+        _uiState.update { currentState ->
+            if (currentState is HomeUiState.Success) block(currentState) else currentState
+        }
+    }
+
+    fun refreshPublications() {
+        (uiState.value as? HomeUiState.Success)?.user?.condominium?.id?.let { 
+            fetchHomeContent(it) 
+        }
+    }
+
+    fun resetActionError() = updateSuccess { it.copy(actionError = null) }
+
+    fun retry() {
+        _uiState.value = HomeUiState.Loading
+        observeUserData()
     }
 }
