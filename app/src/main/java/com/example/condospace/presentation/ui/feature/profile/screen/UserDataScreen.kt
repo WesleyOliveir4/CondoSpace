@@ -187,3 +187,18 @@ fun UserDataScreenPreview() {
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun UserDataScreenErrorPreview() {
+    val navController = rememberNavController()
+
+    CondoSpaceTheme {
+        UserDataScreenContent(
+            navController = navController,
+            uiState = UserDataUiState.Error(
+                message = "Erro ao carregar dados do usuário"
+            )
+        )
+    }
+}

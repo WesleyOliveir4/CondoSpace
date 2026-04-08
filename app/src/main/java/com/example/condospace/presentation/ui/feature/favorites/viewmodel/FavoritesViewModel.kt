@@ -30,7 +30,7 @@ class FavoritesViewModel(
             userPreferencesRepository.userData.collectLatest { user ->
                 _uiState.update { state ->
                     state.copy(
-                        condominiumName = user?.condominium?.name ?: "Selecionar Condomínio",
+                        condominiumName = user?.condominiumEntity?.name ?: "Selecionar Condomínio",
                         userUuid = user?.uuid ?: ""
                     )
                 }

@@ -30,10 +30,9 @@ class HomeViewModel(
 
     private fun observeUserData() {
         viewModelScope.launch {
-            userPreferencesRepository.userData.collectLatest { userModel ->
-                val userEntity = userModel?.toEntity()
-                val uiModel = userEntity?.toUiModel() ?: UserUiModel()
-                
+            userPreferencesRepository.userData.collectLatest { user ->
+                val uiModel = user?.toUiModel() ?: UserUiModel()
+
                 _uiState.update { it.copy(
                     user = uiModel,
                     condominiumName = uiModel.condominium?.name ?: "Selecionar Condomínio"

@@ -2,7 +2,6 @@ package com.example.condospace.presentation.ui.feature.profile.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.condospace.data.mapper.toEntity
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.usecase.login.LogoutUseCase
 import com.example.condospace.presentation.model.UserUiModel
@@ -29,8 +28,7 @@ class ProfileViewModel(
     private fun observeUserData() {
         viewModelScope.launch {
             _uiState.value = ProfileUiState.Loading
-            userPreferencesRepository.userData.collectLatest { userModel ->
-                val userEntity = userModel?.toEntity()
+            userPreferencesRepository.userData.collectLatest { userEntity ->
                 val uiModel = userEntity?.toUiModel() ?: UserUiModel()
 
                 _uiState.value = ProfileUiState.Success(

@@ -8,19 +8,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.condospace.R
 import com.example.condospace.presentation.ui.component.TopBarReturn
 import com.example.condospace.presentation.ui.component.error.EmptyState
+import com.example.condospace.presentation.ui.component.error.ErrorDialog
 import com.example.condospace.presentation.ui.feature.favorites.components.PublicationItem
 import com.example.condospace.presentation.ui.feature.favorites.components.SearchPublications
 import com.example.condospace.presentation.ui.feature.publications.state.PublicationsListUiState
@@ -42,12 +43,27 @@ fun PublicationsListScreen(
     }
 
     CondoSpaceTheme {
-        PublicationsListScreenContent(
-            navController = navController,
-            uiState = uiState,
-            categoryType = categoryType,
-            navigateToPublicationSelected = navigateToPublicationSelected
-        )
+        when (val state = uiState) {
+            is PublicationsListUiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            is PublicationsListUiState.Success -> {
+                PublicationsListScreenContent(
+                    navController = navController,
+                    uiState = state,
+                    categoryType = categoryType,
+                    navigateToPublicationSelected = navigateToPublicationSelected
+                )
+            }
+            is PublicationsListUiState.Error -> {
+                ErrorDialog(
+                    message = state.message,
+                    onDismiss = { navController.popBackStack() }
+                )
+            }
+        }
     }
 }
 
@@ -55,14 +71,14 @@ fun PublicationsListScreen(
 @Composable
 fun PublicationsListScreenContent(
     navController: NavHostController,
-    uiState: PublicationsListUiState,
+    uiState: PublicationsListUiState.Success,
     categoryType: String,
     navigateToPublicationSelected: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopBarReturn(
-                title = if (categoryType == "Todos") "Todas as publicações" else categoryType,
+                title = if (categoryType == "Todos") stringResource(R.string.publications_list_all) else categoryType,
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -74,38 +90,20 @@ fun PublicationsListScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            when {
-                uiState.isLoading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-                uiState.error != null -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = uiState.error,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-                else -> {
-                    SearchPublications(
-                        publications = uiState.publications,
-                        emptyState = {
-                            EmptyState(
-                                title = "Nenhuma publicação encontrada."
-                            )
-                        },
-                        itemContent = { publication ->
-                            PublicationItem(
-                                publication = publication,
-                                onClick = { navigateToPublicationSelected(publication.id) }
-                            )
-                        }
+            SearchPublications(
+                publications = uiState.publications,
+                emptyState = {
+                    EmptyState(
+                        title = stringResource(R.string.publications_empty_state)
+                    )
+                },
+                itemContent = { publication ->
+                    PublicationItem(
+                        publication = publication,
+                        onClick = { navigateToPublicationSelected(publication.id) }
                     )
                 }
-            }
+            )
         }
     }
 }
@@ -118,7 +116,7 @@ fun PublicationsListScreenPreview() {
     CondoSpaceTheme {
         PublicationsListScreenContent(
             navController = navController,
-            uiState = PublicationsListUiState(),
+            uiState = PublicationsListUiState.Success(emptyList()),
             categoryType = "Todos",
             navigateToPublicationSelected = {},
         )

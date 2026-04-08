@@ -11,17 +11,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.condospace.R
 import com.example.condospace.presentation.ui.component.TopBarReturn
+import com.example.condospace.presentation.ui.component.error.ErrorDialog
 import com.example.condospace.presentation.ui.feature.publications.components.BottomContactBar
 import com.example.condospace.presentation.ui.feature.publications.components.PublicationDetails
 import com.example.condospace.presentation.ui.feature.publications.components.PublicationImage
@@ -44,11 +46,33 @@ fun PublicationSelectedScreen(
     }
 
     CondoSpaceTheme {
-        PublicationSelectedScreenContent(
-            navController = navController,
-            uiState = uiState,
-            onFavoriteClick = { viewModel.onFavoriteClick() }
-        )
+        when (val state = uiState) {
+            is PublicationSelectedUiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            is PublicationSelectedUiState.Success -> {
+                PublicationSelectedScreenContent(
+                    navController = navController,
+                    uiState = state,
+                    onFavoriteClick = { viewModel.onFavoriteClick() }
+                )
+
+                state.actionError?.let { message ->
+                    ErrorDialog(
+                        message = message,
+                        onDismiss = { viewModel.resetActionError() }
+                    )
+                }
+            }
+            is PublicationSelectedUiState.Error -> {
+                ErrorDialog(
+                    message = state.message,
+                    onDismiss = { navController.popBackStack() }
+                )
+            }
+        }
     }
 }
 
@@ -56,25 +80,24 @@ fun PublicationSelectedScreen(
 @Composable
 fun PublicationSelectedScreenContent(
     navController: NavHostController,
-    uiState: PublicationSelectedUiState,
+    uiState: PublicationSelectedUiState.Success,
     onFavoriteClick: () -> Unit = {}
 ) {
+    val publication = uiState.publication
     Scaffold(
         topBar = {
             TopBarReturn(
-                title = "Publicação",
+                title = stringResource(R.string.publication_title),
                 onBackClick = { navController.popBackStack() }
             )
         },
         bottomBar = {
-            uiState.publication?.let { publication ->
-                BottomContactBar(
-                    price = publication.price,
-                    onClick = {
-                        // Ação de contato
-                    }
-                )
-            }
+            BottomContactBar(
+                price = publication.price,
+                onClick = {
+                    // Ação de contato
+                }
+            )
         }
     ) { innerPadding ->
 
@@ -84,35 +107,20 @@ fun PublicationSelectedScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            when {
-                uiState.isLoading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-                uiState.error != null -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = uiState.error, color = MaterialTheme.colorScheme.error)
-                    }
-                }
-                uiState.publication != null -> {
-                    val publication = uiState.publication
-                    Column(
-                        modifier = Modifier.verticalScroll(rememberScrollState())
-                    ) {
-                        val imageUrls = publication.imageUrlList?.map { it.url } ?: emptyList()
-                        PublicationImage(imageUrls = imageUrls)
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                val imageUrls = publication.imageUrlList?.map { it.url } ?: emptyList()
+                PublicationImage(imageUrls = imageUrls)
 
-                        PublicationDetails(
-                            publication = publication,
-                            isFavorite = uiState.isFavorite,
-                            onFavoriteClick = {
-                                onFavoriteClick()
-                            },
-                            modifier = Modifier
-                        )
-                    }
-                }
+                PublicationDetails(
+                    publication = publication,
+                    isFavorite = uiState.isFavorite,
+                    onFavoriteClick = {
+                        onFavoriteClick()
+                    },
+                    modifier = Modifier
+                )
             }
         }
     }
@@ -127,7 +135,7 @@ fun PublicationSelectedScreenPreview() {
     CondoSpaceTheme {
         PublicationSelectedScreenContent(
             navController = navController,
-            uiState = PublicationSelectedUiState(
+            uiState = PublicationSelectedUiState.Success(
                 publication = mockPublication,
                 isFavorite = true
             )

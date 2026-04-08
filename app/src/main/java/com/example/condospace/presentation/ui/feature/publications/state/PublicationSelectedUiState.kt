@@ -2,9 +2,12 @@ package com.example.condospace.presentation.ui.feature.publications.state
 
 import com.example.condospace.presentation.model.PublicationUiModel
 
-data class PublicationSelectedUiState(
-    val publication: PublicationUiModel? = null,
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val isFavorite: Boolean = false
-)
+sealed interface PublicationSelectedUiState {
+    data object Loading : PublicationSelectedUiState
+    data class Success(
+        val publication: PublicationUiModel,
+        val isFavorite: Boolean = false,
+        val actionError: String? = null
+    ) : PublicationSelectedUiState
+    data class Error(val message: String) : PublicationSelectedUiState
+}

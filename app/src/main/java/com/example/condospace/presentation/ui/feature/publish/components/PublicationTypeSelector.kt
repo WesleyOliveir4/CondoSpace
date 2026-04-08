@@ -30,7 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.condospace.R
 import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.UserUiModel
 
@@ -60,15 +62,15 @@ fun PublicationTypeSelector(
         ) {
 
             Text(
-                text = "Tipo de publicação",
+                text = stringResource(R.string.publish_type_title),
                 style = MaterialTheme.typography.titleMedium
             )
 
             Spacer(Modifier.height(16.dp))
 
             PublicationTypeItem(
-                title = "Anunciar produto",
-                description = "Venda ou doe itens",
+                title = stringResource(R.string.publish_type_product_title),
+                description = stringResource(R.string.publish_type_product_desc),
                 icon = Icons.Default.Inventory2,
                 selected = selectedType == PublicationType.PRODUCT
             ) {
@@ -78,8 +80,8 @@ fun PublicationTypeSelector(
             Spacer(Modifier.height(12.dp))
 
             PublicationTypeItem(
-                title = "Oferecer serviço",
-                description = "Divulgue seu trabalho",
+                title = stringResource(R.string.publish_type_service_title),
+                description = stringResource(R.string.publish_type_service_desc),
                 icon = Icons.Default.Build,
                 selected = selectedType == PublicationType.SERVICE
             ) {
@@ -89,8 +91,8 @@ fun PublicationTypeSelector(
             Spacer(Modifier.height(12.dp))
 
             PublicationTypeItem(
-                title = "Indicar serviço",
-                description = "Recomende profissionais",
+                title = stringResource(R.string.publish_type_recommendation_title),
+                description = stringResource(R.string.publish_type_recommendation_desc),
                 icon = Icons.Default.ThumbUp,
                 selected = selectedType == PublicationType.RECOMMENDATION
             ) {
@@ -181,9 +183,9 @@ fun CreatePublicationScreen(
             PublicationForm(
                 user = userUiModel,
                 title = when (selectedType) {
-                    PublicationType.PRODUCT -> "Informações do anúncio"
-                    PublicationType.SERVICE -> "Informações do serviço"
-                    PublicationType.RECOMMENDATION -> "Indicar serviço"
+                    PublicationType.PRODUCT -> stringResource(R.string.publication_info_ad)
+                    PublicationType.SERVICE -> stringResource(R.string.publication_info_service)
+                    PublicationType.RECOMMENDATION -> stringResource(R.string.publication_info_recommendation)
                     null -> ""
                 },
                 publicationType = selectedType!!,

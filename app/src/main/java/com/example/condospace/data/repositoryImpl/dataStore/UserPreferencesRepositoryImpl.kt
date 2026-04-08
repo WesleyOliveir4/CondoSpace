@@ -8,12 +8,13 @@ import com.example.condospace.domain.entity.UserEntity
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 class UserPreferencesRepositoryImpl(
     private val dataStore: DataStore<User?>
 ) : UserPreferencesRepository {
 
-    override val userData: Flow<User?> = dataStore.data
+    override val userData: Flow<UserEntity?> = dataStore.data.map { it?.toEntity() }
 
     override suspend fun saveUserData(user: UserEntity) {
         dataStore.updateData { user.toModel() }

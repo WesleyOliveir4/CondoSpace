@@ -29,11 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.condospace.R
 import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 
@@ -74,7 +76,7 @@ fun PublicationCardList(
                 }
             } else if (publications.isEmpty()) {
                 Text(
-                    text = "Nenhuma publicação encontrada",
+                    text = stringResource(R.string.publications_empty_state),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -171,14 +173,14 @@ fun PublicationCardItem(
                 IconButton(onClick = onEditClick) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar"
+                        contentDescription = stringResource(R.string.edit)
                     )
                 }
 
                 IconButton(onClick = onDeleteClick) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Excluir",
+                        contentDescription = stringResource(R.string.delete),
                         tint = Color.Red
                     )
                 }
