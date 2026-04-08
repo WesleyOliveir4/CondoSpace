@@ -30,8 +30,10 @@ fun OutlinedTextFieldCS(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     singleLine: Boolean = true,
     enabled: Boolean = true,
+    readOnly: Boolean = false,
     isError: Boolean = false,
 ) {
     Column(modifier = modifier) {
@@ -54,6 +56,7 @@ fun OutlinedTextFieldCS(
             keyboardActions = keyboardActions,
             singleLine = singleLine,
             enabled = enabled,
+            readOnly = readOnly,
             isError = isError,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -68,7 +71,8 @@ fun OutlinedTextFieldCS(
                 disabledContainerColor = Color.White,
                 errorContainerColor = Color.White,
             ),
-            leadingIcon = leadingIcon
+            leadingIcon = leadingIcon,
+            trailingIcon = trailingIcon
         )
     }
 }

@@ -143,7 +143,11 @@ fun RegisterComponent(
                 OutlinedTextFieldCS(
                     label = stringResource(id = R.string.register_phone_label),
                     value = phone,
-                    onValueChange = { phone = it },
+                    onValueChange = { 
+                        if (it.length <= 11) {
+                            phone = it.filter { char -> char.isDigit() }
+                        }
+                    },
                     placeholder = stringResource(id = R.string.register_phone_placeholder),
                     visualTransformation = PhoneUtils.phoneVisualTransformation,
                     enabled = !isLoading

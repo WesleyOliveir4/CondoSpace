@@ -33,7 +33,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,6 +53,7 @@ import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.UserUiModel
+import com.example.condospace.presentation.ui.component.OutlinedTextFieldCS
 import com.example.condospace.presentation.ui.enums.CategoryType
 import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.utils.CurrencyUtils
@@ -339,19 +339,16 @@ fun FormField(
     singleLine: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(text = label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = 4.dp))
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = placeholder?.let { { Text(it) } },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = keyboardOptions,
-            singleLine = singleLine,
-            shape = RoundedCornerShape(8.dp),
-            visualTransformation = visualTransformation
-        )
-    }
+    OutlinedTextFieldCS(
+        label = label,
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = placeholder ?: "",
+        modifier = modifier.fillMaxWidth(),
+        keyboardOptions = keyboardOptions,
+        singleLine = singleLine,
+        visualTransformation = visualTransformation
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -359,21 +356,20 @@ fun FormField(
 fun CategorySelector(selectedCategory: CategoryType?, onCategorySelected: (CategoryType) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Categoria", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = 4.dp))
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
         ) {
-            OutlinedTextField(
+            OutlinedTextFieldCS(
+                label = "Categoria",
                 value = selectedCategory?.title ?: "",
                 onValueChange = {},
                 readOnly = true,
-                placeholder = { Text("Selecione a categoria") },
+                placeholder = "Selecione a categoria",
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                 modifier = Modifier
                     .menuAnchor()
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
+                    .fillMaxWidth()
             )
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 CategoryType.entries.filter { it != CategoryType.ALLTYPES }.forEach { category ->
