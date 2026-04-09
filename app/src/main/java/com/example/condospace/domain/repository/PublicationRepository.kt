@@ -12,4 +12,5 @@ interface PublicationRepository {
     suspend fun deletePublication(publicationId: String): Result<Unit>
     suspend fun updatePublicationLikes(publicationId: String, increment: Int): Result<Unit>
     suspend fun updatePublication(publication: PublicationEntity): Result<Unit>
+    suspend fun getPublicationsByIds(ids: List<String>): Result<List<PublicationEntity>>
 }

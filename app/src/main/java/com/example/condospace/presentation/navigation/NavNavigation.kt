@@ -56,11 +56,11 @@ fun NavNavigation() {
         composable<NavRoutes.Home> {
             HomeScreen(
                 navController,
-                navigateToPublishList = { categoryType ->
-                    navController.navigate(NavRoutes.PublicationsList(categoryType = categoryType))
+                navigateToPublishList = { categoryType, publicationIds ->
+                    navController.navigate(NavRoutes.PublicationsList(categoryType = categoryType, publicationsIds = publicationIds))
                 },
-                navigateToPublicationSelected = { publicationId ->
-                    navController.navigate(NavRoutes.PublicationSelected(publicationId = publicationId))
+                navigateToPublicationSelected = { publicationId, categoryType ->
+                    navController.navigate(NavRoutes.PublicationSelected(publicationId = publicationId, categoryType = categoryType))
                 },
                 navigateToSelectCondominium = { userId: String ->
                     navController.navigate(NavRoutes.SelectCondominiumScreen(
@@ -73,8 +73,8 @@ fun NavNavigation() {
         composable<NavRoutes.Favorites> {
             FavoritesScreen(
                 navController,
-                navigateToPublicationSelected = { publicationId ->
-                    navController.navigate(NavRoutes.PublicationSelected(publicationId))
+                navigateToPublicationSelected = { publicationId, categoryType ->
+                    navController.navigate(NavRoutes.PublicationSelected(publicationId, categoryType))
                 },
                 navigateToSelectCondominium = { userId: String ->
                     navController.navigate(NavRoutes.SelectCondominiumScreen(
@@ -87,9 +87,9 @@ fun NavNavigation() {
         composable<NavRoutes.Publish> {
             PublishScreen(
                 navController,
-                navigateToPublicationSelected = { publicationId: String ->
+                navigateToPublicationSelected = { publicationId, categoryType ->
                     navController.navigate(
-                        NavRoutes.PublicationSelected(publicationId = publicationId)
+                        NavRoutes.PublicationSelected(publicationId = publicationId, categoryType = categoryType)
                     )
                 },
                 navigateToEditPublication = { publicationId: String ->
@@ -145,7 +145,8 @@ fun NavNavigation() {
                 navigateToPublicationSelected = { publicationId ->
                     navController.navigate(NavRoutes.PublicationSelected(publicationId = publicationId))
                 },
-                categoryType = route.categoryType
+                categoryType = route.categoryType,
+                publicationsIds = route.publicationsIds
             )
         }
 
@@ -154,7 +155,8 @@ fun NavNavigation() {
             val route = backStackEntry.toRoute<NavRoutes.PublicationSelected>()
             PublicationSelectedScreen(
                 navController,
-                publicationId = route.publicationId
+                publicationId = route.publicationId,
+                categoryType = route.categoryType
             )
         }
 

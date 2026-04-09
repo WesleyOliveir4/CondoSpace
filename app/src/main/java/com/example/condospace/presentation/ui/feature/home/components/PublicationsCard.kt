@@ -2,10 +2,12 @@ package com.example.condospace.presentation.ui.feature.home.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,18 +30,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.example.condospace.presentation.model.PublicationImageUiModel
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.ui.feature.home.mocks.PublicationsMocksPreview
 
 @Composable
 fun PublicationsCard(
     publication: PublicationUiModel,
-    onClick: (String) -> Unit
+    onClick: (String, String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -46,7 +52,7 @@ fun PublicationsCard(
             .height(240.dp)
             .padding(end = 12.dp)
             .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp), ambientColor = Color.Black)
-            .clickable { onClick(publication.id) },
+            .clickable { onClick(publication.id, publication.publicationType) },
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
             containerColor = Color.White,
@@ -57,13 +63,28 @@ fun PublicationsCard(
 
         Column {
 
-            AsyncImage(
-                model = publication.imageUrlList?.firstOrNull()?.url,
+            SubcomposeAsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(publication.imageUrlList?.firstOrNull()?.url)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = publication.title,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(130.dp),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.FillBounds,
+                loading = {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color(0xFF354EAB),
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                },
             )
 
             Column(
@@ -86,21 +107,23 @@ fun PublicationsCard(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!publication.publicationType.equals(ServiceType.EXTERNAL.value, ignoreCase = true)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
 
-                    Icon(
-                        imageVector = Icons.Default.Favorite,
-                        contentDescription = null,
-                        tint = Color.Red,
-                        modifier = Modifier.size(16.dp)
-                    )
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = Color.Red,
+                            modifier = Modifier.size(16.dp)
+                        )
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
 
-                    Text(
-                        text = "${publication.likes}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                        Text(
+                            text = "${publication.likes}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         }
@@ -111,8 +134,8 @@ fun PublicationsCard(
 fun PublicationsSection(
     title: String,
     publications: List<PublicationUiModel>,
-    onSeeMoreClick: () -> Unit = {},
-    onItemClick: (String) -> Unit = {}
+    onSeeMoreClick: (String, List<String>?) -> Unit = { _, _ -> },
+    onItemClick: (String, String) -> Unit = { _, _ -> }
 ) {
     if (publications.isEmpty()) return
     Column(
@@ -132,8 +155,13 @@ fun PublicationsSection(
 
             Text(
                 text = "Ver mais",
-                color = Color.Blue,
-                modifier = Modifier.clickable { onSeeMoreClick() }
+                color = Color(0xFF354EAB),
+                modifier = Modifier.clickable {
+                    onSeeMoreClick(
+                        publications.first().publicationType,
+                        publications.map { it.id }
+                    )
+                }
             )
         }
 
@@ -146,7 +174,9 @@ fun PublicationsSection(
             items(publications) { publication ->
                 PublicationsCard(
                     publication = publication,
-                    onClick = { onItemClick(it) }
+                    onClick = { id, type ->
+                        onItemClick(id, type)
+                    }
                 )
             }
         }
@@ -171,7 +201,7 @@ fun PublicationsCardPreview() {
                 date = "2023-10-27",
                 imageUrlList = listOf(PublicationImageUiModel(url = "https://example.com/image.jpg", publicId = "1"))
             ),
-            onClick = {}
+            onClick = {id, type -> }
         )
     }
 }

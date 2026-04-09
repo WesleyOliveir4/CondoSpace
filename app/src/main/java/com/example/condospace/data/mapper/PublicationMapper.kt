@@ -26,7 +26,8 @@ fun Publication.toEntity(): PublicationEntity {
         publicationType = this.publicationType,
         price = this.price,
         likes = this.likes,
-        date = this.date
+        date = this.date,
+        coupon = this.coupon
     )
 }
 
@@ -54,7 +55,8 @@ fun PublicationEntity.toModel(): Publication {
         publicationType = this.publicationType,
         price = this.price,
         likes = this.likes,
-        date = this.date
+        date = this.date,
+        coupon = this.coupon
     )
 }
 

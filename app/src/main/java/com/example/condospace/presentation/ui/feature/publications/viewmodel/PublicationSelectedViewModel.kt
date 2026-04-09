@@ -42,10 +42,10 @@ class PublicationSelectedViewModel(
         }
     }
 
-    fun loadPublication(publicationId: String) {
+    fun loadPublication(publicationId: String, category: String?) {
         viewModelScope.launch {
             _uiState.value = PublicationSelectedUiState.Loading
-            val result = getPublicationByIdUseCase(publicationId)
+            val result = getPublicationByIdUseCase(publicationId, category)
             result.onSuccess { entity ->
                 val publicationUi = entity.toUiModel()
                 val currentUser = userPreferencesRepository.getUserData()

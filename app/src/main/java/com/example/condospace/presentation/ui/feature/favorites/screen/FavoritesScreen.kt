@@ -31,7 +31,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun FavoritesScreen(
     navController: NavHostController,
-    navigateToPublicationSelected: (String) -> Unit,
+    navigateToPublicationSelected: (String, String?) -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
     viewModel: FavoritesViewModel = koinViewModel()
 ) {
@@ -67,7 +67,7 @@ fun FavoritesScreen(
 fun FavoritesScreenContent(
     navController: NavHostController,
     uiState: FavoritesUiState.Success,
-    navigateToPublicationSelected: (String) -> Unit,
+    navigateToPublicationSelected: (String, String?) -> Unit,
     navigateToSelectCondominium: (String) -> Unit
 ) {
     Scaffold(
@@ -98,7 +98,7 @@ fun FavoritesScreenContent(
             ) { publication ->
                 PublicationItem(
                     publication = publication,
-                    onClick = { navigateToPublicationSelected(publication.id) }
+                    onClick = { navigateToPublicationSelected(publication.id,publication.publicationType) }
                 )
             }
         }
@@ -118,7 +118,8 @@ fun FavoritesScreenPreview() {
                 user = UserUiModel(uuid = "123", name = "Teste"),
                 condominiumName = "Condomínio Exemplo"
             ),
-            navigateToPublicationSelected = {},
+            navigateToPublicationSelected = { _, _ ->
+            },
             navigateToSelectCondominium = {}
         )
     }

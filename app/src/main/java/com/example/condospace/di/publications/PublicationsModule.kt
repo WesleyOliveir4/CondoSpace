@@ -15,13 +15,13 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val publicationsModule = module {
-    factory { GetPublicationByIdUseCase(get()) }
-    factory { GetPublicationsByCondominiumAndTypeUseCase(get()) }
+    factory { GetPublicationByIdUseCase(get(), get()) }
+    factory { GetPublicationsByCondominiumAndTypeUseCase(get(), get()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(get()) }
     single<UserRepository> { UserRepositoryImpl(get()) }
     single<PublicationRepository> { PublicationRepositoryImpl(get()) }
 
     viewModel { EditPublicationViewModel(get()) }
-    viewModel { PublicationSelectedViewModel(get(),get(),get(), get()) }
-    viewModel { PublicationsListViewModel(get(), get()) }
+    viewModel { PublicationSelectedViewModel(get(), get(), get(), get()) }
+    viewModel { PublicationsListViewModel(get()) }
 }

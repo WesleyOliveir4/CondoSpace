@@ -31,6 +31,7 @@ import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 @Composable
 fun SearchPublications(
     publications: List<PublicationUiModel>,
+    searchPlaceholder: String = "Buscar...",
     emptyState: @Composable () -> Unit = {},
     itemContent: @Composable (PublicationUiModel) -> Unit
 ) {
@@ -50,7 +51,7 @@ fun SearchPublications(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            placeholder = { Text("Buscar favoritos...") },
+            placeholder = { Text(searchPlaceholder) },
             leadingIcon = {
                 Icon(Icons.Default.Search, contentDescription = null)
             },

@@ -34,12 +34,13 @@ fun PublicationsListScreen(
     navController: NavHostController,
     categoryType: String,
     navigateToPublicationSelected: (String) -> Unit,
-    viewModel: PublicationsListViewModel = koinViewModel()
+    viewModel: PublicationsListViewModel = koinViewModel(),
+    publicationsIds: List<String>?
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(categoryType) {
-        viewModel.init(categoryType)
+    LaunchedEffect(categoryType, publicationsIds) {
+        viewModel.loadPublications(categoryType, publicationsIds ?: emptyList())
     }
 
     CondoSpaceTheme {

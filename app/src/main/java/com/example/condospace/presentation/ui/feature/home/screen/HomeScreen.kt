@@ -2,7 +2,9 @@ package com.example.condospace.presentation.ui.feature.home.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -11,19 +13,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.condospace.R
 import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.navigation.NavRoutes
@@ -31,7 +34,6 @@ import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.component.error.ErrorDialog
 import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.enums.CategoryType
-import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.ui.feature.home.components.CategoriesSection
 import com.example.condospace.presentation.ui.feature.home.components.EmptyPublicationsState
 import com.example.condospace.presentation.ui.feature.home.components.PublicationsSection
@@ -44,8 +46,8 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    navigateToPublishList: (String) -> Unit = {},
-    navigateToPublicationSelected: (String) -> Unit,
+    navigateToPublishList: (String, List<String>?) -> Unit,
+    navigateToPublicationSelected: (String, String?) -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
 ) {
     val viewModel: HomeViewModel = koinViewModel()
@@ -66,7 +68,11 @@ fun HomeScreen(
                     onRefresh = { viewModel.refreshPublications() },
                     navigateToPublishList = navigateToPublishList,
                     navigateToPublicationSelected = navigateToPublicationSelected,
-                    navigateToSelectCondominium = navigateToSelectCondominium
+                    navigateToSelectCondominium = navigateToSelectCondominium,
+                    onCategoryClick = { categoryType ->
+                        val filteredIds = viewModel.getPublicationIdsByCategory(categoryType.title)
+                        navigateToPublishList(categoryType.title, filteredIds)
+                    }
                 )
 
                 state.actionError?.let { message ->
@@ -93,9 +99,10 @@ fun HomeScreenContent(
     navController: NavHostController,
     uiState: HomeUiState.Success,
     onRefresh: () -> Unit,
-    navigateToPublishList: (String) -> Unit,
-    navigateToPublicationSelected: (String) -> Unit,
-    navigateToSelectCondominium: (String) -> Unit
+    navigateToPublishList: (String, List<String>?) -> Unit,
+    navigateToPublicationSelected: (String, String?) -> Unit,
+    navigateToSelectCondominium: (String) -> Unit,
+    onCategoryClick: (CategoryType) -> Unit
 ) {
     Scaffold(
         bottomBar = { NavBar(navController, "Home") },
@@ -121,9 +128,7 @@ fun HomeScreenContent(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
                     CategoriesSection(
-                        onCategoryClick = { categoryType ->
-                            navigateToPublishList(categoryType.title)
-                        }
+                        onCategoryClick = onCategoryClick
                     )
 
                     if (uiState.publicationsService.isEmpty() && uiState.publicationsRecommendation.isEmpty()) {
@@ -133,38 +138,42 @@ fun HomeScreenContent(
                             }
                         )
                     } else {
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         PublicationsSection(
-                            title = "Oferecidos pelo seu condomínio",
+                            title = stringResource(R.string.home_services_title),
                             publications = uiState.publicationsService,
-                            onSeeMoreClick = {
-                                navigateToPublishList(ServiceType.SERVICE.value)
-                            },
-                            onItemClick = { id ->
-                                navigateToPublicationSelected(id)
+                            onSeeMoreClick = { type, listIds ->
+                                navigateToPublishList(type, listIds)
+                                             },
+                            onItemClick = { id, type ->
+                                navigateToPublicationSelected(id, type)
                             }
                         )
 
                         PublicationsSection(
-                            title = "Recomendados pelo seu condomínio",
+                            title = stringResource(R.string.home_recommendations_title),
                             publications = uiState.publicationsRecommendation,
-                            onSeeMoreClick = {
-                                navigateToPublishList(ServiceType.RECOMMENDATION.value)
+                            onSeeMoreClick = { type, listIds ->
+                                navigateToPublishList(type, listIds)
                             },
-                            onItemClick = { id ->
-                                navigateToPublicationSelected(id)
+                            onItemClick = { id, type ->
+                                navigateToPublicationSelected(id, type)
                             }
                         )
 
                         PublicationsSection(
-                            title = "Serviços em destaque na região",
-                            publications = uiState.publicationsService.reversed(),
-                            onSeeMoreClick = {
-                                navigateToPublishList(CategoryType.SERVICES.title)
+                            title = "Serviços próximos de você",
+                            publications = uiState.externalServices,
+                            onSeeMoreClick = { type, listIds ->
+                                navigateToPublishList(type, listIds)
                             },
-                            onItemClick = { id ->
-                                navigateToPublicationSelected(id)
+                            onItemClick = { id, type ->
+                                navigateToPublicationSelected(id, type)
                             }
                         )
+
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
@@ -183,14 +192,18 @@ fun HomeScreenPreview() {
             navController = navController,
             uiState = HomeUiState.Success(
                 condominiumName = "Condomínio Exemplo",
-                user = UserUiModel(uuid = "123", condominium = CondominiumUiModel(name = "Exemplo", cep = "00000-000")),
+                user = UserUiModel(
+                    uuid = "123",
+                    condominium = CondominiumUiModel(name = "Exemplo", cep = "00000-000")
+                ),
                 publicationsService = PublicationsMocksPreview().listMockUi,
                 publicationsRecommendation = PublicationsMocksPreview().listMockUi
             ),
             onRefresh = {},
-            navigateToPublishList = {},
-            navigateToPublicationSelected = {},
-            navigateToSelectCondominium = {}
+            navigateToPublishList = { _, _ -> },
+            navigateToPublicationSelected = { _, _ -> },
+            navigateToSelectCondominium = {},
+            onCategoryClick = {}
         )
     }
 }

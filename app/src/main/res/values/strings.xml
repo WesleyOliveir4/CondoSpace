@@ -57,6 +57,12 @@
     <string name="condominium_register_select_button">Cadastrar e Selecionar</string>
     <string name="condominium_update_success">Condomínio atualizado com sucesso!</string>
 
+    <!-- Home -->
+    <string name="home_services_title">Serviços em destaque</string>
+    <string name="home_recommendations_title">Recomendações recentes</string>
+    <string name="home_external_services_title">Serviços próximos de você</string>
+    <string name="home_see_more">Ver mais</string>
+
     <!-- Publications -->
     <string name="publication_title">Publicação</string>
     <string name="publications_list_all">Todas as publicações</string>

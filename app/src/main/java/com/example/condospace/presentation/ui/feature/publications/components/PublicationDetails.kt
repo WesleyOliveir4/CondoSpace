@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.ui.mocks.PublicationsMocks
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 
@@ -52,11 +53,13 @@ fun PublicationDetails(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
-                LikesRow(
-                    likes = publication.likes,
-                    isFavorite = isFavorite,
-                    onFavoriteClick = onFavoriteClick
-                )
+                if (!publication.publicationType.equals(ServiceType.EXTERNAL.value, ignoreCase = true)) {
+                    LikesRow(
+                        likes = publication.likes,
+                        isFavorite = isFavorite,
+                        onFavoriteClick = onFavoriteClick
+                    )
+                }
             }
         }
 

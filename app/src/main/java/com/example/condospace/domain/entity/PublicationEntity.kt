@@ -16,5 +16,6 @@ data class PublicationEntity(
     val publicationType: String,
     val price: Double,
     val likes: Int,
-    val date: String
+    val date: String,
+    val coupon: String? = null
 )

@@ -44,7 +44,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun PublishScreen(
     navController: NavHostController,
-    navigateToPublicationSelected: (String) -> Unit,
+    navigateToPublicationSelected: (String, String?) -> Unit,
     navigateToEditPublication: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
 ) {
@@ -112,7 +112,7 @@ fun PublishScreenContent(
     navController: NavHostController,
     uiState: PublishUiState.Success,
     publishViewModel: PublishViewModel,
-    navigateToPublicationSelected: (String) -> Unit,
+    navigateToPublicationSelected: (String, String?) -> Unit,
     navigateToEditPublication: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
     snackbarHostState: SnackbarHostState
@@ -151,7 +151,7 @@ fun PublishScreenContent(
                         publications = uiState.myPublications,
                         isLoading = uiState.isListLoading,
                         onItemClick = { publication ->
-                            navigateToPublicationSelected(publication.id)
+                            navigateToPublicationSelected(publication.id, publication.publicationType)
                         },
                         onEditClick = { publication ->
                             navigateToEditPublication(
@@ -200,7 +200,7 @@ fun PublishScreenPreview() {
                 actionError = null
             ),
             publishViewModel = koinViewModel(),
-            navigateToPublicationSelected = {},
+            navigateToPublicationSelected ={ _, _ -> },
             navigateToEditPublication = {},
             navigateToSelectCondominium = {},
             snackbarHostState = remember { SnackbarHostState() }

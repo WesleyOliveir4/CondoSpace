@@ -3,10 +3,12 @@ package com.example.condospace.presentation.ui.feature.home.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.condospace.domain.entity.PublicationEntity
+import com.example.condospace.domain.repository.ExternalServiceRepository
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.usecase.publication.GetPublicationsByCondominiumUseCase
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.model.toUiModel
+import com.example.condospace.presentation.ui.enums.CategoryType
 import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.ui.feature.home.state.HomeUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +20,8 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val getPublicationsByCondominiumUseCase: GetPublicationsByCondominiumUseCase
+    private val getPublicationsByCondominiumUseCase: GetPublicationsByCondominiumUseCase,
+    private val externalServiceRepository: ExternalServiceRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -42,32 +45,50 @@ class HomeViewModel(
 
     private fun handleUserUpdate(userUi: UserUiModel) {
         val condominiumId = userUi.condominium?.id
+        val cep = userUi.condominium?.cep
         
         updateSuccessOrInit(userUi)
 
         if (!condominiumId.isNullOrBlank()) {
-            fetchHomeContent(condominiumId)
+            fetchHomeContent(condominiumId, cep)
         } else {
             clearHomeData()
         }
     }
 
-    private fun fetchHomeContent(condominiumId: String) {
+    private fun fetchHomeContent(condominiumId: String, cep: String?) {
         viewModelScope.launch {
             updateSuccess { it.copy(isRefreshing = true) }
             
-            getPublicationsByCondominiumUseCase(condominiumId)
-                .onSuccess { list -> updateHomeData(list) }
-                .onFailure { e -> handleFailure(e) }
+            val publicationsTask = launch {
+                getPublicationsByCondominiumUseCase(condominiumId)
+                    .onSuccess { list -> updateHomeData(list) }
+                    .onFailure { e -> handleFailure(e) }
+            }
+
+            val externalServicesTask = launch {
+                if (!cep.isNullOrBlank()) {
+                    externalServiceRepository.getNearbyServices(cep)
+                        .onSuccess { services ->
+                            updateSuccess { it.copy(externalServices = services.map { externalServices -> externalServices.toUiModel() }) }
+                        }
+                        .onFailure { e -> handleFailure(e) }
+                }
+            }
         }
     }
 
     private fun updateHomeData(list: List<PublicationEntity>) {
         val services = list.filter { it.publicationType == ServiceType.SERVICE.value }.map { it.toUiModel() }
         val recommendations = list.filter { it.publicationType == ServiceType.RECOMMENDATION.value }.map { it.toUiModel() }
+        val products = list.filter {
+            it.publicationType != ServiceType.RECOMMENDATION.value &&
+            it.publicationType != ServiceType.SERVICE.value
+        }.map { it.toUiModel() }
 
         updateSuccess { 
             it.copy(
+                publicationsProducts = products,
                 publicationsService = services,
                 publicationsRecommendation = recommendations,
                 isRefreshing = false,
@@ -77,7 +98,7 @@ class HomeViewModel(
     }
 
     private fun handleFailure(e: Throwable) {
-        val message = e.message ?: "Erro ao carregar publicações"
+        val message = e.message ?: "Erro ao carregar dados"
         _uiState.update { currentState ->
             if (currentState is HomeUiState.Success) {
                 currentState.copy(isRefreshing = false, actionError = message)
@@ -90,8 +111,10 @@ class HomeViewModel(
     private fun clearHomeData() {
         updateSuccess { 
             it.copy(
+                publicationsProducts = emptyList(),
                 publicationsService = emptyList(), 
-                publicationsRecommendation = emptyList(), 
+                publicationsRecommendation = emptyList(),
+                externalServices = emptyList(),
                 isRefreshing = false 
             ) 
         }
@@ -115,8 +138,20 @@ class HomeViewModel(
     }
 
     fun refreshPublications() {
-        (uiState.value as? HomeUiState.Success)?.user?.condominium?.id?.let { 
-            fetchHomeContent(it) 
+        val user = (uiState.value as? HomeUiState.Success)?.user
+        user?.condominium?.id?.let { 
+            fetchHomeContent(it, user.condominium.cep)
+        }
+    }
+
+    fun getPublicationIdsByCategory(categoryTitle: String): List<String> {
+        val state = _uiState.value as? HomeUiState.Success ?: return emptyList()
+        return if (categoryTitle == CategoryType.ALLTYPES.title) {
+            state.publicationsProducts.map { it.id }
+        } else {
+            state.publicationsProducts
+                .filter { it.publicationType == categoryTitle }
+                .map { it.id }
         }
     }
 
