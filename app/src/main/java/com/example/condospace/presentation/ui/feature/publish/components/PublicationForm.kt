@@ -143,16 +143,21 @@ fun PublicationForm(
         onButtonClick = {
             val date = initialPublication?.date ?: LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
+            // Se for edição, usamos o owner da publicação original. Se for nova, usamos o usuário logado.
+            val ownerUuid = initialPublication?.publicationOwnerUuid ?: user.uuid
+            val ownerName = initialPublication?.publicationOwner ?: user.name
+            val condominiumId = initialPublication?.publicationCondominiumId ?: (user.condominium?.id ?: "")
+
             val publication = PublicationUiModel(
                 id = initialPublication?.id ?: UUID.randomUUID().toString(),
-                publicationOwnerUuid = user.uuid,
-                publicationCondominiumId = user.condominium?.id ?: "",
-                publicationOwner = user.name,
+                publicationOwnerUuid = ownerUuid,
+                publicationCondominiumId = condominiumId,
+                publicationOwner = ownerName,
                 serviceProvider = providerNameState,
                 contact = if (publicationType == PublicationType.RECOMMENDATION) {
                     PhoneUtils.removeMask(contactState)
                 } else {
-                    PhoneUtils.removeMask(user.phoneNumber)
+                    PhoneUtils.removeMask(initialPublication?.contact ?: user.phoneNumber)
                 },
                 price = CurrencyUtils.currencyToDouble(priceState),
                 imagesSelectList = images,
@@ -161,7 +166,7 @@ fun PublicationForm(
                 publicationType = finalPublicationType,
                 likes = initialPublication?.likes ?: 0,
                 date = date,
-                imageUrlList = if (images.all { it.toString().startsWith("http") }) initialPublication?.imageUrlList else null
+                imageUrlList = initialPublication?.imageUrlList
             )
             onPublish(publication)
         },
@@ -198,6 +203,29 @@ fun PublicationForm(
 /**
  * Componente Stateless (Dumb) que define a estrutura visual do Card do formulário.
  */
+@Composable
+fun FormField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String? = null,
+    modifier: Modifier = Modifier,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    singleLine: Boolean = true,
+    visualTransformation: VisualTransformation = VisualTransformation.None
+) {
+    OutlinedTextFieldCS(
+        label = label,
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = placeholder ?: "",
+        modifier = modifier.fillMaxWidth(),
+        keyboardOptions = keyboardOptions,
+        singleLine = singleLine,
+        visualTransformation = visualTransformation
+    )
+}
+
 @Composable
 fun PublicationFormCard(
     formTitle: String,
@@ -332,29 +360,6 @@ fun PublicationFormCard(
 }
 
 // --- Componentes de Apoio ---
-
-@Composable
-fun FormField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String? = null,
-    modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    singleLine: Boolean = true,
-    visualTransformation: VisualTransformation = VisualTransformation.None
-) {
-    OutlinedTextFieldCS(
-        label = label,
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = placeholder ?: "",
-        modifier = modifier.fillMaxWidth(),
-        keyboardOptions = keyboardOptions,
-        singleLine = singleLine,
-        visualTransformation = visualTransformation
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

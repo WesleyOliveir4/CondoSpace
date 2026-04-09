@@ -29,8 +29,6 @@ import com.example.condospace.presentation.ui.feature.publications.state.EditPub
 import com.example.condospace.presentation.ui.feature.publications.viewmodel.EditPublicationViewModel
 import com.example.condospace.presentation.ui.feature.publish.components.PublicationForm
 import com.example.condospace.presentation.ui.feature.publish.components.PublicationType
-import com.example.condospace.presentation.ui.feature.publish.state.PublishUiState
-import com.example.condospace.presentation.ui.feature.publish.viewmodel.PublishViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -41,19 +39,16 @@ fun EditPublicationScreen(
     publicationId: String
 ) {
     val viewModel: EditPublicationViewModel = koinViewModel()
-    val publishViewModel: PublishViewModel = koinViewModel()
-    
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val publishUiState by publishViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(publicationId) {
         viewModel.loadPublication(publicationId)
     }
 
-    val currentPublishState = publishUiState
-    LaunchedEffect(currentPublishState) {
-        if (currentPublishState is PublishUiState.Success && currentPublishState.publishSuccess) {
-            publishViewModel.resetActionState()
+    LaunchedEffect(uiState) {
+        val state = uiState
+        if (state is EditPublicationUiState.Success && state.updateSuccess) {
+            viewModel.resetActionState()
             navController.popBackStack()
         }
     }
@@ -66,24 +61,20 @@ fun EditPublicationScreen(
                 }
             }
             is EditPublicationUiState.Success -> {
-                val user = if (currentPublishState is PublishUiState.Success) currentPublishState.user else UserUiModel()
-                
                 EditPublicationScreenContent(
                     navController = navController,
                     publication = state.publication,
-                    user = user,
+                    user = state.user,
                     onUpdatePublication = { updatedPublication ->
-                        publishViewModel.createPublication(updatedPublication)
+                        viewModel.updatePublication(updatedPublication)
                     }
                 )
 
-                if (currentPublishState is PublishUiState.Success) {
-                    currentPublishState.actionError?.let { message ->
-                        ErrorDialog(
-                            message = message,
-                            onDismiss = { publishViewModel.resetActionState() }
-                        )
-                    }
+                state.actionError?.let { message ->
+                    ErrorDialog(
+                        message = message,
+                        onDismiss = { viewModel.resetActionState() }
+                    )
                 }
             }
             is EditPublicationUiState.Error -> {
