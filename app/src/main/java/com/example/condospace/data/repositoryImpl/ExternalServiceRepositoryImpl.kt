@@ -60,41 +60,7 @@ class ExternalServiceRepositoryImpl(
                         if (distance <= 3.0) {
                             val data = doc.data
                             if (data != null) {
-                                // Tratamento seguro para imageUrlList que pode vir como Map ou List
-                                val imagesRaw = data["imageUrlList"]
-                                val imagesList = when (imagesRaw) {
-                                    is List<*> -> {
-                                        imagesRaw.filterIsInstance<Map<String, Any>>().map {
-                                            PublicationImage(
-                                                url = it["url"] as? String ?: "",
-                                                publicId = it["publicId"] as? String ?: ""
-                                            )
-                                        }
-                                    }
-                                    is Map<*, *> -> {
-                                        imagesRaw.values.filterIsInstance<Map<String, Any>>().map {
-                                            PublicationImage(
-                                                url = it["url"] as? String ?: "",
-                                                publicId = it["publicId"] as? String ?: ""
-                                            )
-                                        }
-                                    }
-                                    else -> null
-                                }
-
-                                nearbyServices.add(
-                                    ExternalServiceEntity(
-                                        id = doc.id,
-                                        publicationOwner = data["publicationOwner"] as? String ?: "",
-                                        publicationType = data["publicationType"] as? String ?: "",
-                                        title = data["title"] as? String ?: "",
-                                        date = data["date"] as? String ?: "",
-                                        coupon = data["coupon"] as? String ?: "",
-                                        description = data["description"] as? String ?: "",
-                                        imageUrlList = imagesList,
-                                        price = (data["price"] as? Number)?.toDouble() ?: 0.0
-                                    )
-                                )
+                                nearbyServices.add(mapToExternalService(doc.id, data))
                             }
                         }
                     }
@@ -102,6 +68,49 @@ class ExternalServiceRepositoryImpl(
             }
             nearbyServices
         }
+    }
+
+    override suspend fun getExternalServiceById(id: String): Result<ExternalServiceEntity> {
+        return runCatching {
+            val doc = firestore.collection("services").document(id).get().await()
+            val data = doc.data ?: throw Exception("Serviço não encontrado")
+            mapToExternalService(doc.id, data)
+        }
+    }
+
+    private fun mapToExternalService(id: String, data: Map<String, Any>): ExternalServiceEntity {
+        val imagesRaw = data["imageUrlList"]
+        val imagesList = when (imagesRaw) {
+            is List<*> -> {
+                imagesRaw.filterIsInstance<Map<String, Any>>().map {
+                    PublicationImage(
+                        url = it["url"] as? String ?: "",
+                        publicId = it["publicId"] as? String ?: ""
+                    )
+                }
+            }
+            is Map<*, *> -> {
+                imagesRaw.values.filterIsInstance<Map<String, Any>>().map {
+                    PublicationImage(
+                        url = it["url"] as? String ?: "",
+                        publicId = it["publicId"] as? String ?: ""
+                    )
+                }
+            }
+            else -> null
+        }
+
+        return ExternalServiceEntity(
+            id = id,
+            publicationOwner = data["publicationOwner"] as? String ?: "",
+            publicationType = data["publicationType"] as? String ?: "",
+            title = data["title"] as? String ?: "",
+            date = data["date"] as? String ?: "",
+            coupon = data["coupon"] as? String ?: "",
+            description = data["description"] as? String ?: "",
+            imageUrlList = imagesList,
+            price = (data["price"] as? Number)?.toDouble() ?: 0.0
+        )
     }
 
     private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {

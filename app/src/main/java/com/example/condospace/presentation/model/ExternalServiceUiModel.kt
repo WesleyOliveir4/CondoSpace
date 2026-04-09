@@ -41,6 +41,6 @@ fun ExternalServiceUiModel.toPublicationUiModel(): PublicationUiModel {
         likes = 0,
         date = date,
         imageUrlList = imageUrlList,
-        isExternal = true
+        coupon = coupon
     )
 }

@@ -86,13 +86,13 @@ fun PublicationItem(
 
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = if (publication.isExternal) Color(0xFFFFEBEE) else Color(0xFFE8F0FE)
+                    color = Color(0xFFE8F0FE)
                 ) {
                     Text(
-                        text = if (publication.isExternal) "Externo" else publication.publicationType,
+                        text = publication.publicationType,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
                         fontSize = 12.sp,
-                        color = if (publication.isExternal) Color(0xFFC62828) else Color(0xFF1967D2)
+                        color = Color(0xFF354EAB)
                     )
                 }
             }

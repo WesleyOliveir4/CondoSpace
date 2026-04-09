@@ -36,13 +36,14 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun PublicationSelectedScreen(
     navController: NavHostController,
-    publicationId: String
+    publicationId: String,
+    categoryType: String?
 ) {
     val viewModel: PublicationSelectedViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(publicationId) {
-        viewModel.loadPublication(publicationId)
+        viewModel.loadPublication(publicationId, categoryType)
     }
 
     CondoSpaceTheme {
@@ -56,7 +57,8 @@ fun PublicationSelectedScreen(
                 PublicationSelectedScreenContent(
                     navController = navController,
                     uiState = state,
-                    onFavoriteClick = { viewModel.onFavoriteClick() }
+                    onFavoriteClick = { viewModel.onFavoriteClick() },
+                    categoryType
                 )
 
                 state.actionError?.let { message ->
@@ -81,7 +83,8 @@ fun PublicationSelectedScreen(
 fun PublicationSelectedScreenContent(
     navController: NavHostController,
     uiState: PublicationSelectedUiState.Success,
-    onFavoriteClick: () -> Unit = {}
+    onFavoriteClick: () -> Unit = {},
+    categoryType: String?
 ) {
     val publication = uiState.publication
     Scaffold(
@@ -94,6 +97,8 @@ fun PublicationSelectedScreenContent(
         bottomBar = {
             BottomContactBar(
                 price = publication.price,
+                categoryType = categoryType,
+                couponCode = publication.coupon,
                 onClick = {
                     // Ação de contato
                 }
@@ -138,7 +143,8 @@ fun PublicationSelectedScreenPreview() {
             uiState = PublicationSelectedUiState.Success(
                 publication = mockPublication,
                 isFavorite = true
-            )
+            ),
+            categoryType = "Serviços"
         )
     }
 }

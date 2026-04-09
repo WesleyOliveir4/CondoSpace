@@ -18,7 +18,7 @@ data class PublicationUiModel(
     val price: Double,
     val likes: Int = 0,
     val date: String,
-    val isExternal: Boolean = false
+    val coupon: String? = null,
 )
 
 
@@ -38,7 +38,6 @@ fun PublicationEntity.toUiModel(): PublicationUiModel{
         price = price,
         likes = likes,
         date = date,
-        isExternal = false
     )
 }
 

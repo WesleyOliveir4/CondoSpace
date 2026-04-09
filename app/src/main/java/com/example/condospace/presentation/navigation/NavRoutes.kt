@@ -28,10 +28,10 @@ sealed class NavRoutes {
         object SettingsScreen : NavRoutes()
 
     @Serializable
-    data class PublicationsList(val categoryType: String) : NavRoutes()
+    data class PublicationsList(val categoryType: String, val publicationsIds: List<String>? = null) : NavRoutes()
     
     @Serializable
-    data class PublicationSelected(val publicationId: String) : NavRoutes()
+    data class PublicationSelected(val publicationId: String, val categoryType: String? = null) : NavRoutes()
     
     @Serializable
     data class EditPublicationScreen(val publicationId: String) : NavRoutes()

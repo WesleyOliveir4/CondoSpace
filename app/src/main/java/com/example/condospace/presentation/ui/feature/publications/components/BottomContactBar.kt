@@ -18,13 +18,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.utils.CurrencyUtils.formatToBRL
 
 @Composable
 fun BottomContactBar(
     price: Double,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    categoryType: String? = null,
+    couponCode: String? = null
 ) {
+    val isExternal = categoryType == ServiceType.EXTERNAL.value
     val priceText = if (price > 0.0) price.formatToBRL() else "Preço a combinar"
 
     Surface(
@@ -42,12 +46,12 @@ fun BottomContactBar(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Preço:",
+                    text = if (isExternal) "Cupom:" else "Preço:",
                     style = MaterialTheme.typography.labelSmall
                 )
 
                 Text(
-                    text = priceText,
+                    text = if (isExternal) (couponCode ?: "---") else priceText,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -63,7 +67,7 @@ fun BottomContactBar(
                     disabledContentColor = Color.Black
                 )
             ) {
-                Text("Falar com vendedor")
+                Text(if (isExternal) "Ver localização" else "Falar com vendedor")
             }
         }
     }
@@ -72,11 +76,22 @@ fun BottomContactBar(
 @Preview(showBackground = true)
 @Composable
 fun BottomContactBarPreview() {
-    BottomContactBar(price = 150.0, onClick = {})
+    BottomContactBar(price = 150.0, onClick = {}, categoryType = "Serviços")
 }
 
 @Preview(showBackground = true)
 @Composable
 fun BottomContactBarZeroPreview() {
-    BottomContactBar(price = 0.0, onClick = {})
+    BottomContactBar(price = 0.0, onClick = {}, categoryType = "Serviços")
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BottomContactBarExternalPreview() {
+    BottomContactBar(
+        price = 0.0,
+        onClick = {},
+        categoryType = ServiceType.EXTERNAL.value,
+        couponCode = "CONDO20"
+    )
 }

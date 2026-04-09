@@ -15,7 +15,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val publicationsModule = module {
-    factory { GetPublicationByIdUseCase(get()) }
+    factory { GetPublicationByIdUseCase(get(), get()) }
     factory { GetPublicationsByCondominiumAndTypeUseCase(get()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(get()) }
     single<UserRepository> { UserRepositoryImpl(get()) }

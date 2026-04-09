@@ -34,7 +34,8 @@ fun PublicationsListScreen(
     navController: NavHostController,
     categoryType: String,
     navigateToPublicationSelected: (String) -> Unit,
-    viewModel: PublicationsListViewModel = koinViewModel()
+    viewModel: PublicationsListViewModel = koinViewModel(),
+    publicationsIds: List<String>?
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

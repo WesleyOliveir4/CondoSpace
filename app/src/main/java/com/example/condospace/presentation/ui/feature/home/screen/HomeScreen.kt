@@ -46,8 +46,8 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    navigateToPublishList: (String) -> Unit = {},
-    navigateToPublicationSelected: (String) -> Unit,
+    navigateToPublishList: (String, List<String>?) -> Unit,
+    navigateToPublicationSelected: (String, String?) -> Unit,
     navigateToSelectCondominium: (String) -> Unit,
 ) {
     val viewModel: HomeViewModel = koinViewModel()
@@ -95,8 +95,8 @@ fun HomeScreenContent(
     navController: NavHostController,
     uiState: HomeUiState.Success,
     onRefresh: () -> Unit,
-    navigateToPublishList: (String) -> Unit,
-    navigateToPublicationSelected: (String) -> Unit,
+    navigateToPublishList: (String, List<String>?) -> Unit,
+    navigateToPublicationSelected: (String, String?) -> Unit,
     navigateToSelectCondominium: (String) -> Unit
 ) {
     Scaffold(
@@ -124,7 +124,7 @@ fun HomeScreenContent(
                 ) {
                     CategoriesSection(
                         onCategoryClick = { categoryType ->
-                            navigateToPublishList(categoryType.title)
+                            navigateToPublishList(categoryType.title, null)
                         }
                     )
 
@@ -140,21 +140,34 @@ fun HomeScreenContent(
                         PublicationsSection(
                             title = stringResource(R.string.home_services_title),
                             publications = uiState.publicationsService,
-                            onSeeMoreClick = { navigateToPublishList("Serviço") },
-                            onItemClick = { navigateToPublicationSelected(it) }
+                            onSeeMoreClick = { type, listIds ->
+                                navigateToPublishList(type, listIds)
+                                             },
+                            onItemClick = { id, type ->
+                                navigateToPublicationSelected(id, type)
+                            }
                         )
 
                         PublicationsSection(
                             title = stringResource(R.string.home_recommendations_title),
                             publications = uiState.publicationsRecommendation,
-                            onSeeMoreClick = { navigateToPublishList("Recomendação") },
-                            onItemClick = { navigateToPublicationSelected(it) }
+                            onSeeMoreClick = { type, listIds ->
+                                navigateToPublishList(type, listIds)
+                            },
+                            onItemClick = { id, type ->
+                                navigateToPublicationSelected(id, type)
+                            }
                         )
 
                         PublicationsSection(
                             title = "Serviços próximos de você",
                             publications = uiState.externalServices.map { it.toPublicationUiModel() },
-                            onItemClick = { navigateToPublicationSelected(it) }
+                            onSeeMoreClick = { type, listIds ->
+                                navigateToPublishList(type, listIds)
+                            },
+                            onItemClick = { id, type ->
+                                navigateToPublicationSelected(id, type)
+                            }
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -184,8 +197,8 @@ fun HomeScreenPreview() {
                 publicationsRecommendation = PublicationsMocksPreview().listMockUi
             ),
             onRefresh = {},
-            navigateToPublishList = {},
-            navigateToPublicationSelected = {},
+            navigateToPublishList = { _, _ -> },
+            navigateToPublicationSelected = { _, _ -> },
             navigateToSelectCondominium = {}
         )
     }

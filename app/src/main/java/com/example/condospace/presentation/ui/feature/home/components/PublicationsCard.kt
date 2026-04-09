@@ -33,12 +33,13 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.condospace.presentation.model.PublicationImageUiModel
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.ui.feature.home.mocks.PublicationsMocksPreview
 
 @Composable
 fun PublicationsCard(
     publication: PublicationUiModel,
-    onClick: (String) -> Unit
+    onClick: (String, String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -46,7 +47,7 @@ fun PublicationsCard(
             .height(240.dp)
             .padding(end = 12.dp)
             .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp), ambientColor = Color.Black)
-            .clickable { onClick(publication.id) },
+            .clickable { onClick(publication.id, publication.publicationType) },
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
             containerColor = Color.White,
@@ -86,7 +87,7 @@ fun PublicationsCard(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                if (!publication.isExternal) {
+                if (!publication.publicationType.equals(ServiceType.EXTERNAL.value, ignoreCase = true)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
 
                         Icon(
@@ -113,8 +114,8 @@ fun PublicationsCard(
 fun PublicationsSection(
     title: String,
     publications: List<PublicationUiModel>,
-    onSeeMoreClick: () -> Unit = {},
-    onItemClick: (String) -> Unit = {}
+    onSeeMoreClick: (String, List<String>?) -> Unit = { _, _ -> },
+    onItemClick: (String, String) -> Unit = { _, _ -> }
 ) {
     if (publications.isEmpty()) return
     Column(
@@ -135,7 +136,12 @@ fun PublicationsSection(
             Text(
                 text = "Ver mais",
                 color = Color.Blue,
-                modifier = Modifier.clickable { onSeeMoreClick() }
+                modifier = Modifier.clickable {
+                    onSeeMoreClick(
+                        publications.first().publicationType,
+                        publications.map { it.id }
+                    )
+                }
             )
         }
 
@@ -148,7 +154,9 @@ fun PublicationsSection(
             items(publications) { publication ->
                 PublicationsCard(
                     publication = publication,
-                    onClick = { onItemClick(it) }
+                    onClick = { id, type ->
+                        onItemClick(id, type)
+                    }
                 )
             }
         }
@@ -173,7 +181,7 @@ fun PublicationsCardPreview() {
                 date = "2023-10-27",
                 imageUrlList = listOf(PublicationImageUiModel(url = "https://example.com/image.jpg", publicId = "1"))
             ),
-            onClick = {}
+            onClick = {id, type -> }
         )
     }
 }
