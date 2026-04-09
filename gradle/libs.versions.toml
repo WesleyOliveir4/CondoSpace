@@ -30,6 +30,9 @@ firebaseFirestoreVersion = "26.1.2"
 datastore = "1.1.2"
 cloudinary = "3.1.2"
 playServicesCastTv = "21.1.1"
+retrofit = "2.11.0"
+okhttp = "4.12.0"
+navigationRuntimeKtx = "2.9.7"
 
 [libraries]
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -69,6 +72,10 @@ google-firebase-firestore = { group = "com.google.firebase", name = "firebase-fi
 androidx-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 cloudinary-android = { group = "com.cloudinary", name = "cloudinary-android", version.ref = "cloudinary" }
 play-services-cast-tv = { group = "com.google.android.gms", name = "play-services-cast-tv", version.ref = "playServicesCastTv" }
+retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
+okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

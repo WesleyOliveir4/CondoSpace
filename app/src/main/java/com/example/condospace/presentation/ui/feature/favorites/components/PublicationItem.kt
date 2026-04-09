@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.MaterialTheme
@@ -88,12 +86,13 @@ fun PublicationItem(
 
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFFE8F0FE)
+                    color = if (publication.isExternal) Color(0xFFFFEBEE) else Color(0xFFE8F0FE)
                 ) {
                     Text(
-                        text = publication.publicationType,
+                        text = if (publication.isExternal) "Externo" else publication.publicationType,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        color = if (publication.isExternal) Color(0xFFC62828) else Color(0xFF1967D2)
                     )
                 }
             }

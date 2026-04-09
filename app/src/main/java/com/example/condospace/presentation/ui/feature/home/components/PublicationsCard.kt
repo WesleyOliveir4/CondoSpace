@@ -86,21 +86,23 @@ fun PublicationsCard(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!publication.isExternal) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
 
-                    Icon(
-                        imageVector = Icons.Default.Favorite,
-                        contentDescription = null,
-                        tint = Color.Red,
-                        modifier = Modifier.size(16.dp)
-                    )
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = Color.Red,
+                            modifier = Modifier.size(16.dp)
+                        )
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
 
-                    Text(
-                        text = "${publication.likes}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                        Text(
+                            text = "${publication.likes}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         }

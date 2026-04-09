@@ -9,12 +9,14 @@ import com.example.condospace.data.repositoryImpl.firebase.ImageRepositoryImpl
 import com.example.condospace.data.repositoryImpl.firebase.PublicationRepositoryImpl
 import com.example.condospace.data.repositoryImpl.dataStore.UserPreferencesRepositoryImpl
 import com.example.condospace.data.repositoryImpl.dataStore.UserRepositoryImpl
+import com.example.condospace.data.repositoryImpl.ExternalServiceRepositoryImpl
 import com.example.condospace.data.model.User
 import com.example.condospace.domain.repository.AuthRepository
 import com.example.condospace.domain.repository.ImageRepository
 import com.example.condospace.domain.repository.PublicationRepository
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.repository.UserRepository
+import com.example.condospace.domain.repository.ExternalServiceRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import org.koin.android.ext.koin.androidContext
@@ -36,4 +38,6 @@ val dataModule = module {
     
     single { androidContext().userDataStore }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(get()) }
+
+    single<ExternalServiceRepository> { ExternalServiceRepositoryImpl(get(), get(), get()) }
 }

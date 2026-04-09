@@ -7,15 +7,11 @@ plugins {
 
 android {
     namespace = "com.example.condospace"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.condospace"
-        minSdk = 35
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -79,6 +75,12 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.google.firebase.firestore)
     implementation(libs.play.services.cast.tv)
+
+    // Retrofit
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.serialization)
+    implementation(libs.okhttp.logging)
+    implementation(libs.androidx.navigation.runtime.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

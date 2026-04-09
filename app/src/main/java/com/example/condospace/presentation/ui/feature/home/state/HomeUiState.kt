@@ -1,5 +1,6 @@
 package com.example.condospace.presentation.ui.feature.home.state
 
+import com.example.condospace.presentation.model.ExternalServiceUiModel
 import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.UserUiModel
 
@@ -11,6 +12,7 @@ sealed interface HomeUiState {
         val condominiumName: String,
         val publicationsService: List<PublicationUiModel> = emptyList(),
         val publicationsRecommendation: List<PublicationUiModel> = emptyList(),
+        val externalServices: List<ExternalServiceUiModel> = emptyList(),
         val isRefreshing: Boolean = false,
         val actionError: String? = null
     ) : HomeUiState

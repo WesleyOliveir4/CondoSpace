@@ -5,8 +5,8 @@ import com.example.condospace.domain.entity.PublicationEntity
 
 data class PublicationUiModel(
     val id: String,
-    val publicationOwnerUuid: String,
-    val publicationCondominiumId: String,
+    val publicationOwnerUuid: String = "",
+    val publicationCondominiumId: String = "",
     val publicationOwner: String,
     val serviceProvider: String? = null,
     val contact: String? = null,
@@ -16,8 +16,9 @@ data class PublicationUiModel(
     val description: String,
     val publicationType: String,
     val price: Double,
-    val likes: Int,
-    val date: String
+    val likes: Int = 0,
+    val date: String,
+    val isExternal: Boolean = false
 )
 
 
@@ -36,7 +37,8 @@ fun PublicationEntity.toUiModel(): PublicationUiModel{
         publicationType = publicationType,
         price = price,
         likes = likes,
-        date = date
+        date = date,
+        isExternal = false
     )
 }
 
