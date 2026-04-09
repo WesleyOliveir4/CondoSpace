@@ -131,6 +131,7 @@ fun HomeScreenContent(
                         onCategoryClick = onCategoryClick
                     )
 
+
                     if (uiState.publicationsService.isEmpty() && uiState.publicationsRecommendation.isEmpty()) {
                         EmptyPublicationsState(
                             onAnnounceClick = {

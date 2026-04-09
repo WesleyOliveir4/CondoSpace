@@ -20,12 +20,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.model.CondominiumUiModel
@@ -37,6 +36,7 @@ import com.example.condospace.presentation.ui.feature.profile.components.UserDat
 import com.example.condospace.presentation.ui.feature.profile.state.UserDataUiState
 import com.example.condospace.presentation.ui.feature.profile.viewmodel.UserDataViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -69,14 +69,17 @@ fun UserDataScreenContent(
     onImageSelected: (Uri) -> Unit = {},
     onClearMessages: () -> Unit = {}
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(uiState) {
         if (uiState is UserDataUiState.Success) {
-            uiState.successMessage?.let {
+            val message = uiState.successMessage ?: uiState.error
+            if (message != null) {
                 onClearMessages()
-            }
-            uiState.error?.let {
-                onClearMessages()
+                scope.launch {
+                    snackbarHostState.showSnackbar(message)
+                }
             }
         }
     }
@@ -87,7 +90,8 @@ fun UserDataScreenContent(
                 title = "Meus dados",
                 onBackClick = { navController.popBackStack() }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
 
         Surface(
