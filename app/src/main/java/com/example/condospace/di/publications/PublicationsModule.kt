@@ -7,6 +7,7 @@ import com.example.condospace.domain.repository.PublicationRepository
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.repository.UserRepository
 import com.example.condospace.domain.usecase.publication.EditPublicationUseCase
+import com.example.condospace.domain.usecase.publication.GetContactUrlUseCase
 import com.example.condospace.domain.usecase.publication.GetPublicationByIdUseCase
 import com.example.condospace.domain.usecase.publication.GetPublicationsByCondominiumAndTypeUseCase
 import com.example.condospace.presentation.ui.feature.publications.viewmodel.EditPublicationViewModel
@@ -18,12 +19,13 @@ import org.koin.dsl.module
 val publicationsModule = module {
     factory { GetPublicationByIdUseCase(get(), get()) }
     factory { EditPublicationUseCase(get(), get()) }
+    factory { GetContactUrlUseCase() }
     factory { GetPublicationsByCondominiumAndTypeUseCase(get(), get()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(get()) }
     single<UserRepository> { UserRepositoryImpl(get()) }
     single<PublicationRepository> { PublicationRepositoryImpl(get()) }
 
     viewModel { EditPublicationViewModel(get(), get(), get()) }
-    viewModel { PublicationSelectedViewModel(get(), get(), get(), get()) }
+    viewModel { PublicationSelectedViewModel(get(), get(), get(), get(), get()) }
     viewModel { PublicationsListViewModel(get()) }
 }

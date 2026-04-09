@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.condospace.domain.repository.PublicationRepository
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.repository.UserRepository
+import com.example.condospace.domain.usecase.publication.GetContactUrlUseCase
 import com.example.condospace.domain.usecase.publication.GetPublicationByIdUseCase
+import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.toUiModel
 import com.example.condospace.presentation.ui.feature.publications.state.PublicationSelectedUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +20,8 @@ class PublicationSelectedViewModel(
     private val getPublicationByIdUseCase: GetPublicationByIdUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val userRepository: UserRepository,
-    private val publicationRepository: PublicationRepository
+    private val publicationRepository: PublicationRepository,
+    private val getContactUrlUseCase: GetContactUrlUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PublicationSelectedUiState>(PublicationSelectedUiState.Loading)
@@ -101,6 +104,15 @@ class PublicationSelectedViewModel(
             // 4. Update Likes in Publication Table
             publicationRepository.updatePublicationLikes(publicationId, increment)
         }
+    }
+
+    fun getContactUrl(publication: PublicationUiModel, categoryType: String?): String? {
+        return getContactUrlUseCase(
+            contact = publication.contact,
+            publicationOwner = publication.publicationOwner,
+            title = publication.title,
+            categoryType = categoryType
+        )
     }
 
     fun resetActionError() {

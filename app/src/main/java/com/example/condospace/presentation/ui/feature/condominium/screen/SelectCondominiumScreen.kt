@@ -1,6 +1,7 @@
 package com.example.condospace.presentation.ui.feature.condominium.screen
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -30,8 +31,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,6 +52,7 @@ import com.example.condospace.presentation.ui.feature.condominium.components.Sea
 import com.example.condospace.presentation.ui.feature.condominium.state.CondominiumState
 import com.example.condospace.presentation.ui.feature.condominium.viewmodel.SelectCondominiumViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -67,38 +69,49 @@ fun SelectCondominiumScreen(
     
     val snackbarHostState = remember { SnackbarHostState() }
     val successMsg = stringResource(R.string.condominium_update_success)
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(userId) {
         condominiumViewModel.fetchUserCondominium(userId)
     }
 
-    // Stable effect to handle Snackbars without cancellation on state changes
-    LaunchedEffect(Unit) {
-        snapshotFlow { condominiumState }.collect { state ->
-            if (state is CondominiumState.Success) {
-                if (state.saveSuccess) {
-                    snackbarHostState.showSnackbar(
-                        message = successMsg,
-                        duration = SnackbarDuration.Long
-                    )
-                    condominiumViewModel.resetActionState()
-                    if (registerFlow) {
-                        navigateToLogin()
+    LaunchedEffect(condominiumState) {
+        val state = condominiumState
+        when (state) {
+            is CondominiumState.Success if state.saveSuccess -> {
+                if (registerFlow) {
+                    navigateToLogin()
+                } else {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = successMsg,
+                            duration = SnackbarDuration.Short
+                        )
                     }
                 }
-                state.error?.let { message ->
-                    snackbarHostState.showSnackbar(
-                        message = message,
-                        duration = SnackbarDuration.Long
-                    )
-                    condominiumViewModel.resetActionState()
-                }
-            } else if (state is CondominiumState.Error) {
-                snackbarHostState.showSnackbar(
-                    message = state.message,
-                    duration = SnackbarDuration.Long
-                )
+                condominiumViewModel.resetActionState()
             }
+
+            is CondominiumState.Success if state.error != null -> {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = state.error,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+                condominiumViewModel.resetActionState()
+            }
+
+            is CondominiumState.Error -> {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = state.message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+
+            else -> {}
         }
     }
 
@@ -111,7 +124,8 @@ fun SelectCondominiumScreen(
             isSearching = isSearching,
             onSearchClick = { condominiumViewModel.searchCondominiumByCep(it) },
             onSaveCondominiumSelectedClick = { condominiumViewModel.saveCondominiumSelected(userId, it) },
-            onSaveCondominiumCreateClick = { condominiumViewModel.saveCondominiumCreated(userId, it) }
+            onSaveCondominiumCreateClick = { condominiumViewModel.saveCondominiumCreated(userId, it) },
+            isSaving = (condominiumState as? CondominiumState.Success)?.isSaving == true
         )
     }
 }
@@ -127,6 +141,7 @@ fun SelectCondominiumScreenContent(
     onSearchClick: (String) -> Unit,
     onSaveCondominiumSelectedClick: (CondominiumUiModel) -> Unit,
     onSaveCondominiumCreateClick: (CondominiumUiModel) -> Unit,
+    isSaving: Boolean,
 ) {
     Scaffold(
         topBar = {
@@ -148,18 +163,21 @@ fun SelectCondominiumScreenContent(
                     condominiumState.selectedCondominium
                 } else null
 
-                val isSaving = (condominiumState as? CondominiumState.Success)?.isSaving == true
-
                 SelectCondominiumLayout(
                     currentCondo = currentCondo,
                     searchResults = searchResults,
                     isSearching = isSearching,
+                    isSaving = isSaving,
                     onSearchClick = onSearchClick,
                     onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
                     onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
                 )
 
-                if (condominiumState is CondominiumState.Loading || isSaving) {
+                AnimatedVisibility(
+                    visible = condominiumState is CondominiumState.Loading || isSaving,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
                     val isInitialLoading = condominiumState is CondominiumState.Loading && currentCondo == null
                     Box(
                         modifier = Modifier
@@ -186,13 +204,13 @@ fun SelectCondominiumLayout(
     currentCondo: CondominiumUiModel?,
     searchResults: List<CondominiumUiModel>,
     isSearching: Boolean,
+    isSaving: Boolean,
     onSearchClick: (String) -> Unit,
     onSaveCondominiumSelectedClick: (CondominiumUiModel) -> Unit,
     onSaveCondominiumCreateClick: (CondominiumUiModel) -> Unit
 ) {
-    var isEditing by remember(currentCondo) { mutableStateOf(currentCondo == null) }
+    var isEditing by remember { mutableStateOf(currentCondo == null) }
     
-    // Auto-close editing mode when a condominium is successfully selected/found
     LaunchedEffect(currentCondo) {
         if (currentCondo != null) {
             isEditing = false
@@ -242,7 +260,7 @@ fun SelectCondominiumLayout(
                 SearchCondominiumCard(
                     searchResults = searchResults,
                     isSearching = isSearching,
-                    isSaving = false,
+                    isSaving = isSaving,
                     onSearchClick = onSearchClick,
                     onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
                     onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
@@ -266,6 +284,7 @@ fun SelectCondominiumScreenPreview() {
             onSearchClick = {},
             onSaveCondominiumSelectedClick = {},
             onSaveCondominiumCreateClick = {},
+            isSaving = false
         )
     }
 }

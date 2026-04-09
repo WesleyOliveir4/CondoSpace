@@ -1,5 +1,7 @@
 package com.example.condospace.presentation.ui.feature.publications.screen
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,6 +44,7 @@ fun PublicationSelectedScreen(
 ) {
     val viewModel: PublicationSelectedViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(publicationId) {
         viewModel.loadPublication(publicationId, categoryType)
@@ -58,7 +62,14 @@ fun PublicationSelectedScreen(
                     navController = navController,
                     uiState = state,
                     onFavoriteClick = { viewModel.onFavoriteClick() },
-                    categoryType
+                    onContactClick = {
+                        val url = viewModel.getContactUrl(state.publication, categoryType)
+                        url?.let {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                            context.startActivity(intent)
+                        }
+                    },
+                    categoryType = categoryType
                 )
 
                 state.actionError?.let { message ->
@@ -84,6 +95,7 @@ fun PublicationSelectedScreenContent(
     navController: NavHostController,
     uiState: PublicationSelectedUiState.Success,
     onFavoriteClick: () -> Unit = {},
+    onContactClick: () -> Unit = {},
     categoryType: String?
 ) {
     val publication = uiState.publication
@@ -99,9 +111,7 @@ fun PublicationSelectedScreenContent(
                 price = publication.price,
                 categoryType = categoryType,
                 couponCode = publication.coupon,
-                onClick = {
-                    // Ação de contato
-                }
+                onClick = onContactClick
             )
         }
     ) { innerPadding ->
