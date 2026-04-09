@@ -8,6 +8,7 @@ import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.usecase.publication.GetPublicationsByCondominiumUseCase
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.model.toUiModel
+import com.example.condospace.presentation.ui.enums.CategoryType
 import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.ui.feature.home.state.HomeUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,9 +81,14 @@ class HomeViewModel(
     private fun updateHomeData(list: List<PublicationEntity>) {
         val services = list.filter { it.publicationType == ServiceType.SERVICE.value }.map { it.toUiModel() }
         val recommendations = list.filter { it.publicationType == ServiceType.RECOMMENDATION.value }.map { it.toUiModel() }
+        val products = list.filter {
+            it.publicationType != ServiceType.RECOMMENDATION.value &&
+            it.publicationType != ServiceType.SERVICE.value
+        }.map { it.toUiModel() }
 
         updateSuccess { 
             it.copy(
+                publicationsProducts = products,
                 publicationsService = services,
                 publicationsRecommendation = recommendations,
                 isRefreshing = false,
@@ -105,6 +111,7 @@ class HomeViewModel(
     private fun clearHomeData() {
         updateSuccess { 
             it.copy(
+                publicationsProducts = emptyList(),
                 publicationsService = emptyList(), 
                 publicationsRecommendation = emptyList(),
                 externalServices = emptyList(),
@@ -134,6 +141,17 @@ class HomeViewModel(
         val user = (uiState.value as? HomeUiState.Success)?.user
         user?.condominium?.id?.let { 
             fetchHomeContent(it, user.condominium.cep)
+        }
+    }
+
+    fun getPublicationIdsByCategory(categoryTitle: String): List<String> {
+        val state = _uiState.value as? HomeUiState.Success ?: return emptyList()
+        return if (categoryTitle == CategoryType.ALLTYPES.title) {
+            state.publicationsProducts.map { it.id }
+        } else {
+            state.publicationsProducts
+                .filter { it.publicationType == categoryTitle }
+                .map { it.id }
         }
     }
 

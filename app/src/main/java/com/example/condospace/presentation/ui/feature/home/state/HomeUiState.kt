@@ -10,6 +10,7 @@ sealed interface HomeUiState {
     data class Success(
         val user: UserUiModel,
         val condominiumName: String,
+        val publicationsProducts: List<PublicationUiModel> = emptyList(),
         val publicationsService: List<PublicationUiModel> = emptyList(),
         val publicationsRecommendation: List<PublicationUiModel> = emptyList(),
         val externalServices: List<PublicationUiModel> = emptyList(),

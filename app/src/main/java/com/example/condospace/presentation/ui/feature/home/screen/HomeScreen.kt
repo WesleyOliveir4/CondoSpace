@@ -29,11 +29,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.condospace.R
 import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.model.UserUiModel
-import com.example.condospace.presentation.model.toPublicationUiModel
 import com.example.condospace.presentation.navigation.NavRoutes
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
 import com.example.condospace.presentation.ui.component.error.ErrorDialog
 import com.example.condospace.presentation.ui.component.navBar.NavBar
+import com.example.condospace.presentation.ui.enums.CategoryType
 import com.example.condospace.presentation.ui.feature.home.components.CategoriesSection
 import com.example.condospace.presentation.ui.feature.home.components.EmptyPublicationsState
 import com.example.condospace.presentation.ui.feature.home.components.PublicationsSection
@@ -68,7 +68,11 @@ fun HomeScreen(
                     onRefresh = { viewModel.refreshPublications() },
                     navigateToPublishList = navigateToPublishList,
                     navigateToPublicationSelected = navigateToPublicationSelected,
-                    navigateToSelectCondominium = navigateToSelectCondominium
+                    navigateToSelectCondominium = navigateToSelectCondominium,
+                    onCategoryClick = { categoryType ->
+                        val filteredIds = viewModel.getPublicationIdsByCategory(categoryType.title)
+                        navigateToPublishList(categoryType.title, filteredIds)
+                    }
                 )
 
                 state.actionError?.let { message ->
@@ -97,7 +101,8 @@ fun HomeScreenContent(
     onRefresh: () -> Unit,
     navigateToPublishList: (String, List<String>?) -> Unit,
     navigateToPublicationSelected: (String, String?) -> Unit,
-    navigateToSelectCondominium: (String) -> Unit
+    navigateToSelectCondominium: (String) -> Unit,
+    onCategoryClick: (CategoryType) -> Unit
 ) {
     Scaffold(
         bottomBar = { NavBar(navController, "Home") },
@@ -123,9 +128,7 @@ fun HomeScreenContent(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
                     CategoriesSection(
-                        onCategoryClick = { categoryType ->
-                            navigateToPublishList(categoryType.title, null)
-                        }
+                        onCategoryClick = onCategoryClick
                     )
 
                     if (uiState.publicationsService.isEmpty() && uiState.publicationsRecommendation.isEmpty()) {
@@ -199,7 +202,8 @@ fun HomeScreenPreview() {
             onRefresh = {},
             navigateToPublishList = { _, _ -> },
             navigateToPublicationSelected = { _, _ -> },
-            navigateToSelectCondominium = {}
+            navigateToSelectCondominium = {},
+            onCategoryClick = {}
         )
     }
 }
