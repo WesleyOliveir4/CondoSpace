@@ -8,30 +8,23 @@ import com.example.condospace.presentation.ui.feature.publications.state.EditPub
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class EditPublicationViewModel(
     private val getPublicationByIdUseCase: GetPublicationByIdUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(EditPublicationUiState())
+    private val _uiState = MutableStateFlow<EditPublicationUiState>(EditPublicationUiState.Loading)
     val uiState: StateFlow<EditPublicationUiState> = _uiState.asStateFlow()
 
     fun loadPublication(publicationId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.value = EditPublicationUiState.Loading
             val result = getPublicationByIdUseCase(publicationId)
             result.onSuccess { entity ->
-                _uiState.update { it.copy(
-                    publication = entity.toUiModel(),
-                    isLoading = false
-                ) }
+                _uiState.value = EditPublicationUiState.Success(entity.toUiModel())
             }.onFailure { exception ->
-                _uiState.update { it.copy(
-                    error = exception.message ?: "Erro ao carregar publicação",
-                    isLoading = false
-                ) }
+                _uiState.value = EditPublicationUiState.Error(exception.message ?: "Erro ao carregar publicação")
             }
         }
     }

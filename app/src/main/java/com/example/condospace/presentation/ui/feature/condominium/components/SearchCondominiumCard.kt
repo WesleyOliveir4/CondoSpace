@@ -27,7 +27,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,11 +36,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.condospace.R
 import com.example.condospace.presentation.model.CondominiumUiModel
+import com.example.condospace.presentation.ui.component.OutlinedTextFieldCS
 import com.example.condospace.presentation.utils.CepUtils
 import com.example.condospace.presentation.utils.CepUtils.applyCepMask
 
@@ -67,7 +69,7 @@ fun SearchCondominiumCard(
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = "Buscar Novo Condomínio",
+                text = stringResource(id = R.string.condominium_search_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -75,22 +77,20 @@ fun SearchCondominiumCard(
             
             Spacer(Modifier.height(16.dp))
 
-            OutlinedTextField(
+            OutlinedTextFieldCS(
+                label = stringResource(id = R.string.condominium_cep_label),
                 value = cep,
-                onValueChange = { 
+                onValueChange = {
                     val digits = it.filter { char -> char.isDigit() }
-                    if (digits.length <= 8) cep = digits 
-                },
-                label = { Text("Digite o CEP") },
-                placeholder = { Text("Ex: 12345-678") },
-                modifier = Modifier.fillMaxWidth(),
+                    if (digits.length <= 8) cep = digits
+                                },
+                placeholder = stringResource(id = R.string.condominium_cep_placeholder),
                 enabled = !isSearching && !isSaving,
-                shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 visualTransformation = CepUtils.cepVisualTransformation,
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = null)
-                }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
             Spacer(Modifier.height(12.dp))
@@ -116,7 +116,7 @@ fun SearchCondominiumCard(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Pesquisar", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.condominium_search_button), fontWeight = FontWeight.SemiBold)
                 }
             }
 
@@ -130,7 +130,7 @@ fun SearchCondominiumCard(
                     
                     if (searchResults.isNotEmpty()) {
                         Text(
-                            text = "Condomínios encontrados:",
+                            text = stringResource(id = R.string.condominium_results_label),
                             style = MaterialTheme.typography.labelLarge,
                             color = Color.Gray
                         )
@@ -192,7 +192,7 @@ private fun CondoItem(
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = "CEP: ${condo.cep.applyCepMask()}",
+                text = stringResource(id = R.string.cep_label, condo.cep.applyCepMask()),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
@@ -209,20 +209,19 @@ private fun EmptySearchResultsContent(
 ) {
     Column {
         Text(
-            text = "Nenhum condomínio cadastrado neste CEP.",
+            text = stringResource(id = R.string.condominium_not_found),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.error
         )
         Spacer(Modifier.height(16.dp))
-        
-        OutlinedTextField(
+
+        OutlinedTextFieldCS(
+            label = stringResource(id = R.string.condominium_name_label),
             value = manualName,
-            onValueChange = onNameChange,
-            label = { Text("Nome do condomínio") },
-            placeholder = { Text("Digite o nome para cadastrar") },
             modifier = Modifier.fillMaxWidth(),
+            onValueChange = onNameChange,
+            placeholder = stringResource(id = R.string.condominium_name_placeholder),
             enabled = !isSaving,
-            shape = RoundedCornerShape(12.dp)
         )
 
         Spacer(Modifier.height(16.dp))
@@ -245,7 +244,7 @@ private fun EmptySearchResultsContent(
                     strokeWidth = 2.dp
                 )
             } else {
-                Text("Cadastrar e Selecionar", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(id = R.string.condominium_register_select_button), fontWeight = FontWeight.SemiBold)
             }
         }
     }

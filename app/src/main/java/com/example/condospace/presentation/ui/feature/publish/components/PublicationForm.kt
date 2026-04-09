@@ -33,7 +33,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,14 +45,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
+import com.example.condospace.R
 import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.UserUiModel
+import com.example.condospace.presentation.ui.component.OutlinedTextFieldCS
 import com.example.condospace.presentation.ui.enums.CategoryType
 import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.utils.CurrencyUtils
@@ -137,7 +139,7 @@ fun PublicationForm(
         images = images,
         onAddPhoto = { galleryLauncher.launch("image/*") },
         onRemovePhoto = { uri -> images = images - uri },
-        buttonText = if (initialPublication != null) "Salvar alterações" else "Publicar anúncio",
+        buttonText = if (initialPublication != null) stringResource(R.string.publish_button_save) else stringResource(R.string.publish_button_create),
         isButtonEnabled = isButtonEnabled,
         onButtonClick = {
             val date = initialPublication?.date ?: LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
@@ -245,10 +247,10 @@ fun PublicationFormCard(
             Text(text = formTitle, style = MaterialTheme.typography.titleMedium)
 
             FormField(
-                label = "Título",
+                label = stringResource(R.string.publish_title_label),
                 value = titleValue,
                 onValueChange = onTitleChange,
-                placeholder = "Ex: Título do seu anúncio"
+                placeholder = stringResource(R.string.publish_title_placeholder)
             )
 
             if (showCategorySelector) {
@@ -257,23 +259,23 @@ fun PublicationFormCard(
 
             if (showProviderField) {
                 FormField(
-                    label = "Nome do prestador",
+                    label = stringResource(R.string.publish_provider_name_label),
                     value = providerValue,
                     onValueChange = onProviderChange,
-                    placeholder = "Quem você está indicando?"
+                    placeholder = stringResource(R.string.publish_provider_name_placeholder)
                 )
             }
 
             FormField(
-                label = "Descrição",
+                label = stringResource(R.string.publish_description_label),
                 value = descriptionValue,
                 onValueChange = onDescriptionChange,
                 modifier = Modifier.height(120.dp),
                 singleLine = false,
-                placeholder = "Dê mais detalhes sobre o que está anunciando..."
+                placeholder = stringResource(R.string.publish_description_placeholder)
             )
 
-            Text(text = "Fotos", style = MaterialTheme.typography.labelMedium)
+            Text(text = stringResource(R.string.publish_photos_label), style = MaterialTheme.typography.labelMedium)
             PhotoCarousel(
                 images = images,
                 onAddPhoto = onAddPhoto,
@@ -282,30 +284,30 @@ fun PublicationFormCard(
 
             if (showPriceField) {
                 FormField(
-                    label = "Preço em R$",
+                    label = stringResource(R.string.publish_price_label),
                     value = priceValue,
                     onValueChange = onPriceChange,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    placeholder = "0,00"
+                    placeholder = stringResource(R.string.publish_price_placeholder)
                 )
             }
 
             if (showLocationField) {
                 FormField(
-                    label = "Localização / Atendimento",
+                    label = stringResource(R.string.publish_location_label),
                     value = locationValue,
                     onValueChange = onLocationChange,
-                    placeholder = "Onde você atende?"
+                    placeholder = stringResource(R.string.publish_location_placeholder)
                 )
             }
 
             if (showContactField) {
                 FormField(
-                    label = "Contato do prestador",
+                    label = stringResource(R.string.publish_provider_contact_label),
                     value = contactValue,
                     onValueChange = onContactChange,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    placeholder = "(00) 00000-0000",
+                    placeholder = stringResource(R.string.publish_provider_contact_placeholder),
                     visualTransformation = contactVisualTransformation
                 )
             }
@@ -339,19 +341,16 @@ fun FormField(
     singleLine: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(text = label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = 4.dp))
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = placeholder?.let { { Text(it) } },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = keyboardOptions,
-            singleLine = singleLine,
-            shape = RoundedCornerShape(8.dp),
-            visualTransformation = visualTransformation
-        )
-    }
+    OutlinedTextFieldCS(
+        label = label,
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = placeholder ?: "",
+        modifier = modifier.fillMaxWidth(),
+        keyboardOptions = keyboardOptions,
+        singleLine = singleLine,
+        visualTransformation = visualTransformation
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -359,21 +358,20 @@ fun FormField(
 fun CategorySelector(selectedCategory: CategoryType?, onCategorySelected: (CategoryType) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Categoria", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = 4.dp))
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
         ) {
-            OutlinedTextField(
+            OutlinedTextFieldCS(
+                label = stringResource(R.string.publish_category_label),
                 value = selectedCategory?.title ?: "",
                 onValueChange = {},
                 readOnly = true,
-                placeholder = { Text("Selecione a categoria") },
+                placeholder = stringResource(R.string.publish_category_placeholder),
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                 modifier = Modifier
                     .menuAnchor()
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
+                    .fillMaxWidth()
             )
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 CategoryType.entries.filter { it != CategoryType.ALLTYPES }.forEach { category ->
@@ -429,7 +427,7 @@ fun PhotoCarousel(images: List<Uri>, onAddPhoto: () -> Unit, onRemovePhoto: (Uri
                     .clickable { onAddPhoto() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Adicionar foto")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.publish_add_photo_description))
             }
         }
     }

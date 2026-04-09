@@ -8,7 +8,7 @@ import com.example.condospace.presentation.ui.feature.profile.state.SettingsUiSt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
@@ -16,7 +16,7 @@ class SettingsViewModel(
     private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
+    private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
@@ -25,32 +25,44 @@ class SettingsViewModel(
 
     private fun loadSettings() {
         viewModelScope.launch {
-            userPreferencesRepository.userData.collect { user ->
-                _uiState.update { it.copy(notificationsEnabled = user?.notificationsEnabled ?: true) }
+            userPreferencesRepository.userData.collectLatest { user ->
+                _uiState.value = SettingsUiState.Success(
+                    notificationsEnabled = user?.notificationsEnabled ?: true
+                )
             }
         }
     }
 
     fun toggleNotifications(enabled: Boolean) {
-        viewModelScope.launch {
-            val currentUser = userPreferencesRepository.getUserData()
-            currentUser?.let { user ->
-                _uiState.update { it.copy(isLoading = true) }
-                val updatedUser = user.copy(notificationsEnabled = enabled)
-                
-                val result = updateUserUseCase(updatedUser)
-                
-                result.onFailure { error ->
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
+        val currentState = _uiState.value
+        if (currentState is SettingsUiState.Success) {
+            viewModelScope.launch {
+                _uiState.value = currentState.copy(isUpdating = true)
+                val currentUser = userPreferencesRepository.getUserData()
+                currentUser?.let { user ->
+                    val updatedUser = user.copy(notificationsEnabled = enabled)
+                    val result = updateUserUseCase(updatedUser)
+                    
+                    result.onSuccess {
+                        _uiState.value = currentState.copy(
+                            notificationsEnabled = enabled,
+                            isUpdating = false
+                        )
+                    }.onFailure { error ->
+                        _uiState.value = currentState.copy(
+                            isUpdating = false,
                             error = error.message ?: "Erro ao atualizar configurações"
                         ) 
                     }
-                }.onSuccess {
-                    _uiState.update { it.copy(isLoading = false) }
                 }
             }
+        }
+    }
+
+    fun clearError() {
+        val currentState = _uiState.value
+        if (currentState is SettingsUiState.Success) {
+            _uiState.value = currentState.copy(error = null)
         }
     }
 }

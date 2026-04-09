@@ -1,7 +1,13 @@
 package com.example.condospace.presentation.ui.feature.profile.state
 
-data class SettingsUiState(
-    val notificationsEnabled: Boolean = true,
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
+sealed interface SettingsUiState {
+    data object Loading : SettingsUiState
+    
+    data class Success(
+        val notificationsEnabled: Boolean,
+        val isUpdating: Boolean = false,
+        val error: String? = null
+    ) : SettingsUiState
+    
+    data class Error(val message: String) : SettingsUiState
+}

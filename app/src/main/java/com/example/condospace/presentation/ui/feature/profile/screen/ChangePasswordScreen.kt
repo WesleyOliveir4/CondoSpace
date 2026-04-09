@@ -23,11 +23,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.presentation.model.CondominiumUiModel
-import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
+import com.example.condospace.presentation.ui.component.error.ErrorDialog
 import com.example.condospace.presentation.ui.feature.profile.components.ChangePasswordCard
-import com.example.condospace.presentation.ui.feature.profile.state.UserDataUiState
+import com.example.condospace.presentation.ui.feature.profile.state.ChangePasswordUiState
 import com.example.condospace.presentation.ui.feature.profile.viewmodel.ChangePasswordViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 import org.koin.androidx.compose.koinViewModel
@@ -40,17 +39,11 @@ fun ChangePasswordScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(uiState.successMessage) {
-        uiState.successMessage?.let {
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+    LaunchedEffect(uiState) {
+        val state = uiState
+        if (state is ChangePasswordUiState.Success) {
+            Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
             navController.popBackStack()
-        }
-    }
-
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            viewModel.clearMessages()
         }
     }
 
@@ -58,7 +51,8 @@ fun ChangePasswordScreen(
         ChangePasswordScreenContent(
             navController = navController,
             uiState = uiState,
-            onPasswordChange = { viewModel.updatePassword(it) }
+            onPasswordChange = { viewModel.updatePassword(it) },
+            onResetState = { viewModel.resetState() }
         )
     }
 }
@@ -68,8 +62,9 @@ fun ChangePasswordScreen(
 @Composable
 fun ChangePasswordScreenContent(
     navController: NavHostController,
-    uiState: UserDataUiState,
-    onPasswordChange: (String) -> Unit
+    uiState: ChangePasswordUiState,
+    onPasswordChange: (String) -> Unit,
+    onResetState: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -86,12 +81,22 @@ fun ChangePasswordScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+            when (uiState) {
+                is ChangePasswordUiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
                 }
-            } else {
-                ChangePasswordComponent(onPasswordChange = onPasswordChange)
+                is ChangePasswordUiState.Error -> {
+                    ErrorDialog(
+                        message = uiState.message,
+                        onDismiss = onResetState
+                    )
+                    ChangePasswordComponent(onPasswordChange = onPasswordChange)
+                }
+                else -> {
+                    ChangePasswordComponent(onPasswordChange = onPasswordChange)
+                }
             }
         }
     }
@@ -121,17 +126,7 @@ fun ChangePasswordScreenPreview() {
     CondoSpaceTheme {
         ChangePasswordScreenContent(
             navController = navController,
-            uiState = UserDataUiState(
-                user = UserUiModel(
-                    name = "João Silva",
-                    phoneNumber = "(11) 98999-2000",
-                    email = "john.jay@example.com",
-                    condominium = CondominiumUiModel(
-                        name = "Condomínio Exemplo",
-                        cep = "12345-678",
-                    )
-                )
-            ),
+            uiState = ChangePasswordUiState.Idle,
             onPasswordChange = {}
         )
     }

@@ -2,7 +2,6 @@ package com.example.condospace.presentation.ui.feature.publications.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.condospace.data.mapper.toEntity
 import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.usecase.publication.GetPublicationsByCondominiumAndTypeUseCase
 import com.example.condospace.presentation.model.toUiModel
@@ -11,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PublicationsListViewModel(
@@ -19,7 +17,7 @@ class PublicationsListViewModel(
     private val getPublicationsByCondominiumAndTypeUseCase: GetPublicationsByCondominiumAndTypeUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PublicationsListUiState())
+    private val _uiState = MutableStateFlow<PublicationsListUiState>(PublicationsListUiState.Loading)
     val uiState: StateFlow<PublicationsListUiState> = _uiState.asStateFlow()
 
     private var currentCategory: String? = null
@@ -31,8 +29,7 @@ class PublicationsListViewModel(
 
     private fun observeUserData() {
         viewModelScope.launch {
-            userPreferencesRepository.userData.collectLatest { userModel ->
-                val userEntity = userModel?.toEntity()
+            userPreferencesRepository.userData.collectLatest { userEntity ->
                 val condominiumId = userEntity?.condominiumEntity?.id
                 
                 if (!condominiumId.isNullOrBlank()) {
@@ -44,18 +41,16 @@ class PublicationsListViewModel(
 
     private fun loadPublications(condominiumId: String, type: String?) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.value = PublicationsListUiState.Loading
             val result = getPublicationsByCondominiumAndTypeUseCase(condominiumId, type)
             result.onSuccess { list ->
-                _uiState.update { it.copy(
-                    publications = list.map { it.toUiModel() },
-                    isLoading = false
-                ) }
+                _uiState.value = PublicationsListUiState.Success(
+                    publications = list.map { it.toUiModel() }
+                )
             }.onFailure { e ->
-                _uiState.update { it.copy(
-                    error = e.message ?: "Erro ao carregar publicações",
-                    isLoading = false
-                ) }
+                _uiState.value = PublicationsListUiState.Error(
+                    message = e.message ?: "Erro ao carregar publicações"
+                )
             }
         }
     }

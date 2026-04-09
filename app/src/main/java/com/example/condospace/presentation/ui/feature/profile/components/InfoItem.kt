@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +37,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.condospace.R
+import com.example.condospace.presentation.ui.component.OutlinedTextFieldCS
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
 import com.example.condospace.presentation.utils.PhoneUtils.applyPhoneMask
 import com.example.condospace.presentation.utils.PhoneUtils.removeMask
@@ -89,16 +89,9 @@ fun InfoItem(
             modifier = Modifier.weight(1f)
         ) {
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
             if (isEditing) {
-                OutlinedTextField(
+
+                OutlinedTextFieldCS(
                     value = editedValue,
                     onValueChange = { newValue ->
                         if (keyboardOptions.keyboardType == KeyboardType.Phone) {
@@ -113,14 +106,24 @@ fun InfoItem(
                     singleLine = true,
                     isError = !isInputValid && editedValue.isNotEmpty(),
                     visualTransformation = visualTransformation,
-                    keyboardOptions = keyboardOptions
+                    keyboardOptions = keyboardOptions,
+                    label = title
                 )
+
             } else {
                 val displayValue = if (keyboardOptions.keyboardType == KeyboardType.Phone) {
                     value.applyPhoneMask()
                 } else {
                     value
                 }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = displayValue,
                     style = MaterialTheme.typography.bodyMedium
@@ -137,7 +140,6 @@ fun InfoItem(
                         enabled = isInputValid,
                         onClick = {
                             isEditing = false
-                            // Envia o valor limpo (sem máscara) ao confirmar
                             val finalValue = if (keyboardOptions.keyboardType == KeyboardType.Phone) {
                                 removeMask(editedValue)
                             } else {
@@ -172,7 +174,6 @@ fun InfoItem(
                 IconButton(
                     onClick = {
                         isEditing = true
-                        // Começa vazio se houver transformação visual (como senha)
                         editedValue = if (visualTransformation != VisualTransformation.None) "" else value
                     }
                 ) {

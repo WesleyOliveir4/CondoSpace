@@ -1,20 +1,26 @@
 package com.example.condospace.presentation.ui.feature.favorites.screen
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.condospace.presentation.ui.component.navBar.NavBar
+import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.CondoSpaceTopBar
+import com.example.condospace.presentation.ui.component.error.EmptyState
+import com.example.condospace.presentation.ui.component.navBar.NavBar
 import com.example.condospace.presentation.ui.feature.favorites.components.PublicationItem
 import com.example.condospace.presentation.ui.feature.favorites.components.SearchPublications
 import com.example.condospace.presentation.ui.feature.favorites.state.FavoritesUiState
@@ -32,12 +38,26 @@ fun FavoritesScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CondoSpaceTheme {
-        FavoritesScreenContent(
-            navController = navController,
-            uiState = uiState,
-            navigateToPublicationSelected = navigateToPublicationSelected,
-            navigateToSelectCondominium = navigateToSelectCondominium
-        )
+        when (val state = uiState) {
+            is FavoritesUiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            is FavoritesUiState.Success -> {
+                FavoritesScreenContent(
+                    navController = navController,
+                    uiState = state,
+                    navigateToPublicationSelected = navigateToPublicationSelected,
+                    navigateToSelectCondominium = navigateToSelectCondominium
+                )
+            }
+            is FavoritesUiState.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = state.message, color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
     }
 }
 
@@ -46,7 +66,7 @@ fun FavoritesScreen(
 @Composable
 fun FavoritesScreenContent(
     navController: NavHostController,
-    uiState: FavoritesUiState,
+    uiState: FavoritesUiState.Success,
     navigateToPublicationSelected: (String) -> Unit,
     navigateToSelectCondominium: (String) -> Unit
 ) {
@@ -56,7 +76,7 @@ fun FavoritesScreenContent(
             CondoSpaceTopBar(
                 condominiumName = uiState.condominiumName,
                 residenceSelector = {
-                    navigateToSelectCondominium(uiState.userUuid)
+                    navigateToSelectCondominium(uiState.user.uuid)
                 }
             )
         }
@@ -69,7 +89,12 @@ fun FavoritesScreenContent(
             color = MaterialTheme.colorScheme.background
         ) {
             SearchPublications(
-                publications = uiState.publications
+                publications = uiState.publications,
+                emptyState = {
+                    EmptyState(
+                        title = "Nenhuma publicação\n favoritada."
+                    )
+                }
             ) { publication ->
                 PublicationItem(
                     publication = publication,
@@ -89,9 +114,9 @@ fun FavoritesScreenPreview() {
     CondoSpaceTheme {
         FavoritesScreenContent(
             navController = navController,
-            uiState = FavoritesUiState(
-                condominiumName = "Condomínio Exemplo",
-                userUuid = "123"
+            uiState = FavoritesUiState.Success(
+                user = UserUiModel(uuid = "123", name = "Teste"),
+                condominiumName = "Condomínio Exemplo"
             ),
             navigateToPublicationSelected = {},
             navigateToSelectCondominium = {}

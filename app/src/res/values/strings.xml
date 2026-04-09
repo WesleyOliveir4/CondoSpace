@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">CondoSpace</string>
+    <string name="confirm">Confirmar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="edit">Editar</string>
+    <string name="phone">Telefone</string>
+    <string name="full_name">Nome Completo</string>
+    <string name="password">Senha</string>
+    <string name="password_hint_title">Dicas para uma senha forte:</string>
+    <string name="password_hint_length">Mínimo de 6 caracteres</string>
+    <string name="password_hint_complexity">Use letras e números</string>
+    <string name="password_hint_avoid_personal">Evite datas de nascimento</string>
+
+    <!-- Login -->
+    <string name="login_welcome_subtitle">Marketplace do seu condomínio</string>
+    <string name="login_email_label">E-mail</string>
+    <string name="login_email_placeholder">seu@email.com</string>
+    <string name="login_password_placeholder">••••••••</string>
+    <string name="login_forgot_password">Esqueci minha senha</string>
+    <string name="login_button_text">Entrar</string>
+    <string name="login_no_account_text">Não tem uma conta? </string>
+    <string name="login_register_action">Cadastrar</string>
+
+    <!-- Register -->
+    <string name="register_title">Criar Conta</string>
+    <string name="register_subtitle">Junte-se ao marketplace do seu condomínio</string>
+    <string name="register_username_label">Nome do usuário</string>
+    <string name="register_username_placeholder">Seu nome completo</string>
+    <string name="register_email_label">E-mail</string>
+    <string name="register_email_placeholder">seu@email.com</string>
+    <string name="register_password_label">Senha</string>
+    <string name="register_password_placeholder">Mínimo 6 caracteres</string>
+    <string name="register_phone_label">Telefone</string>
+    <string name="register_phone_placeholder">(00) 00000-0000</string>
+    <string name="register_button_text">Criar conta</string>
+
+    <!-- Content Descriptions -->
+    <string name="content_description_logo">Logo</string>
+</resources>

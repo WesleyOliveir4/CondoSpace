@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.presentation.ui.component.TopBarReturn
+import com.example.condospace.presentation.ui.component.error.ErrorDialog
 import com.example.condospace.presentation.ui.feature.profile.components.SettingsCard
 import com.example.condospace.presentation.ui.feature.profile.state.SettingsUiState
 import com.example.condospace.presentation.ui.feature.profile.viewmodel.SettingsViewModel
@@ -38,7 +39,8 @@ fun SettingsScreen(
         SettingsScreenContent(
             navController = navController,
             uiState = uiState,
-            onNotificationsToggled = { viewModel.toggleNotifications(it) }
+            onNotificationsToggled = { viewModel.toggleNotifications(it) },
+            onClearError = { viewModel.clearError() }
         )
     }
 }
@@ -48,7 +50,8 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     navController: NavHostController,
     uiState: SettingsUiState,
-    onNotificationsToggled: (Boolean) -> Unit
+    onNotificationsToggled: (Boolean) -> Unit,
+    onClearError: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -64,15 +67,52 @@ fun SettingsScreenContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+            when (uiState) {
+                is SettingsUiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
                 }
-            } else {
-                SettingsComponent(
-                    notificationsEnabled = uiState.notificationsEnabled,
-                    onNotificationsToggled = onNotificationsToggled
-                )
+
+                is SettingsUiState.Error -> {
+                    ErrorDialog(
+                        title = "Erro",
+                        message = uiState.message,
+                        onDismiss = onClearError
+                    )
+                    SettingsComponent(
+                        notificationsEnabled = true,
+                        onNotificationsToggled = onNotificationsToggled
+                    )
+                }
+
+                is SettingsUiState.Success -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        SettingsComponent(
+                            notificationsEnabled = uiState.notificationsEnabled,
+                            onNotificationsToggled = onNotificationsToggled
+                        )
+
+                        if (uiState.isUpdating) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.1f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                        uiState.error?.let {
+                            ErrorDialog(
+                                title = "Erro ao salvar",
+                                message = it,
+                                onDismiss = onClearError
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -103,7 +143,7 @@ fun SettingsScreenPreview() {
     CondoSpaceTheme {
         SettingsScreenContent(
             navController = navController,
-            uiState = SettingsUiState(notificationsEnabled = true),
+            uiState = SettingsUiState.Success(notificationsEnabled = true),
             onNotificationsToggled = {}
         )
     }

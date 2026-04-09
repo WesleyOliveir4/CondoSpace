@@ -34,11 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.condospace.R
 import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
 import com.example.condospace.presentation.ui.feature.condominium.components.CurrentCondominiumCard
@@ -123,7 +125,7 @@ fun SelectCondominiumScreenContent(
     Scaffold(
         topBar = {
             TopBarReturn(
-                title = "Condomínio",
+                title = stringResource(id = R.string.condominium_title),
                 onBackClick = { navController.navigateUp() }
             )
         },
@@ -176,8 +178,6 @@ fun SelectCondominiumLayout(
     onSaveCondominiumSelectedClick: (CondominiumUiModel) -> Unit,
     onSaveCondominiumCreateClick: (CondominiumUiModel) -> Unit
 ) {
-    // Se temos um condomínio e não estamos salvando um novo, mostramos apenas o card.
-    // O usuário pode clicar em editar para abrir a busca novamente.
     var isEditing by remember(currentCondo) { mutableStateOf(currentCondo == null) }
 
     Column(
@@ -189,13 +189,13 @@ fun SelectCondominiumLayout(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Configuração de Local",
+                text = stringResource(id = R.string.condominium_config_address),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "Vincule-se ao seu condomínio para acessar as funcionalidades.",
+                text = stringResource(id = R.string.condominium_config_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
@@ -231,7 +231,6 @@ fun SelectCondominiumLayout(
                     }
                 )
             } else {
-                // Quando não está editando e já selecionou, fica apenas o fundo limpo com o card acima
                 Box(Modifier.fillMaxWidth())
             }
         }

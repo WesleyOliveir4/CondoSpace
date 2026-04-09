@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PublicationSelectedViewModel(
@@ -22,7 +21,7 @@ class PublicationSelectedViewModel(
     private val publicationRepository: PublicationRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PublicationSelectedUiState())
+    private val _uiState = MutableStateFlow<PublicationSelectedUiState>(PublicationSelectedUiState.Loading)
     val uiState: StateFlow<PublicationSelectedUiState> = _uiState.asStateFlow()
 
     init {
@@ -33,9 +32,10 @@ class PublicationSelectedViewModel(
         viewModelScope.launch {
             userPreferencesRepository.userData.collectLatest { user ->
                 val favoriteIds = user?.publicationsIdFavored ?: emptyList()
-                _uiState.update { state ->
-                    state.copy(
-                        isFavorite = favoriteIds.contains(state.publication?.id)
+                val currentState = _uiState.value
+                if (currentState is PublicationSelectedUiState.Success) {
+                    _uiState.value = currentState.copy(
+                        isFavorite = favoriteIds.contains(currentState.publication.id)
                     )
                 }
             }
@@ -44,30 +44,30 @@ class PublicationSelectedViewModel(
 
     fun loadPublication(publicationId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.value = PublicationSelectedUiState.Loading
             val result = getPublicationByIdUseCase(publicationId)
             result.onSuccess { entity ->
                 val publicationUi = entity.toUiModel()
                 val currentUser = userPreferencesRepository.getUserData()
                 val isFavorite = currentUser?.publicationsIdFavored?.contains(publicationUi.id) == true
                 
-                _uiState.update { it.copy(
+                _uiState.value = PublicationSelectedUiState.Success(
                     publication = publicationUi,
-                    isLoading = false,
                     isFavorite = isFavorite
-                ) }
+                )
             }.onFailure { exception ->
-                _uiState.update { it.copy(
-                    error = exception.message ?: "Erro ao carregar publicação",
-                    isLoading = false
-                ) }
+                _uiState.value = PublicationSelectedUiState.Error(
+                    message = exception.message ?: "Erro ao carregar publicação"
+                )
             }
         }
     }
 
     fun onFavoriteClick() {
-        val currentPublication = _uiState.value.publication ?: return
-        val publicationId = currentPublication.id
+        val currentState = _uiState.value
+        if (currentState !is PublicationSelectedUiState.Success) return
+        
+        val publicationId = currentState.publication.id
         
         viewModelScope.launch {
             val currentUser = userPreferencesRepository.getUserData() ?: return@launch
@@ -83,14 +83,12 @@ class PublicationSelectedViewModel(
             }
 
             // 1. Update UI State immediately for better UX
-            _uiState.update { state ->
-                state.copy(
-                    isFavorite = isAdding,
-                    publication = state.publication?.copy(
-                        likes = (state.publication.likes + increment).coerceAtLeast(0)
-                    )
+            _uiState.value = currentState.copy(
+                isFavorite = isAdding,
+                publication = currentState.publication.copy(
+                    likes = (currentState.publication.likes + increment).coerceAtLeast(0)
                 )
-            }
+            )
 
             val updatedUser = currentUser.copy(publicationsIdFavored = currentFavorites)
 
@@ -102,6 +100,13 @@ class PublicationSelectedViewModel(
 
             // 4. Update Likes in Publication Table
             publicationRepository.updatePublicationLikes(publicationId, increment)
+        }
+    }
+
+    fun resetActionError() {
+        val currentState = _uiState.value
+        if (currentState is PublicationSelectedUiState.Success) {
+            _uiState.value = currentState.copy(actionError = null)
         }
     }
 }

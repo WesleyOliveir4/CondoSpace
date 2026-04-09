@@ -3,6 +3,7 @@
     <string name="confirm">Confirmar</string>
     <string name="cancel">Cancelar</string>
     <string name="edit">Editar</string>
+    <string name="delete">Excluir</string>
     <string name="phone">Telefone</string>
     <string name="full_name">Nome Completo</string>
     <string name="password">Senha</string>
@@ -10,4 +11,119 @@
     <string name="password_hint_length">Mínimo de 6 caracteres</string>
     <string name="password_hint_complexity">Use letras e números</string>
     <string name="password_hint_avoid_personal">Evite datas de nascimento</string>
+    <string name="success">Sucesso!</string>
+    <string name="ok">OK</string>
+    <string name="cep_label">CEP: %1$s</string>
+
+    <!-- Login -->
+    <string name="login_welcome_subtitle">Marketplace do seu condomínio</string>
+    <string name="login_email_label">E-mail</string>
+    <string name="login_email_placeholder">seu@email.com</string>
+    <string name="login_password_placeholder">••••••••</string>
+    <string name="login_forgot_password">Esqueci minha senha</string>
+    <string name="login_button_text">Entrar</string>
+    <string name="login_no_account_text">Não tem uma conta? </string>
+    <string name="login_register_action">Cadastrar</string>
+
+    <!-- Register -->
+    <string name="register_toolbar_title">Cadastro</string>
+    <string name="register_title">Criar Conta</string>
+    <string name="register_subtitle">Junte-se ao marketplace do seu condomínio</string>
+    <string name="register_username_label">Nome do usuário</string>
+    <string name="register_username_placeholder">Seu nome completo</string>
+    <string name="register_email_label">E-mail</string>
+    <string name="register_email_placeholder">seu@email.com</string>
+    <string name="register_password_label">Senha</string>
+    <string name="register_password_placeholder">Mínimo 6 caracteres</string>
+    <string name="register_phone_label">Telefone</string>
+    <string name="register_phone_placeholder">(00) 00000-0000</string>
+    <string name="register_button_text">Criar conta</string>
+
+    <!-- Condominium -->
+    <string name="condominium_title">Condomínio</string>
+    <string name="condominium_config_address">Configuração de Endereço</string>
+    <string name="condominium_config_subtitle">Vincule-se ao seu condomínio para acessar todas as publicações.</string>
+    <string name="condominium_current_label">Condomínio Atual</string>
+    <string name="condominium_not_selected">Você ainda não selecionou um condomínio.</string>
+    <string name="condominium_edit_description">Editar condomínio</string>
+    <string name="condominium_search_title">Buscar Novo Condomínio</string>
+    <string name="condominium_cep_label">Digite o CEP</string>
+    <string name="condominium_cep_placeholder">Ex: 15234-042</string>
+    <string name="condominium_search_button">Pesquisar</string>
+    <string name="condominium_results_label">Condomínios encontrados:</string>
+    <string name="condominium_not_found">Nenhum condomínio cadastrado neste CEP.</string>
+    <string name="condominium_name_label">Nome do condomínio</string>
+    <string name="condominium_name_placeholder">Digite o nome para cadastrar</string>
+    <string name="condominium_register_select_button">Cadastrar e Selecionar</string>
+    <string name="condominium_update_success">Condomínio atualizado com sucesso!</string>
+
+    <!-- Publications -->
+    <string name="publication_title">Publicação</string>
+    <string name="publications_list_all">Todas as publicações</string>
+    <string name="publications_empty_state">Nenhuma publicação encontrada.</string>
+    <string name="publication_edit_title">Editar publicação</string>
+    <string name="publication_info_service">Informações do serviço</string>
+    <string name="publication_info_ad">Informações do anúncio</string>
+    <string name="publication_info_recommendation">Indicar serviço</string>
+    <string name="publication_my_publications">Minhas publicações</string>
+    <string name="publication_default_condominium">Selecionar Condomínio</string>
+
+    <!-- Publish Form -->
+    <string name="publish_type_title">Tipo de publicação</string>
+    <string name="publish_type_product_title">Anunciar produto</string>
+    <string name="publish_type_product_desc">Venda ou doe itens</string>
+    <string name="publish_type_service_title">Oferecer serviço</string>
+    <string name="publish_type_service_desc">Divulgue seu trabalho</string>
+    <string name="publish_type_recommendation_title">Indicar serviço</string>
+    <string name="publish_type_recommendation_desc">Recomende profissionais</string>
+
+    <string name="publish_title_label">Título</string>
+    <string name="publish_title_placeholder">Ex: Título do seu anúncio</string>
+    <string name="publish_description_label">Descrição</string>
+    <string name="publish_description_placeholder">Dê mais detalhes sobre o que está anunciando...</string>
+    <string name="publish_photos_label">Fotos</string>
+    <string name="publish_price_label">Preço em R$</string>
+    <string name="publish_price_placeholder">0,00</string>
+    <string name="publish_category_label">Categoria</string>
+    <string name="publish_category_placeholder">Selecione a categoria</string>
+    <string name="publish_provider_name_label">Nome do prestador</string>
+    <string name="publish_provider_name_placeholder">Quem você está indicando?</string>
+    <string name="publish_provider_contact_label">Contato do prestador</string>
+    <string name="publish_provider_contact_placeholder">(00) 00000-0000</string>
+    <string name="publish_location_label">Localização / Atendimento</string>
+    <string name="publish_location_placeholder">Onde você atende?</string>
+    <string name="publish_button_create">Publicar anúncio</string>
+    <string name="publish_button_save">Salvar alterações</string>
+    <string name="publish_add_photo_description">Adicionar foto</string>
+    <string name="publish_create_success">Publicação criada com sucesso!</string>
+    <string name="publish_delete_success">Publicação excluída com sucesso!</string>
+
+    <!-- Profile -->
+    <string name="profile_loading">Carregando...</string>
+    <string name="profile_version">Condo Market v1.0.0</string>
+    <string name="profile_logout_button">Sair da conta</string>
+    <string name="profile_logout_dialog_title">Sair da conta</string>
+    <string name="profile_logout_dialog_message">Tem certeza que deseja sair da sua conta?</string>
+    <string name="profile_logout_confirm">Sair</string>
+    <string name="profile_error_load">Erro ao carregar perfil</string>
+    <string name="profile_not_informed">Não informado</string>
+    <string name="profile_email">E-mail</string>
+    <string name="profile_cep">CEP</string>
+    <string name="profile_my_data">Meus dados</string>
+    <string name="profile_change_password">Alterar senha</string>
+    <string name="profile_settings">Configurações</string>
+
+    <!-- Errors -->
+    <string name="error_ops_title">Ops, ocorreu um erro</string>
+    <string name="error_ok_button">Ok, entendi!</string>
+    <string name="error_load_publications">Erro ao carregar publicações</string>
+    <string name="error_load_publication">Erro ao carregar publicação</string>
+    <string name="error_save_publication">Erro ao salvar publicação</string>
+    <string name="error_delete_publication">Erro ao deletar publicação</string>
+    <string name="error_delete_publication_find">Erro ao buscar publicação para exclusão: %1$s</string>
+    <string name="error_upload_images">Erro no upload das imagens</string>
+    <string name="error_unknown">Erro desconhecido</string>
+
+    <!-- Content Descriptions -->
+    <string name="content_description_logo">Logo</string>
 </resources>
