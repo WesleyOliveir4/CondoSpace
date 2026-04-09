@@ -5,6 +5,7 @@ import com.example.condospace.data.remote.OpenCageService
 import com.example.condospace.data.remote.ViaCepService
 import com.example.condospace.domain.entity.ExternalServiceEntity
 import com.example.condospace.domain.repository.ExternalServiceRepository
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import kotlin.math.*
@@ -75,6 +76,27 @@ class ExternalServiceRepositoryImpl(
             val doc = firestore.collection("services").document(id).get().await()
             val data = doc.data ?: throw Exception("Serviço não encontrado")
             mapToExternalService(doc.id, data)
+        }
+    }
+
+    override suspend fun getExternalServicesByIds(ids: List<String>): Result<List<ExternalServiceEntity>> {
+        return runCatching {
+            if (ids.isEmpty()) return@runCatching emptyList()
+            
+            val chunks = ids.chunked(30)
+            val services = mutableListOf<ExternalServiceEntity>()
+            
+            for (chunk in chunks) {
+                val snapshot = firestore.collection("services")
+                    .whereIn(FieldPath.documentId(), chunk)
+                    .get()
+                    .await()
+                
+                services.addAll(snapshot.documents.mapNotNull { doc ->
+                    doc.data?.let { mapToExternalService(doc.id, it) }
+                })
+            }
+            services
         }
     }
 

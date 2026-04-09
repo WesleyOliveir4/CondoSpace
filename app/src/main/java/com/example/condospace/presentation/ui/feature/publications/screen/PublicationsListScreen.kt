@@ -39,8 +39,8 @@ fun PublicationsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(categoryType) {
-        viewModel.init(categoryType)
+    LaunchedEffect(categoryType, publicationsIds) {
+        viewModel.loadPublications(categoryType, publicationsIds ?: emptyList())
     }
 
     CondoSpaceTheme {

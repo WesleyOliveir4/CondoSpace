@@ -5,6 +5,7 @@ import com.example.condospace.data.mapper.toModel
 import com.example.condospace.data.model.Publication
 import com.example.condospace.domain.entity.PublicationEntity
 import com.example.condospace.domain.repository.PublicationRepository
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -135,6 +136,29 @@ class PublicationRepositoryImpl(
                 .set(publication.toModel())
                 .await()
             Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getPublicationsByIds(ids: List<String>): Result<List<PublicationEntity>> {
+        return try {
+            if (ids.isEmpty()) return Result.success(emptyList())
+            
+            // Firestore 'in' operator supports up to 30 items
+            val chunks = ids.chunked(30)
+            val publications = mutableListOf<PublicationEntity>()
+            
+            for (chunk in chunks) {
+                val snapshot = firestore.collection("publications")
+                    .whereIn(FieldPath.documentId(), chunk)
+                    .get()
+                    .await()
+                
+                publications.addAll(snapshot.toObjects(Publication::class.java).map { it.toEntity() })
+            }
+            
+            Result.success(publications.sortedByDescending { it.date })
         } catch (e: Exception) {
             Result.failure(e)
         }
