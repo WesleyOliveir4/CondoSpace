@@ -15,6 +15,7 @@ import com.example.condospace.presentation.ui.feature.condominium.state.Condomin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -25,7 +26,7 @@ class SelectCondominiumViewModel(
     private val updateUserCondominiumUseCase: UpdateUserCondominiumUseCase
 ) : ViewModel() {
 
-    private val _condominiumState = MutableStateFlow<CondominiumState>(CondominiumState.Idle)
+    private val _condominiumState = MutableStateFlow<CondominiumState>(CondominiumState.Loading)
     val condominiumState: StateFlow<CondominiumState> = _condominiumState.asStateFlow()
 
     private val _searchResults = MutableStateFlow<List<CondominiumUiModel>>(emptyList())
@@ -34,8 +35,12 @@ class SelectCondominiumViewModel(
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
-    fun resetState() {
-        _condominiumState.value = CondominiumState.Idle
+    fun resetActionState() {
+        _condominiumState.update { state ->
+            if (state is CondominiumState.Success) {
+                state.copy(saveSuccess = false, error = null)
+            } else state
+        }
     }
 
     fun fetchUserCondominium(userId: String) {
@@ -43,11 +48,9 @@ class SelectCondominiumViewModel(
             _condominiumState.value = CondominiumState.Loading
             getUserCondominiumUseCase(userId)
                 .onSuccess { condo ->
-                    if (condo != null) {
-                        _condominiumState.value = CondominiumState.CondominiumFound(condo.toUiModel())
-                    } else {
-                        _condominiumState.value = CondominiumState.CondominiumNotFound
-                    }
+                    _condominiumState.value = CondominiumState.Success(
+                        selectedCondominium = condo?.toUiModel()
+                    )
                 }
                 .onFailure { error ->
                     _condominiumState.value = CondominiumState.Error(error.message ?: "Erro desconhecido")
@@ -72,21 +75,21 @@ class SelectCondominiumViewModel(
 
     fun saveCondominiumCreated(userId: String, condominiumUiModel: CondominiumUiModel) {
         viewModelScope.launch {
-            _condominiumState.value = CondominiumState.Loading
-            condominiumUiModel.id = UUID.randomUUID().toString()
-            saveCondominiumUseCase(userId, condominiumUiModel.toEntity())
+            updateSavingState(true)
+            val newCondo = condominiumUiModel.copy(id = UUID.randomUUID().toString())
+            saveCondominiumUseCase(userId, newCondo.toEntity())
                 .onSuccess {
-                    saveCondominiumSelected(userId, condominiumUiModel)
+                    saveCondominiumSelected(userId, newCondo)
                 }
                 .onFailure { error ->
-                    _condominiumState.value = CondominiumState.Error(error.message ?: "Erro ao salvar")
+                    updateError(error.message ?: "Erro ao salvar")
                 }
         }
     }
 
     fun saveCondominiumSelected(userId: String, condominium: CondominiumUiModel) {
         viewModelScope.launch {
-            _condominiumState.value = CondominiumState.Loading
+            updateSavingState(true)
             updateUserCondominiumUseCase(
                 userId = userId,
                 condominiumEntity = Condominium(
@@ -95,10 +98,37 @@ class SelectCondominiumViewModel(
                     cep = condominium.cep
                 ).toEntity()
             ).onSuccess {
-                _condominiumState.value = CondominiumState.CondominiumSaved(condominium)
+                _condominiumState.update { state ->
+                    if (state is CondominiumState.Success) {
+                        state.copy(
+                            selectedCondominium = condominium,
+                            isSaving = false,
+                            saveSuccess = true
+                        )
+                    } else {
+                        CondominiumState.Success(
+                            selectedCondominium = condominium,
+                            saveSuccess = true
+                        )
+                    }
+                }
             }.onFailure { error ->
-                _condominiumState.value = CondominiumState.Error(error.message ?: "Erro ao vincular condomínio")
+                updateError(error.message ?: "Erro ao vincular condomínio")
             }
+        }
+    }
+
+    private fun updateSavingState(isSaving: Boolean) {
+        _condominiumState.update { state ->
+            if (state is CondominiumState.Success) state.copy(isSaving = isSaving)
+            else state
+        }
+    }
+
+    private fun updateError(message: String) {
+        _condominiumState.update { state ->
+            if (state is CondominiumState.Success) state.copy(isSaving = false, error = message)
+            else CondominiumState.Error(message)
         }
     }
 }

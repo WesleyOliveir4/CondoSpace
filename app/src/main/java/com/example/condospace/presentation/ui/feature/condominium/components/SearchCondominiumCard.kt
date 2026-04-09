@@ -232,9 +232,7 @@ private fun EmptySearchResultsContent(
                 .fillMaxWidth()
                 .height(52.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            ),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF354EAB)),
             enabled = !isSaving && manualName.isNotBlank()
         ) {
             if (isSaving) {

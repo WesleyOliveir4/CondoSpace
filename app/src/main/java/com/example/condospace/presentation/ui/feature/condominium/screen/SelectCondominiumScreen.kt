@@ -6,38 +6,41 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.condospace.R
@@ -45,7 +48,6 @@ import com.example.condospace.presentation.model.CondominiumUiModel
 import com.example.condospace.presentation.ui.component.TopBarReturn
 import com.example.condospace.presentation.ui.feature.condominium.components.CurrentCondominiumCard
 import com.example.condospace.presentation.ui.feature.condominium.components.SearchCondominiumCard
-import com.example.condospace.presentation.ui.feature.condominium.components.SuccessDialog
 import com.example.condospace.presentation.ui.feature.condominium.state.CondominiumState
 import com.example.condospace.presentation.ui.feature.condominium.viewmodel.SelectCondominiumViewModel
 import com.example.condospace.presentation.ui.theme.CondoSpaceTheme
@@ -59,41 +61,45 @@ fun SelectCondominiumScreen(
     registerFlow: Boolean,
 ) {
     val condominiumViewModel: SelectCondominiumViewModel = koinViewModel()
-    val condominiumState by condominiumViewModel.condominiumState.collectAsState()
-    val searchResults by condominiumViewModel.searchResults.collectAsState()
-    val isSearching by condominiumViewModel.isSearching.collectAsState()
+    val condominiumState by condominiumViewModel.condominiumState.collectAsStateWithLifecycle()
+    val searchResults by condominiumViewModel.searchResults.collectAsStateWithLifecycle()
+    val isSearching by condominiumViewModel.isSearching.collectAsStateWithLifecycle()
     
     val snackbarHostState = remember { SnackbarHostState() }
-    var showSuccessDialog by remember { mutableStateOf(false) }
+    val successMsg = stringResource(R.string.condominium_update_success)
 
     LaunchedEffect(userId) {
         condominiumViewModel.fetchUserCondominium(userId)
     }
 
-    LaunchedEffect(condominiumState) {
-        when (val state = condominiumState) {
-            is CondominiumState.CondominiumSaved -> {
-                showSuccessDialog = true
-            }
-            is CondominiumState.Error -> {
-                snackbarHostState.showSnackbar(state.message)
-            }
-            else -> {}
-        }
-    }
-
-    if (showSuccessDialog) {
-        SuccessDialog(
-            onConfirm = {
-                showSuccessDialog = false
-                condominiumViewModel.resetState()
-                if (registerFlow) {
-                    navigateToLogin()
-                } else {
-                    navController.popBackStack()
+    // Stable effect to handle Snackbars without cancellation on state changes
+    LaunchedEffect(Unit) {
+        snapshotFlow { condominiumState }.collect { state ->
+            if (state is CondominiumState.Success) {
+                if (state.saveSuccess) {
+                    snackbarHostState.showSnackbar(
+                        message = successMsg,
+                        duration = SnackbarDuration.Long
+                    )
+                    condominiumViewModel.resetActionState()
+                    if (registerFlow) {
+                        navigateToLogin()
+                    }
                 }
+                state.error?.let { message ->
+                    snackbarHostState.showSnackbar(
+                        message = message,
+                        duration = SnackbarDuration.Long
+                    )
+                    condominiumViewModel.resetActionState()
+                }
+            } else if (state is CondominiumState.Error) {
+                snackbarHostState.showSnackbar(
+                    message = state.message,
+                    duration = SnackbarDuration.Long
+                )
             }
-        )
+        }
     }
 
     CondoSpaceTheme {
@@ -138,29 +144,36 @@ fun SelectCondominiumScreenContent(
             color = MaterialTheme.colorScheme.background
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                if (condominiumState is CondominiumState.Loading && searchResults.isEmpty()) {
+                val currentCondo = if (condominiumState is CondominiumState.Success) {
+                    condominiumState.selectedCondominium
+                } else null
+
+                val isSaving = (condominiumState as? CondominiumState.Success)?.isSaving == true
+
+                SelectCondominiumLayout(
+                    currentCondo = currentCondo,
+                    searchResults = searchResults,
+                    isSearching = isSearching,
+                    onSearchClick = onSearchClick,
+                    onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
+                    onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
+                )
+
+                if (condominiumState is CondominiumState.Loading || isSaving) {
+                    val isInitialLoading = condominiumState is CondominiumState.Loading && currentCondo == null
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .then(
+                                if (isInitialLoading) Modifier.background(MaterialTheme.colorScheme.background)
+                                else Modifier
+                                    .background(Color.Black.copy(alpha = 0.4f))
+                                    .pointerInput(Unit) {}
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = Color(0xFF354EAB))
                     }
-                } else {
-                    val currentCondo = when (condominiumState) {
-                        is CondominiumState.CondominiumFound -> condominiumState.condominium
-                        is CondominiumState.CondominiumSaved -> condominiumState.condominium
-                        else -> null
-                    }
-
-                    SelectCondominiumLayout(
-                        currentCondo = currentCondo,
-                        searchResults = searchResults,
-                        isSearching = isSearching,
-                        isSaving = condominiumState is CondominiumState.Loading,
-                        onSearchClick = onSearchClick,
-                        onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
-                        onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
-                    )
                 }
             }
         }
@@ -173,17 +186,25 @@ fun SelectCondominiumLayout(
     currentCondo: CondominiumUiModel?,
     searchResults: List<CondominiumUiModel>,
     isSearching: Boolean,
-    isSaving: Boolean,
     onSearchClick: (String) -> Unit,
     onSaveCondominiumSelectedClick: (CondominiumUiModel) -> Unit,
     onSaveCondominiumCreateClick: (CondominiumUiModel) -> Unit
 ) {
     var isEditing by remember(currentCondo) { mutableStateOf(currentCondo == null) }
+    
+    // Auto-close editing mode when a condominium is successfully selected/found
+    LaunchedEffect(currentCondo) {
+        if (currentCondo != null) {
+            isEditing = false
+        }
+    }
+
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(scrollState)
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -210,9 +231,9 @@ fun SelectCondominiumLayout(
             targetState = isEditing,
             transitionSpec = {
                 if (targetState) {
-                    (slideInVertically { it } + fadeIn()) with (slideOutVertically { -it } + fadeOut())
+                    (slideInVertically { it } + fadeIn()) togetherWith (slideOutVertically { -it } + fadeOut())
                 } else {
-                    (slideInVertically { -it } + fadeIn()) with (slideOutVertically { it } + fadeOut())
+                    (slideInVertically { -it } + fadeIn()) togetherWith (slideOutVertically { it } + fadeOut())
                 }
             },
             label = "SearchTransition"
@@ -221,17 +242,11 @@ fun SelectCondominiumLayout(
                 SearchCondominiumCard(
                     searchResults = searchResults,
                     isSearching = isSearching,
-                    isSaving = isSaving,
+                    isSaving = false,
                     onSearchClick = onSearchClick,
-                    onSaveCondominiumSelectedClick = {
-                        onSaveCondominiumSelectedClick(it)
-                    },
-                    onSaveCondominiumCreateClick = {
-                        onSaveCondominiumCreateClick(it)
-                    }
+                    onSaveCondominiumSelectedClick = onSaveCondominiumSelectedClick,
+                    onSaveCondominiumCreateClick = onSaveCondominiumCreateClick
                 )
-            } else {
-                Box(Modifier.fillMaxWidth())
             }
         }
     }
@@ -245,7 +260,7 @@ fun SelectCondominiumScreenPreview() {
         SelectCondominiumScreenContent(
             navController = navController,
             snackbarHostState = remember { SnackbarHostState() },
-            condominiumState = CondominiumState.Idle,
+            condominiumState = CondominiumState.Success(null),
             searchResults = emptyList(),
             isSearching = false,
             onSearchClick = {},
