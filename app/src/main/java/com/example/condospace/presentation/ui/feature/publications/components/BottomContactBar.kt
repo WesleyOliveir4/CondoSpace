@@ -61,7 +61,7 @@ fun BottomContactBar(
                 onClick = onClick,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonColors(
-                    containerColor = Color.Blue,
+                    containerColor = Color(0xFF354EAB),
                     contentColor = Color.White,
                     disabledContainerColor = Color.Gray,
                     disabledContentColor = Color.Black
