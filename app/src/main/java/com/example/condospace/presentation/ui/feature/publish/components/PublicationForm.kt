@@ -81,8 +81,7 @@ fun PublicationForm(
     var priceState by remember {
         mutableStateOf(
             initialPublication?.price?.let {
-                val cents = (it * 100).toLong().toString()
-                CurrencyUtils.formatToBRL(cents)
+                (it * 100).toLong().toString()
             } ?: ""
         )
     }
@@ -150,7 +149,6 @@ fun PublicationForm(
                 publicationCondominiumId = user.condominium?.id ?: "",
                 publicationOwner = user.name,
                 serviceProvider = providerNameState,
-                // Regra: RECOMMENDATION usa contactState, SERVICE e PRODUCT usam user.phoneNumber
                 contact = if (publicationType == PublicationType.RECOMMENDATION) {
                     PhoneUtils.removeMask(contactState)
                 } else {
@@ -167,7 +165,6 @@ fun PublicationForm(
             )
             onPublish(publication)
         },
-        // --- Parâmetros de Configuração de Campos ---
         showCategorySelector = publicationType == PublicationType.PRODUCT,
         selectedCategory = selectedCategory,
         onCategorySelected = { selectedCategory = it },
@@ -178,7 +175,11 @@ fun PublicationForm(
 
         showPriceField = publicationType == PublicationType.PRODUCT,
         priceValue = priceState,
-        onPriceChange = { priceState = CurrencyUtils.formatToBRL(it) },
+        onPriceChange = { input ->
+            val digits = input.filter { it.isDigit() }
+            if (digits.length <= 12) priceState = digits
+        },
+        priceVisualTransformation = CurrencyUtils.currencyVisualTransformation,
 
         showLocationField = publicationType == PublicationType.SERVICE,
         locationValue = locationState,
@@ -223,6 +224,7 @@ fun PublicationFormCard(
     showPriceField: Boolean = false,
     priceValue: String = "",
     onPriceChange: (String) -> Unit = {},
+    priceVisualTransformation: VisualTransformation = VisualTransformation.None,
 
     showLocationField: Boolean = false,
     locationValue: String = "",
@@ -288,7 +290,8 @@ fun PublicationFormCard(
                     value = priceValue,
                     onValueChange = onPriceChange,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    placeholder = stringResource(R.string.publish_price_placeholder)
+                    placeholder = stringResource(R.string.publish_price_placeholder),
+                    visualTransformation = priceVisualTransformation
                 )
             }
 
