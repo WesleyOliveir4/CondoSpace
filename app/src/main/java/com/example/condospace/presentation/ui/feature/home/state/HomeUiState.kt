@@ -12,7 +12,7 @@ sealed interface HomeUiState {
         val condominiumName: String,
         val publicationsService: List<PublicationUiModel> = emptyList(),
         val publicationsRecommendation: List<PublicationUiModel> = emptyList(),
-        val externalServices: List<ExternalServiceUiModel> = emptyList(),
+        val externalServices: List<PublicationUiModel> = emptyList(),
         val isRefreshing: Boolean = false,
         val actionError: String? = null
     ) : HomeUiState

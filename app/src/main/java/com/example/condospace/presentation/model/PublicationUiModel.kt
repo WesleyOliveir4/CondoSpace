@@ -38,6 +38,7 @@ fun PublicationEntity.toUiModel(): PublicationUiModel{
         price = price,
         likes = likes,
         date = date,
+        coupon = coupon
     )
 }
 

@@ -8,7 +8,6 @@ import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.usecase.publication.GetPublicationsByCondominiumUseCase
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.model.toUiModel
-import com.example.condospace.presentation.model.toUiModel
 import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.ui.feature.home.state.HomeUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,8 +68,8 @@ class HomeViewModel(
             val externalServicesTask = launch {
                 if (!cep.isNullOrBlank()) {
                     externalServiceRepository.getNearbyServices(cep)
-                        .onSuccess { services -> 
-                            updateSuccess { it.copy(externalServices = services.map { externalServicesEntity -> externalServicesEntity.toUiModel() }) }
+                        .onSuccess { services ->
+                            updateSuccess { it.copy(externalServices = services.map { externalServices -> externalServices.toUiModel() }) }
                         }
                         .onFailure { e -> handleFailure(e) }
                 }

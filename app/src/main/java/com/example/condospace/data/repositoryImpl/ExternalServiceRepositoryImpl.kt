@@ -1,9 +1,10 @@
 package com.example.condospace.data.repositoryImpl
 
-import com.example.condospace.data.model.PublicationImage
+import com.example.condospace.data.mapper.toEntity
+import com.example.condospace.data.model.Publication
 import com.example.condospace.data.remote.OpenCageService
 import com.example.condospace.data.remote.ViaCepService
-import com.example.condospace.domain.entity.ExternalServiceEntity
+import com.example.condospace.domain.entity.PublicationEntity
 import com.example.condospace.domain.repository.ExternalServiceRepository
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,7 +17,7 @@ class ExternalServiceRepositoryImpl(
     private val firestore: FirebaseFirestore
 ) : ExternalServiceRepository {
 
-    override suspend fun getNearbyServices(cep: String): Result<List<ExternalServiceEntity>> {
+    override suspend fun getNearbyServices(cep: String): Result<List<PublicationEntity>> {
         return runCatching {
             // 1. ViaCep
             val viaCepResponse = viaCepService.getAddressByCep(cep)
@@ -47,7 +48,7 @@ class ExternalServiceRepositoryImpl(
 
             // 4. Firestore query
             val snapshot = firestore.collection("services").get().await()
-            val nearbyServices = mutableListOf<ExternalServiceEntity>()
+            val nearbyServices = mutableListOf<PublicationEntity>()
 
             for (doc in snapshot.documents) {
                 val key = doc.id // e.g., "-23.6850989,-46.6816044"
@@ -59,9 +60,8 @@ class ExternalServiceRepositoryImpl(
                     if (lat != null && lng != null) {
                         val distance = calculateDistance(targetLat, targetLng, lat, lng)
                         if (distance <= 3.0) {
-                            val data = doc.data
-                            if (data != null) {
-                                nearbyServices.add(mapToExternalService(doc.id, data))
+                            doc.toObject(Publication::class.java)?.let { publication ->
+                                nearbyServices.add(publication.copy(id = doc.id).toEntity())
                             }
                         }
                     }
@@ -71,20 +71,20 @@ class ExternalServiceRepositoryImpl(
         }
     }
 
-    override suspend fun getExternalServiceById(id: String): Result<ExternalServiceEntity> {
+    override suspend fun getExternalServiceById(id: String): Result<PublicationEntity> {
         return runCatching {
             val doc = firestore.collection("services").document(id).get().await()
-            val data = doc.data ?: throw Exception("Serviço não encontrado")
-            mapToExternalService(doc.id, data)
+            val publication = doc.toObject(Publication::class.java) ?: throw Exception("Serviço não encontrado")
+            publication.copy(id = doc.id).toEntity()
         }
     }
 
-    override suspend fun getExternalServicesByIds(ids: List<String>): Result<List<ExternalServiceEntity>> {
+    override suspend fun getExternalServicesByIds(ids: List<String>): Result<List<PublicationEntity>> {
         return runCatching {
             if (ids.isEmpty()) return@runCatching emptyList()
             
             val chunks = ids.chunked(30)
-            val services = mutableListOf<ExternalServiceEntity>()
+            val services = mutableListOf<PublicationEntity>()
             
             for (chunk in chunks) {
                 val snapshot = firestore.collection("services")
@@ -93,46 +93,11 @@ class ExternalServiceRepositoryImpl(
                     .await()
                 
                 services.addAll(snapshot.documents.mapNotNull { doc ->
-                    doc.data?.let { mapToExternalService(doc.id, it) }
+                    doc.toObject(Publication::class.java)?.copy(id = doc.id)?.toEntity()
                 })
             }
             services
         }
-    }
-
-    private fun mapToExternalService(id: String, data: Map<String, Any>): ExternalServiceEntity {
-        val imagesRaw = data["imageUrlList"]
-        val imagesList = when (imagesRaw) {
-            is List<*> -> {
-                imagesRaw.filterIsInstance<Map<String, Any>>().map {
-                    PublicationImage(
-                        url = it["url"] as? String ?: "",
-                        publicId = it["publicId"] as? String ?: ""
-                    )
-                }
-            }
-            is Map<*, *> -> {
-                imagesRaw.values.filterIsInstance<Map<String, Any>>().map {
-                    PublicationImage(
-                        url = it["url"] as? String ?: "",
-                        publicId = it["publicId"] as? String ?: ""
-                    )
-                }
-            }
-            else -> null
-        }
-
-        return ExternalServiceEntity(
-            id = id,
-            publicationOwner = data["publicationOwner"] as? String ?: "",
-            publicationType = data["publicationType"] as? String ?: "",
-            title = data["title"] as? String ?: "",
-            date = data["date"] as? String ?: "",
-            coupon = data["coupon"] as? String ?: "",
-            description = data["description"] as? String ?: "",
-            imageUrlList = imagesList,
-            price = (data["price"] as? Number)?.toDouble() ?: 0.0
-        )
     }
 
     private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {

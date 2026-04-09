@@ -18,5 +18,6 @@ data class Publication(
     val publicationType: String = "",
     val price: Double = 0.0,
     val likes: Int = 0,
-    val date: String = ""
+    val date: String = "",
+    val coupon: String? = null
 )

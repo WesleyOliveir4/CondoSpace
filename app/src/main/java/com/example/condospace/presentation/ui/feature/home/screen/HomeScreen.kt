@@ -161,7 +161,7 @@ fun HomeScreenContent(
 
                         PublicationsSection(
                             title = "Serviços próximos de você",
-                            publications = uiState.externalServices.map { it.toPublicationUiModel() },
+                            publications = uiState.externalServices,
                             onSeeMoreClick = { type, listIds ->
                                 navigateToPublishList(type, listIds)
                             },
