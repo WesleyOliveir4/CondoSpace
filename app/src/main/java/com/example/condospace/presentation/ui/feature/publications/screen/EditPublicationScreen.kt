@@ -113,7 +113,7 @@ fun EditPublicationScreenContent(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 16.dp)
+                .padding(all = 16.dp)
         ) {
             PublicationForm(
                 title = if (currentPublicationType == PublicationType.SERVICE)

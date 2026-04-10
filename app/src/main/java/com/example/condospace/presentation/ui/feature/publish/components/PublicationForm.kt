@@ -8,7 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -57,7 +57,6 @@ import com.example.condospace.presentation.model.PublicationUiModel
 import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.ui.component.OutlinedTextFieldCS
 import com.example.condospace.presentation.ui.enums.CategoryType
-import com.example.condospace.presentation.ui.enums.ServiceType
 import com.example.condospace.presentation.utils.CurrencyUtils
 import com.example.condospace.presentation.utils.PhoneUtils
 import java.time.LocalDateTime
@@ -80,12 +79,9 @@ fun PublicationForm(
     var descriptionState by remember { mutableStateOf(initialPublication?.description ?: "") }
     var priceState by remember {
         mutableStateOf(
-            initialPublication?.price?.let {
-                (it * 100).toLong().toString()
-            } ?: ""
+            initialPublication?.price?.let { (it * 100).toLong().toString() } ?: ""
         )
     }
-    // contactState armazena apenas números. Usado manualmente apenas em RECOMMENDATION.
     var contactState by remember {
         mutableStateOf(if (publicationType == PublicationType.RECOMMENDATION) initialPublication?.contact?.filter { it.isDigit() } ?: "" else "")
     }
@@ -122,31 +118,21 @@ fun PublicationForm(
         }
     }
 
-    // --- Configuração Dinâmica baseada no PublicationType ---
-    val finalPublicationType = when (publicationType) {
-        PublicationType.PRODUCT -> selectedCategory?.title ?: initialPublication?.publicationType ?: ""
-        PublicationType.SERVICE -> ServiceType.SERVICE.value
-        PublicationType.RECOMMENDATION -> ServiceType.RECOMMENDATION.value
-    }
-
-    PublicationFormCard(
+    PublicationFormContainer(
         formTitle = title,
-        titleValue = titleState,
-        onTitleChange = { titleState = it },
-        descriptionValue = descriptionState,
-        onDescriptionChange = { descriptionState = it },
-        images = images,
-        onAddPhoto = { galleryLauncher.launch("image/*") },
-        onRemovePhoto = { uri -> images = images - uri },
         buttonText = if (initialPublication != null) stringResource(R.string.publish_button_save) else stringResource(R.string.publish_button_create),
         isButtonEnabled = isButtonEnabled,
         onButtonClick = {
             val date = initialPublication?.date ?: LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-
-            // Se for edição, usamos o owner da publicação original. Se for nova, usamos o usuário logado.
             val ownerUuid = initialPublication?.publicationOwnerUuid ?: user.uuid
             val ownerName = initialPublication?.publicationOwner ?: user.name
             val condominiumId = initialPublication?.publicationCondominiumId ?: (user.condominium?.id ?: "")
+
+            val finalPublicationType = when (publicationType) {
+                PublicationType.PRODUCT -> selectedCategory?.title ?: initialPublication?.publicationType ?: ""
+                PublicationType.SERVICE -> PublicationType.SERVICE.value
+                PublicationType.RECOMMENDATION -> PublicationType.RECOMMENDATION.value
+            }
 
             val publication = PublicationUiModel(
                 id = initialPublication?.id ?: UUID.randomUUID().toString(),
@@ -169,40 +155,158 @@ fun PublicationForm(
                 imageUrlList = initialPublication?.imageUrlList
             )
             onPublish(publication)
-        },
-        showCategorySelector = publicationType == PublicationType.PRODUCT,
-        selectedCategory = selectedCategory,
-        onCategorySelected = { selectedCategory = it },
+        }
+    ) {
+        // Campo Comum: Título
+        FormField(
+            label = stringResource(R.string.publish_title_label),
+            value = titleState,
+            onValueChange = { titleState = it },
+            placeholder = stringResource(R.string.publish_title_placeholder)
+        )
 
-        showProviderField = publicationType == PublicationType.RECOMMENDATION,
-        providerValue = providerNameState,
-        onProviderChange = { providerNameState = it },
+        // Seções específicas por tipo
+        when (publicationType) {
+            PublicationType.PRODUCT -> {
+                CategorySelector(selectedCategory) { selectedCategory = it }
 
-        showPriceField = publicationType == PublicationType.PRODUCT,
-        priceValue = priceState,
-        onPriceChange = { input ->
-            val digits = input.filter { it.isDigit() }
-            if (digits.length <= 12) priceState = digits
-        },
-        priceVisualTransformation = CurrencyUtils.currencyVisualTransformation,
+                CommonDescriptionAndPhotos(
+                    descriptionValue = descriptionState,
+                    onDescriptionChange = { descriptionState = it },
+                    images = images,
+                    onAddPhoto = { galleryLauncher.launch("image/*") },
+                    onRemovePhoto = { images = images - it }
+                )
 
-        showLocationField = publicationType == PublicationType.SERVICE,
-        locationValue = locationState,
-        onLocationChange = { locationState = it },
+                FormField(
+                    label = stringResource(R.string.publish_price_label),
+                    value = priceState,
+                    onValueChange = { input ->
+                        val digits = input.filter { it.isDigit() }
+                        if (digits.length <= 12) priceState = digits
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    placeholder = stringResource(R.string.publish_price_placeholder),
+                    visualTransformation = CurrencyUtils.currencyVisualTransformation
+                )
+            }
 
-        showContactField = publicationType == PublicationType.RECOMMENDATION,
-        contactValue = contactState,
-        onContactChange = { input ->
-            val digits = input.filter { it.isDigit() }
-            if (digits.length <= 11) contactState = digits
-        },
-        contactVisualTransformation = PhoneUtils.phoneVisualTransformation
-    )
+            PublicationType.SERVICE -> {
+                CommonDescriptionAndPhotos(
+                    descriptionValue = descriptionState,
+                    onDescriptionChange = { descriptionState = it },
+                    images = images,
+                    onAddPhoto = { galleryLauncher.launch("image/*") },
+                    onRemovePhoto = { images = images - it }
+                )
+
+//                FormField(
+//                    label = stringResource(R.string.publish_location_label),
+//                    value = locationState,
+//                    onValueChange = { locationState = it },
+//                    placeholder = stringResource(R.string.publish_location_placeholder)
+//                )
+            }
+
+            PublicationType.RECOMMENDATION -> {
+                FormField(
+                    label = stringResource(R.string.publish_provider_name_label),
+                    value = providerNameState,
+                    onValueChange = { providerNameState = it },
+                    placeholder = stringResource(R.string.publish_provider_name_placeholder)
+                )
+
+                CommonDescriptionAndPhotos(
+                    descriptionValue = descriptionState,
+                    onDescriptionChange = { descriptionState = it },
+                    images = images,
+                    onAddPhoto = { galleryLauncher.launch("image/*") },
+                    onRemovePhoto = { images = images - it }
+                )
+
+                FormField(
+                    label = stringResource(R.string.publish_provider_contact_label),
+                    value = contactState,
+                    onValueChange = { input ->
+                        val digits = input.filter { it.isDigit() }
+                        if (digits.length <= 11) contactState = digits
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    placeholder = stringResource(R.string.publish_provider_contact_placeholder),
+                    visualTransformation = PhoneUtils.phoneVisualTransformation
+                )
+            }
+        }
+    }
 }
 
 /**
- * Componente Stateless (Dumb) que define a estrutura visual do Card do formulário.
+ * Container genérico para os formulários de publicação.
  */
+@Composable
+private fun PublicationFormContainer(
+    formTitle: String,
+    buttonText: String,
+    isButtonEnabled: Boolean,
+    onButtonClick: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(2.dp, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(text = formTitle, style = MaterialTheme.typography.titleMedium)
+            content()
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = onButtonClick,
+                enabled = isButtonEnabled,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF354EAB)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text(buttonText)
+            }
+        }
+    }
+}
+
+/**
+ * Campos comuns de Descrição e Fotos.
+ */
+@Composable
+private fun CommonDescriptionAndPhotos(
+    descriptionValue: String,
+    onDescriptionChange: (String) -> Unit,
+    images: List<Uri>,
+    onAddPhoto: () -> Unit,
+    onRemovePhoto: (Uri) -> Unit
+) {
+    FormField(
+        label = stringResource(R.string.publish_description_label),
+        value = descriptionValue,
+        onValueChange = onDescriptionChange,
+        modifier = Modifier.height(120.dp),
+        singleLine = false,
+        placeholder = stringResource(R.string.publish_description_placeholder)
+    )
+
+    Text(text = stringResource(R.string.publish_photos_label), style = MaterialTheme.typography.labelMedium)
+    PhotoCarousel(
+        images = images,
+        onAddPhoto = onAddPhoto,
+        onRemovePhoto = onRemovePhoto
+    )
+}
+
 @Composable
 fun FormField(
     label: String,
@@ -225,141 +329,6 @@ fun FormField(
         visualTransformation = visualTransformation
     )
 }
-
-@Composable
-fun PublicationFormCard(
-    formTitle: String,
-    titleValue: String,
-    onTitleChange: (String) -> Unit,
-    descriptionValue: String,
-    onDescriptionChange: (String) -> Unit,
-    images: List<Uri>,
-    onAddPhoto: () -> Unit,
-    onRemovePhoto: (Uri) -> Unit,
-    buttonText: String,
-    isButtonEnabled: Boolean,
-    onButtonClick: () -> Unit,
-
-    // Configurações de visibilidade e valores específicos
-    showCategorySelector: Boolean = false,
-    selectedCategory: CategoryType? = null,
-    onCategorySelected: (CategoryType) -> Unit = {},
-
-    showProviderField: Boolean = false,
-    providerValue: String = "",
-    onProviderChange: (String) -> Unit = {},
-
-    showPriceField: Boolean = false,
-    priceValue: String = "",
-    onPriceChange: (String) -> Unit = {},
-    priceVisualTransformation: VisualTransformation = VisualTransformation.None,
-
-    showLocationField: Boolean = false,
-    locationValue: String = "",
-    onLocationChange: (String) -> Unit = {},
-
-    showContactField: Boolean = false,
-    contactValue: String = "",
-    onContactChange: (String) -> Unit = {},
-    contactVisualTransformation: VisualTransformation = VisualTransformation.None
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(text = formTitle, style = MaterialTheme.typography.titleMedium)
-
-            FormField(
-                label = stringResource(R.string.publish_title_label),
-                value = titleValue,
-                onValueChange = onTitleChange,
-                placeholder = stringResource(R.string.publish_title_placeholder)
-            )
-
-            if (showCategorySelector) {
-                CategorySelector(selectedCategory, onCategorySelected)
-            }
-
-            if (showProviderField) {
-                FormField(
-                    label = stringResource(R.string.publish_provider_name_label),
-                    value = providerValue,
-                    onValueChange = onProviderChange,
-                    placeholder = stringResource(R.string.publish_provider_name_placeholder)
-                )
-            }
-
-            FormField(
-                label = stringResource(R.string.publish_description_label),
-                value = descriptionValue,
-                onValueChange = onDescriptionChange,
-                modifier = Modifier.height(120.dp),
-                singleLine = false,
-                placeholder = stringResource(R.string.publish_description_placeholder)
-            )
-
-            Text(text = stringResource(R.string.publish_photos_label), style = MaterialTheme.typography.labelMedium)
-            PhotoCarousel(
-                images = images,
-                onAddPhoto = onAddPhoto,
-                onRemovePhoto = onRemovePhoto
-            )
-
-            if (showPriceField) {
-                FormField(
-                    label = stringResource(R.string.publish_price_label),
-                    value = priceValue,
-                    onValueChange = onPriceChange,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    placeholder = stringResource(R.string.publish_price_placeholder),
-                    visualTransformation = priceVisualTransformation
-                )
-            }
-
-            if (showLocationField) {
-                FormField(
-                    label = stringResource(R.string.publish_location_label),
-                    value = locationValue,
-                    onValueChange = onLocationChange,
-                    placeholder = stringResource(R.string.publish_location_placeholder)
-                )
-            }
-
-            if (showContactField) {
-                FormField(
-                    label = stringResource(R.string.publish_provider_contact_label),
-                    value = contactValue,
-                    onValueChange = onContactChange,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    placeholder = stringResource(R.string.publish_provider_contact_placeholder),
-                    visualTransformation = contactVisualTransformation
-                )
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            Button(
-                onClick = onButtonClick,
-                enabled = isButtonEnabled,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF354EAB)),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            ) {
-                Text(buttonText)
-            }
-        }
-    }
-}
-
-// --- Componentes de Apoio ---
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
