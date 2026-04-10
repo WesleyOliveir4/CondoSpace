@@ -135,7 +135,13 @@ fun HomeScreenContent(
                     if (uiState.publicationsService.isEmpty() && uiState.publicationsRecommendation.isEmpty()) {
                         EmptyPublicationsState(
                             onAnnounceClick = {
-                                navController.navigate(NavRoutes.Publish)
+                                navController.navigate(NavRoutes.Publish) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
                         )
                     } else {

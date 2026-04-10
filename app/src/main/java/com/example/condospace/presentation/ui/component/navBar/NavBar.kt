@@ -19,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.example.condospace.presentation.navigation.NavRoutes
 
@@ -52,7 +53,7 @@ fun NavBar(navController: NavHostController, key: String) {
                 selected = item.title == key,
                 onClick = {
                     navController.navigate(item.routes) {
-                        popUpTo(navController.graph.startDestinationId) {
+                        popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
                         launchSingleTop = true
@@ -62,7 +63,7 @@ fun NavBar(navController: NavHostController, key: String) {
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = "Home"
+                        contentDescription = item.title
                     )
                 },
                 label = { Text(text = item.title) },
