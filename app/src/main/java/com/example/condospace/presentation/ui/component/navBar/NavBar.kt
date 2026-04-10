@@ -24,13 +24,13 @@ import androidx.navigation.NavHostController
 import com.example.condospace.presentation.navigation.NavRoutes
 
 @Composable
-fun NavBar(navController: NavHostController, key: String) {
+fun NavBar(navController: NavHostController, currentRoute: String?) { // Mudei o nome de 'key' para ficar mais claro
 
     val navItems = listOf(
-        NavItem("Home", Icons.Default.Home, NavRoutes.Home),
-        NavItem("Favorites", Icons.Default.FavoriteBorder, NavRoutes.Favorites),
-        NavItem("Publish", Icons.Default.AddCircleOutline, NavRoutes.Publish),
-        NavItem("Profile", Icons.Default.PersonOutline, NavRoutes.Profile)
+        NavItem("Início", Icons.Default.Home, NavRoutes.Home),
+        NavItem("Favoritos", Icons.Default.FavoriteBorder, NavRoutes.Favorites),
+        NavItem("Publicar", Icons.Default.AddCircleOutline, NavRoutes.Publish),
+        NavItem("Perfil", Icons.Default.PersonOutline, NavRoutes.Profile)
     )
 
     NavigationBar(
@@ -48,9 +48,10 @@ fun NavBar(navController: NavHostController, key: String) {
     ) {
 
         navItems.forEach { item ->
+           val isSelected = currentRoute?.contains(item.routes::class.simpleName ?: "") == true
 
             NavigationBarItem(
-                selected = item.title == key,
+                selected = isSelected,
                 onClick = {
                     navController.navigate(item.routes) {
                         popUpTo(navController.graph.findStartDestination().id) {
@@ -60,12 +61,7 @@ fun NavBar(navController: NavHostController, key: String) {
                         restoreState = true
                     }
                 },
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.title
-                    )
-                },
+                icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
                 label = { Text(text = item.title) },
                 alwaysShowLabel = false,
                 colors = NavigationBarItemDefaults.colors(

@@ -29,6 +29,7 @@ fun BottomContactBar(
     couponCode: String? = null
 ) {
     val isExternal = categoryType == ServiceType.EXTERNAL.value
+    val isService = categoryType == ServiceType.SERVICE.value || categoryType == ServiceType.RECOMMENDATION.value
     val priceText = if (price > 0.0) price.formatToBRL() else "Preço a combinar"
 
     Surface(
@@ -67,7 +68,10 @@ fun BottomContactBar(
                     disabledContentColor = Color.Black
                 )
             ) {
-                Text(if (isExternal) "Ver localização" else "Falar com vendedor")
+                Text(
+                    if (isExternal) "Ver localização"
+                    else if(isService) "Falar com prestador"
+                    else "Falar com vendedor")
             }
         }
     }
@@ -76,7 +80,7 @@ fun BottomContactBar(
 @Preview(showBackground = true)
 @Composable
 fun BottomContactBarPreview() {
-    BottomContactBar(price = 150.0, onClick = {}, categoryType = "Serviços")
+    BottomContactBar(price = 150.0, onClick = {}, categoryType = "Outros")
 }
 
 @Preview(showBackground = true)
