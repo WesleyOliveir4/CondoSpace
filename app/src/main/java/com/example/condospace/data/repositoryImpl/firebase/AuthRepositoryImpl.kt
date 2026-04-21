@@ -29,7 +29,8 @@ class AuthRepositoryImpl(
 
     override suspend fun updatePassword(newPassword: String): Result<Unit> {
         return try {
-            auth.currentUser?.updatePassword(newPassword)?.await()
+            val user = auth.currentUser ?: throw Exception("User not logged in")
+            user.updatePassword(newPassword).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
