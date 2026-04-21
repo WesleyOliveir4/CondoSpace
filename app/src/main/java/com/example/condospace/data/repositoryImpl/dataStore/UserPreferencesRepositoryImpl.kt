@@ -25,6 +25,10 @@ class UserPreferencesRepositoryImpl(
     }
 
     override suspend fun getUserData(): UserEntity? {
-        return dataStore.data.first()?.toEntity()
+        return try {
+            dataStore.data.first()?.toEntity()
+        } catch (e: Exception) {
+            null
+        }
     }
 }

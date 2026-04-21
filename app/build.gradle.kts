@@ -73,6 +73,8 @@ dependencies {
     // Koin
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+    testImplementation("io.insert-koin:koin-test:4.0.0")
+    testImplementation("io.insert-koin:koin-test-junit4:4.0.0")
     implementation(libs.google.firebase.firestore)
     implementation(libs.play.services.cast.tv)
 

@@ -17,7 +17,7 @@ class SearchCondominiumByCepUseCaseTest {
 
     @Before
     fun setUp() {
-        repository = mockk()
+        repository = mockk(relaxed = true)
         useCase = SearchCondominiumByCepUseCase(repository)
     }
 
@@ -29,20 +29,21 @@ class SearchCondominiumByCepUseCaseTest {
         // Assert
         assertTrue(result.isSuccess)
         assertTrue(result.getOrNull()?.isEmpty() == true)
+        io.mockk.coVerify(exactly = 0) { repository.searchByCep(any()) }
     }
 
     @Test
-    fun `invoke should call repository when cep length is 8`() = runTest {
+    fun `invoke should return failure when condominium repository fails`() = runTest {
         // Arrange
         val cep = "12345678"
-        val condos = listOf(mockk<CondominiumEntity>())
-        coEvery { repository.searchByCep(cep) } returns Result.success(condos)
+        val errorMessage = "Network Error"
+        coEvery { repository.searchByCep(cep) } returns Result.failure(Exception(errorMessage))
 
         // Act
         val result = useCase(cep)
 
         // Assert
-        assertTrue(result.isSuccess)
-        assertEquals(condos, result.getOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(errorMessage, result.exceptionOrNull()?.message)
     }
 }

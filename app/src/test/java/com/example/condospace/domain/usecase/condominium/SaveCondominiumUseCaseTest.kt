@@ -5,7 +5,13 @@ import com.example.condospace.domain.repository.CondominiumRepository
 import com.example.condospace.domain.repository.UserRepository
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -17,11 +23,22 @@ class SaveCondominiumUseCaseTest {
     private lateinit var userRepository: UserRepository
     private lateinit var useCase: SaveCondominiumUseCase
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
+        Dispatchers.setMain(testDispatcher)
         condominiumRepository = mockk()
         userRepository = mockk()
         useCase = SaveCondominiumUseCase(condominiumRepository, userRepository)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.usecase.publication.EditPublicationUseCase
 import com.example.condospace.domain.usecase.publication.GetPublicationByIdUseCase
 import com.example.condospace.presentation.model.PublicationUiModel
+import com.example.condospace.presentation.model.UserUiModel
 import com.example.condospace.presentation.model.toEntity
 import com.example.condospace.presentation.model.toUiModel
 import com.example.condospace.presentation.ui.feature.publications.state.EditPublicationUiState
@@ -24,6 +25,8 @@ class EditPublicationViewModel(
     private val _uiState = MutableStateFlow<EditPublicationUiState>(EditPublicationUiState.Loading)
     val uiState: StateFlow<EditPublicationUiState> = _uiState.asStateFlow()
 
+    private var currentUser = UserUiModel()
+
     init {
         observeUserData()
     }
@@ -31,8 +34,8 @@ class EditPublicationViewModel(
     private fun observeUserData() {
         viewModelScope.launch {
             userPreferencesRepository.userData.collectLatest { userEntity ->
-                val userUiModel = userEntity?.toUiModel() ?: com.example.condospace.presentation.model.UserUiModel()
-                updateState { it.copy(user = userUiModel) }
+                currentUser = userEntity?.toUiModel() ?: UserUiModel()
+                updateState { it.copy(user = currentUser) }
             }
         }
     }
@@ -42,7 +45,10 @@ class EditPublicationViewModel(
             _uiState.value = EditPublicationUiState.Loading
             val result = getPublicationByIdUseCase(publicationId)
             result.onSuccess { entity ->
-                _uiState.value = EditPublicationUiState.Success(publication = entity.toUiModel())
+                _uiState.value = EditPublicationUiState.Success(
+                    publication = entity.toUiModel(),
+                    user = currentUser
+                )
             }.onFailure { exception ->
                 _uiState.value = EditPublicationUiState.Error(exception.message ?: "Erro ao carregar publicação")
             }
