@@ -5,17 +5,23 @@ import com.example.condospace.domain.entity.PublicationEntity
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.runs
+import io.mockk.slot
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -128,22 +134,71 @@ class PublicationRepositoryImplTest {
     }
 
     @Test
-    fun `getPublicationById should return failure when publication is not found`() = runTest {
+    fun `getPublicationsByUser should emit success list when listener receives snapshot`() = runTest {
+        // Arrange
+        val userId = "user123"
+        val query = mockk<Query>()
+        val snapshot = mockk<QuerySnapshot>()
+        val registration = mockk<ListenerRegistration>()
+        
+        every { collectionReference.whereEqualTo("publicationOwnerUuid", userId) } returns query
+        every { query.addSnapshotListener(any()) } answers {
+            val listener = it.invocation.args[0] as EventListener<QuerySnapshot>
+            listener.onEvent(snapshot, null)
+            registration
+        }
+        every { snapshot.toObjects(Publication::class.java) } returns emptyList()
+        every { registration.remove() } just runs
+
+        // Act
+        val result = repository.getPublicationsByUser(userId).first()
+
+        // Assert
+        assertTrue(result.isSuccess)
+        assertTrue(result.getOrNull()?.isEmpty() == true)
+    }
+
+    @Test
+    fun `getPublicationsByUser should emit failure when listener receives error`() = runTest {
+        // Arrange
+        val userId = "user123"
+        val query = mockk<Query>()
+        val registration = mockk<ListenerRegistration>()
+        val error = mockk<com.google.firebase.firestore.FirebaseFirestoreException>()
+        
+        every { collectionReference.whereEqualTo("publicationOwnerUuid", userId) } returns query
+        every { query.addSnapshotListener(any()) } answers {
+            val listener = it.invocation.args[0] as EventListener<QuerySnapshot>
+            listener.onEvent(null, error)
+            registration
+        }
+        every { registration.remove() } just runs
+
+        // Act
+        val result = repository.getPublicationsByUser(userId).first()
+
+        // Assert
+        assertTrue(result.isFailure)
+        assertEquals(error, result.exceptionOrNull())
+    }
+
+    @Test
+    fun `getPublicationById should return success when publication is found`() = runTest {
         // Arrange
         val pubId = "pub123"
         val task = mockk<Task<com.google.firebase.firestore.DocumentSnapshot>>()
         val snapshot = mockk<com.google.firebase.firestore.DocumentSnapshot>()
+        val publication = mockk<Publication>(relaxed = true)
         
         every { collectionReference.document(pubId) } returns documentReference
         every { documentReference.get() } returns task
         coEvery { task.await() } returns snapshot
-        every { snapshot.toObject(Publication::class.java) } returns null
+        every { snapshot.toObject(Publication::class.java) } returns publication
 
         // Act
         val result = repository.getPublicationById(pubId)
 
         // Assert
-        assertTrue(result.isFailure)
-        assertEquals("Publicação não encontrada", result.exceptionOrNull()?.message)
+        assertTrue(result.isSuccess)
     }
 }

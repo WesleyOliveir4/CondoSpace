@@ -11,10 +11,14 @@ class UpdateUserCondominiumUseCase(
     suspend operator fun invoke(userId: String, condominiumEntity: CondominiumEntity): Result<Unit> {
         return userRepository.updateUserCondominium(userId = userId, condominium = condominiumEntity)
             .onSuccess {
-                val currentUser = userPreferencesRepository.getUserData()
-                if (currentUser != null) {
-                    val updatedUser = currentUser.copy(condominiumEntity = condominiumEntity)
-                    userPreferencesRepository.saveUserData(updatedUser)
+                try {
+                    val currentUser = userPreferencesRepository.getUserData()
+                    if (currentUser != null) {
+                        val updatedUser = currentUser.copy(condominiumEntity = condominiumEntity)
+                        userPreferencesRepository.saveUserData(updatedUser)
+                    }
+                } catch (e: Exception) {
+                    // Tratar futuramente enviando para alguma ferramenta de observabilidade
                 }
             }
     }

@@ -47,27 +47,6 @@ class PublicationRepositoryImpl(
         }
     }
 
-    override suspend fun getPublicationsByCondominiumAndType(condominiumId: String, type: String?): Result<List<PublicationEntity>> {
-        return try {
-            var query = firestore.collection("publications")
-                .whereEqualTo("publicationCondominiumId", condominiumId)
-            
-            if (type != null && type != "Todos") {
-                query = query.whereEqualTo("publicationType", type)
-            }
-            
-            val snapshot = query.orderBy("date", Query.Direction.DESCENDING)
-                .get()
-                .await()
-            
-            val publications = snapshot.toObjects(Publication::class.java).map {
-                it.toEntity()
-            }
-            Result.success(publications)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 
     override fun getPublicationsByUser(userId: String): Flow<Result<List<PublicationEntity>>> = callbackFlow {
         val subscription = firestore.collection("publications")
