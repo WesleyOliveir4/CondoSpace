@@ -70,8 +70,8 @@ fun BottomContactBar(
             ) {
                 Text(
                     if (isExternal) "Ver localização"
-                    else if(isService) "Falar com prestador"
-                    else "Falar com vendedor")
+                    else if(isService) "Falar com o prestador"
+                    else "Falar com o vendedor")
             }
         }
     }

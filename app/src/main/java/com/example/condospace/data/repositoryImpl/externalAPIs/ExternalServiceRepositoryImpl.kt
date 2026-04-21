@@ -1,4 +1,4 @@
-package com.example.condospace.data.repositoryImpl
+package com.example.condospace.data.repositoryImpl.externalAPIs
 
 import com.example.condospace.data.mapper.toEntity
 import com.example.condospace.data.model.Publication
@@ -9,7 +9,11 @@ import com.example.condospace.domain.repository.ExternalServiceRepository
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-import kotlin.math.*
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class ExternalServiceRepositoryImpl(
     private val viaCepService: ViaCepService,
@@ -38,8 +42,8 @@ class ExternalServiceRepositoryImpl(
             if (openCageResponse.status.code != 200) throw Exception(openCageResponse.status.message)
 
             // 3. Find best result
-            val bestResult = openCageResponse.results.find { 
-                it.components.postcode?.replace("-", "") == cep.replace("-", "") 
+            val bestResult = openCageResponse.results.find {
+                it.components.postcode?.replace("-", "") == cep.replace("-", "")
             } ?: openCageResponse.results.maxByOrNull { it.confidence }
             ?: throw Exception("Localização não encontrada")
 
@@ -82,16 +86,16 @@ class ExternalServiceRepositoryImpl(
     override suspend fun getExternalServicesByIds(ids: List<String>): Result<List<PublicationEntity>> {
         return runCatching {
             if (ids.isEmpty()) return@runCatching emptyList()
-            
+
             val chunks = ids.chunked(30)
             val services = mutableListOf<PublicationEntity>()
-            
+
             for (chunk in chunks) {
                 val snapshot = firestore.collection("services")
                     .whereIn(FieldPath.documentId(), chunk)
                     .get()
                     .await()
-                
+
                 services.addAll(snapshot.documents.mapNotNull { doc ->
                     doc.toObject(Publication::class.java)?.copy(id = doc.id)?.toEntity()
                 })

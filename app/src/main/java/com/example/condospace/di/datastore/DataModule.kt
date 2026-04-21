@@ -1,4 +1,4 @@
-package com.example.condospace.di
+package com.example.condospace.di.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -9,7 +9,7 @@ import com.example.condospace.data.repositoryImpl.firebase.ImageRepositoryImpl
 import com.example.condospace.data.repositoryImpl.firebase.PublicationRepositoryImpl
 import com.example.condospace.data.repositoryImpl.dataStore.UserPreferencesRepositoryImpl
 import com.example.condospace.data.repositoryImpl.dataStore.UserRepositoryImpl
-import com.example.condospace.data.repositoryImpl.ExternalServiceRepositoryImpl
+import com.example.condospace.data.repositoryImpl.externalAPIs.ExternalServiceRepositoryImpl
 import com.example.condospace.data.model.User
 import com.example.condospace.domain.repository.AuthRepository
 import com.example.condospace.domain.repository.ImageRepository

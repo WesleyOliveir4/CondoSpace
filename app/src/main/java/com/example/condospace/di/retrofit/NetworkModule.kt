@@ -1,4 +1,4 @@
-package com.example.condospace.di
+package com.example.condospace.di.retrofit
 
 import com.example.condospace.data.remote.OpenCageService
 import com.example.condospace.data.remote.ViaCepService

@@ -1,8 +1,8 @@
 package com.example.condospace
 
 import android.app.Application
-import com.example.condospace.di.dataModule
-import com.example.condospace.di.networkModule
+import com.example.condospace.di.datastore.dataModule
+import com.example.condospace.di.retrofit.networkModule
 import com.example.condospace.di.favorites.favoritesModule
 import com.example.condospace.di.home.homeModule
 import com.example.condospace.di.login.loginModule
