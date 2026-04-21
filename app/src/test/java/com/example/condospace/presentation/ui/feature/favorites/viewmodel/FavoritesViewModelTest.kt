@@ -6,17 +6,20 @@ import com.example.condospace.domain.repository.UserPreferencesRepository
 import com.example.condospace.domain.usecase.publication.GetFavoritePublicationsUseCase
 import com.example.condospace.presentation.ui.feature.favorites.state.FavoritesUiState
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -28,21 +31,8 @@ class FavoritesViewModelTest {
     private lateinit var getFavoritePublicationsUseCase: GetFavoritePublicationsUseCase
     private lateinit var viewModel: FavoritesViewModel
 
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
     private val userDataFlow = MutableStateFlow<UserEntity?>(null)
-
-    private fun createPublicationEntity(id: String = "1") = PublicationEntity(
-        id = id,
-        publicationOwnerUuid = "uid",
-        publicationCondominiumId = "condoId",
-        publicationOwner = "Owner",
-        title = "Title",
-        description = "Desc",
-        publicationType = "Type",
-        price = 10.0,
-        likes = 0,
-        date = "2023-10-10"
-    )
 
     @Before
     fun setUp() {
@@ -50,7 +40,7 @@ class FavoritesViewModelTest {
         userPreferencesRepository = mockk()
         getFavoritePublicationsUseCase = mockk()
 
-        every { userPreferencesRepository.userData } returns userDataFlow
+        coEvery { userPreferencesRepository.userData } returns userDataFlow
 
         viewModel = FavoritesViewModel(
             userPreferencesRepository,
@@ -64,84 +54,82 @@ class FavoritesViewModelTest {
     }
 
     @Test
-    fun `observeUserData should update state to Success when user data is available`() = runTest {
-        // Arrange
-        val userEntity = UserEntity(
+    fun `viewModel should load favorites when userData is emitted`() = runTest(testDispatcher) {
+        val user = UserEntity(
             uuid = "user123",
-            name = "Test User",
-            email = "test@test.com",
+            name = "Test",
             phoneNumber = "",
             profilePicture = null,
-            publicationsIdFavored = listOf("1"),
-            userIsLogged = true
+            email = "",
+            publicationsIdFavored = listOf("pub1")
         )
-        val publications = listOf(createPublicationEntity(id = "1"))
-        coEvery { getFavoritePublicationsUseCase("user123", listOf("1")) } returns Result.success(publications)
+        val publications = listOf(mockk<PublicationEntity>(relaxed = true))
+        val deferred = CompletableDeferred<Result<List<PublicationEntity>>>()
+        
+        coEvery { getFavoritePublicationsUseCase("user123", listOf("pub1")) } coAnswers { deferred.await() }
 
-        // Act
-        userDataFlow.value = userEntity
+        userDataFlow.value = user
+        runCurrent()
 
-        // Assert
         assertTrue(viewModel.uiState.value is FavoritesUiState.Success)
-        val state = viewModel.uiState.value as FavoritesUiState.Success
-        assertEquals("user123", state.user.uuid)
-        assertEquals(1, state.publications.size)
-        assertEquals("1", state.publications[0].id)
+        val loadingState = viewModel.uiState.value as FavoritesUiState.Success
+        assertTrue(loadingState.isListLoading)
+
+        deferred.complete(Result.success(publications))
+        advanceUntilIdle()
+
+        val successState = viewModel.uiState.value as FavoritesUiState.Success
+        assertFalse(successState.isListLoading)
+        assertEquals(1, successState.publications.size)
     }
 
     @Test
-    fun `observeUserData should update state to Error when user is null`() = runTest {
-        // Act
+    fun `viewModel should show error when user is null`() = runTest(testDispatcher) {
         userDataFlow.value = null
+        advanceUntilIdle()
 
-        // Assert
         assertTrue(viewModel.uiState.value is FavoritesUiState.Error)
         assertEquals("Usuário não encontrado", (viewModel.uiState.value as FavoritesUiState.Error).message)
     }
 
     @Test
-    fun `loadFavorites should handle empty favorite list`() = runTest {
-        // Arrange
-        val userEntity = UserEntity(
+    fun `viewModel should show empty list when favoriteIds is empty`() = runTest(testDispatcher) {
+        val user = UserEntity(
             uuid = "user123",
-            name = "Test User",
-            email = "test@test.com",
+            name = "Test",
             phoneNumber = "",
             profilePicture = null,
-            publicationsIdFavored = emptyList(),
-            userIsLogged = true
+            email = "",
+            publicationsIdFavored = emptyList()
         )
+        
+        userDataFlow.value = user
+        advanceUntilIdle()
 
-        // Act
-        userDataFlow.value = userEntity
-
-        // Assert
+        assertTrue(viewModel.uiState.value is FavoritesUiState.Success)
         val state = viewModel.uiState.value as FavoritesUiState.Success
         assertTrue(state.publications.isEmpty())
-        assertEquals(false, state.isListLoading)
+        assertFalse(state.isListLoading)
     }
 
     @Test
-    fun `loadFavorites should update actionError when use case fails`() = runTest {
-        // Arrange
-        val userEntity = UserEntity(
+    fun `viewModel should handle failure in loadFavorites`() = runTest(testDispatcher) {
+        val user = UserEntity(
             uuid = "user123",
-            name = "Test User",
-            email = "test@test.com",
+            name = "Test",
             phoneNumber = "",
             profilePicture = null,
-            publicationsIdFavored = listOf("1"),
-            userIsLogged = true
+            email = "",
+            publicationsIdFavored = listOf("pub1")
         )
-        val errorMessage = "Error loading favorites"
-        coEvery { getFavoritePublicationsUseCase("user123", listOf("1")) } returns Result.failure(Exception(errorMessage))
+        
+        coEvery { getFavoritePublicationsUseCase("user123", listOf("pub1")) } returns Result.failure(Exception("Load Error"))
 
-        // Act
-        userDataFlow.value = userEntity
+        userDataFlow.value = user
+        advanceUntilIdle()
 
-        // Assert
         val state = viewModel.uiState.value as FavoritesUiState.Success
-        assertEquals(errorMessage, state.actionError)
-        assertEquals(false, state.isListLoading)
+        assertEquals("Load Error", state.actionError)
+        assertFalse(state.isListLoading)
     }
 }

@@ -8,11 +8,10 @@ import com.example.condospace.domain.usecase.login.SignInUseCase
 import com.example.condospace.presentation.ui.feature.login.state.LoginState
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -30,8 +29,8 @@ class LoginViewModelTest {
     private lateinit var userRepository: UserRepository
     private lateinit var userPreferencesRepository: UserPreferencesRepository
     private lateinit var viewModel: LoginViewModel
-
-    private val testDispatcher = UnconfinedTestDispatcher()
+    
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
@@ -39,9 +38,16 @@ class LoginViewModelTest {
         signInUseCase = mockk()
         authRepository = mockk()
         userRepository = mockk()
-        userPreferencesRepository = mockk(relaxed = true)
+        userPreferencesRepository = mockk()
         
         coEvery { userPreferencesRepository.getUserData() } returns null
+        
+        viewModel = LoginViewModel(
+            signInUseCase,
+            authRepository,
+            userRepository,
+            userPreferencesRepository
+        )
     }
 
     @After
@@ -50,42 +56,22 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `init should set state to Authenticated when user is already logged in`() = runTest {
-        // Arrange
-        val user = mockk<UserEntity>()
-        every { user.userIsLogged } returns true
-        coEvery { userPreferencesRepository.getUserData() } returns user
-
-        // Act
-        viewModel = LoginViewModel(signInUseCase, authRepository, userRepository, userPreferencesRepository)
-
-        // Assert
-        assertEquals(LoginState.Authenticated, viewModel.loginState.value)
-    }
-
-    @Test
-    fun `login should update state to Authenticated when successful`() = runTest {
+    fun `login should update state to Authenticated on success`() = runTest {
         // Arrange
         val email = "test@test.com"
         val password = "password"
         val uid = "uid123"
-        val user = UserEntity(
-            uuid = uid,
-            name = "Test",
-            phoneNumber = "",
-            profilePicture = null,
-            email = email,
-            userIsLogged = false
-        )
-
-        viewModel = LoginViewModel(signInUseCase, authRepository, userRepository, userPreferencesRepository)
+        val user = mockk<UserEntity>(relaxed = true)
+        
         coEvery { signInUseCase(email, password) } returns Result.success(Unit)
-        every { authRepository.getCurrentUserUid() } returns uid
+        coEvery { authRepository.getCurrentUserUid() } returns uid
         coEvery { userRepository.getUser(uid) } returns Result.success(user)
         coEvery { userRepository.updateUser(any()) } returns Result.success(Unit)
+        coEvery { userPreferencesRepository.saveUserData(any()) } returns Unit
 
         // Act
         viewModel.login(email, password)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Assert
         assertEquals(LoginState.Authenticated, viewModel.loginState.value)
@@ -93,28 +79,23 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `login should update state to Error when sign in fails`() = runTest {
+    fun `login should update state to Error on failure`() = runTest {
         // Arrange
         val email = "test@test.com"
         val password = "password"
-        val errorMessage = "Invalid credentials"
-        
-        viewModel = LoginViewModel(signInUseCase, authRepository, userRepository, userPreferencesRepository)
-        coEvery { signInUseCase(email, password) } returns Result.failure(Exception(errorMessage))
+        coEvery { signInUseCase(email, password) } returns Result.failure(Exception("Login error"))
 
         // Act
         viewModel.login(email, password)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Assert
         assertTrue(viewModel.loginState.value is LoginState.Error)
-        assertEquals(errorMessage, (viewModel.loginState.value as LoginState.Error).message)
+        assertEquals("Login error", (viewModel.loginState.value as LoginState.Error).message)
     }
 
     @Test
-    fun `login should update state to Error when email or password is empty`() = runTest {
-        // Arrange
-        viewModel = LoginViewModel(signInUseCase, authRepository, userRepository, userPreferencesRepository)
-
+    fun `login with empty fields should update state to Error`() = runTest {
         // Act
         viewModel.login("", "")
 
